@@ -1,2 +1,2 @@
 # wayfire-ipc
-A wayfire ipc plugin aims to be kind of I3/sway compatible.
+An experimental ipc plugin for wayfire, aims to be kind of I3/sway compatible.
