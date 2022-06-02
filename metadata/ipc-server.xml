@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<wayfire>
+	<plugin name="ipc-server">
+	<_short>IPC Server</_short>
+    <_long>Allow 3th party applications to subscribe to events or send commands to the core through ipc socket.</_long>
+	<category>Desktop</category>
+	</plugin>
+</wayfire>
