@@ -80,8 +80,6 @@ class ipc_command : public command
 	static bool container_has_ancestor(wayfire_view descendant, wayfire_view ancestor);
 	static void close_view_container_child(Json::Value container);
 	static Json::Value checkarg(int argc, const char *name, enum expected_args type, int val);
-	static std::pair<wlr_output *const, wf::output_state_t>* all_output_by_name_or_id(const char *name);
-	static std::pair<wlr_output *const, wf::output_state_t>* all_output_by_name_or_id(uint32_t id);
 };
 
 #endif

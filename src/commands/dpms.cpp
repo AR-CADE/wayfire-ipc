@@ -1,3 +1,5 @@
+#include <json/value.h>
+#include <wayfire/output.hpp>
 #include <wayfire/singleton-plugin.hpp>
 #include <wayfire/output-layout.hpp>
 #include <wayfire/workspace-manager.hpp>
@@ -96,43 +98,36 @@ class wayfire_dpms
         wf::get_core().output_layout->apply_configuration(config);
     }
 
-    void set_state_off(Json::Value ids = Json::arrayValue)
+    void set_state_off(Json::Value name_or_id)
     {
         bool apply = false;
-        Json::Value list = Json::arrayValue;
-
-        if (ids.isArray() && ids.empty() == false) {
-            list = ids;
-        }
-
-        if (ids.isNumeric() && ids.empty() == false) {
-            list.append(ids);
-        }
-
+        
         auto config = wf::get_core().output_layout->get_current_configuration();
+
+        wf::output_t *output = nullptr;
+
+        if (!(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+        {
+            std::string str_name_or_id = name_or_id.asString();   
+            output = command::all_output_by_name_or_id(str_name_or_id.c_str());
+
+            if (!output)
+            {
+                return;
+            }
+        }
 
         for (auto& entry : config)
         {
-            if (list.empty() == false)
+            auto o = wf::get_core().output_layout->find_output(entry.first);
+
+            if (output && !(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
             {
-                auto o = wf::get_core().output_layout->find_output(entry.first);
-                
-                bool found = false;
-
-                for (auto id : list)
-                {
-                    if (id.isNumeric() && !(id.asInt() < 0) &&
-                        (id.asUInt() == o->get_id()))
-                    {
-                        found = true;
-                    }
-                }                    
-
-                if (found == false)
+                if (o->get_id() != output->get_id())
                 {
                     continue;
                 }
-            }  
+            }             
 
             if (entry.second.source != wf::OUTPUT_IMAGE_SOURCE_DPMS)
             {
@@ -145,46 +140,38 @@ class wayfire_dpms
         {
             wf::get_core().output_layout->apply_configuration(config);
         }
-
     }
 
-    void set_state_on(Json::Value ids = IPC_ANY_TOCKEN)
+    void set_state_on(Json::Value name_or_id)
     {
         bool apply = false;
-        Json::Value list = Json::arrayValue;
-
-        if (ids.isArray() && ids.empty() == false) {
-            list = ids;
-        }
-
-        if (ids.isNumeric() && ids.empty() == false) {
-            list.append(ids);
-        }
 
         auto config = wf::get_core().output_layout->get_current_configuration();
 
+        wf::output_t *output = nullptr;
+
+        if (!(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+        {
+            std::string str_name_or_id = name_or_id.asString();   
+            output = command::all_output_by_name_or_id(str_name_or_id.c_str());
+
+            if (!output)
+            {
+                return;
+            }
+        }
+
         for (auto& entry : config)
         {
-            if (list.empty() == false)
+            auto o = wf::get_core().output_layout->find_output(entry.first);
+
+            if (output && !(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
             {
-                auto o = wf::get_core().output_layout->find_output(entry.first);
-                
-                bool found = false;
-
-                for (auto id : list)
-                {
-                    if (id.isNumeric() && !(id.asInt() < 0) &&
-                        (id.asUInt() == o->get_id()))
-                    {
-                        found = true;
-                    }
-                }                    
-
-                if (found == false)
+                if (o->get_id() != output->get_id())
                 {
                     continue;
                 }
-            } 
+            }  
  
             if (entry.second.source != wf::OUTPUT_IMAGE_SOURCE_SELF)
             {
@@ -246,12 +233,12 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         Json::Value argv = signal->argv;
         //
         // argv[0] = "output"
-        // argv[1] = eg. "*" or ["eDP-1",2] or 1 or "eDP-1"
+        // argv[1] = eg. "*" or 1 or "eDP-1"
         // argv[2] = "dpms"
         // argv[3] = "on" or "off"
         //
         Json::Value option = argv.get(Json::ArrayIndex(3), IPC_ON_TOCKEN);
-        Json::Value ids = command::_get_ids_at_index(argv, Json::ArrayIndex(1));
+        Json::Value name_or_id = argv.get(Json::ArrayIndex(1), IPC_ANY_TOCKEN);
 
         if (option.isString() == false || option.empty())
         {
@@ -260,11 +247,11 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
 
         if (option.asString() == IPC_OFF_TOCKEN)
         {
-            get_instance().set_state_off(ids);
+            get_instance().set_state_off(name_or_id);
         }
         else 
         {        
-            get_instance().set_state_on(ids);
+            get_instance().set_state_on(name_or_id);
         }
  
     };

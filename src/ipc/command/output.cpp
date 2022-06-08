@@ -44,10 +44,12 @@ void free_output_config(struct output_config *oc) {
 }
 
 Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx);
+Json::Value scale_handler(int argc, char **argv, command_handler_context *ctx);
 
 std::map<std::string, std::function<Json::Value(int argc, char **argv, command_handler_context *ctx)>> output_handler_map
 { 
 	{"dpms", dpms_handler},  
+	{"scale", scale_handler},  
 };
 
 Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)

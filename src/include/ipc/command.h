@@ -4,39 +4,76 @@
 #include <json/value.h>
 #include <ipc.h>
 #include <string>
+#include <wayfire/core.hpp>
+#include <wayfire/output-layout.hpp>
+#include <wayfire/output.hpp>
 
 class command {
 
 public:
-    static Json::Value _get_ids_at_index(Json::Value argv, Json::ArrayIndex index) 
+     static wf::output_t *all_output_by_name(const char *name)
     {
-        Json::Value value = argv.get(Json::ArrayIndex(index), IPC_ANY_TOCKEN);
-        if (value.isNumeric() == false && (value.isBool() || value.empty() || (value.isString() && value.asString() == IPC_ANY_TOCKEN)))
+        if (!name)
         {
-            return IPC_ANY_TOCKEN;
+            return nullptr;
         }
-
-        if (!value.isArray())
+        
+        auto outputs = wf::get_core().output_layout->get_outputs();
+        for (wf::output_t *output : outputs)
         {
-            Json::Value array = Json::arrayValue;
-            return array.append(value);
-        }
-
-        return value;
+            if (std::string(name) == std::string(output->handle->name))
+            {
+                return output;
+            }
+            if (output != nullptr)
+            {
+                if (std::string(name) == std::string(output->handle->name))
+                {
+                    return output;
+                }
+            }
+        } 
+        return nullptr;
     }
 
-    static std::string getCmdBase(Json::Value argv) 
+    static wf::output_t *all_output_by_id(uint32_t id)
     {
-        if (!argv.isArray()) 
+        auto outputs = wf::get_core().output_layout->get_outputs();
+        for (wf::output_t *output : outputs)
         {
-            return "";
+            if (output != nullptr)
+            {
+                if (output->get_id() == id)
+                {
+                    return output;
+                }
+            }
         }
-        Json::Value arg = argv.get(Json::ArrayIndex(0), IPC_EMPTY_TOCKEN);
-        if (!arg.isString()) 
+
+        return nullptr;
+    }
+
+    static wf::output_t *all_output_by_name_or_id(const char *name_or_id)
+    {
+        if (!name_or_id)
         {
-            return "";
+            return nullptr;
         }
-        return arg.asString();
+        
+        auto output = all_output_by_name(name_or_id);
+
+        if (output == nullptr) 
+        {
+            try 
+            { 
+                output = all_output_by_id(std::stoi(std::string(name_or_id)));
+            } catch (...) 
+            {
+            
+            }
+        }
+
+        return output;
     }
 
 

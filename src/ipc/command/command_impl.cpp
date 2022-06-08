@@ -139,40 +139,6 @@ void ipc_command::close_view_container_child(Json::Value container)
     }
 }
 
-std::pair<wlr_output *const, wf::output_state_t>* ipc_command::all_output_by_name_or_id(const char *name)
-{
-    auto config = wf::get_core().output_layout->get_current_configuration();
-
-    for (auto& entry : config)
-    {
-        if (std::string(name) == std::string(entry.first->name))
-        {
-            return &entry;
-        } 
-    }
-    return nullptr;
-}
-
-std::pair<wlr_output *const, wf::output_state_t>* ipc_command::all_output_by_name_or_id(uint32_t id)
-{
-    auto config = wf::get_core().output_layout->get_current_configuration();
-
-    for (auto& entry : config)
-    {
-        auto output = wf::get_core().output_layout->find_output(entry.first);
-
-        if (output != nullptr)
-        {
-            if (output->get_id() == id)
-            {
-                return &entry;
-            }
-        } 
-    }
-
-    return nullptr;
-}
-
 static void set_config_node(const Json::Value& node, bool node_overridden, command_handler_context *handler_context ) {
 	if (handler_context == nullptr) {
 		return;
