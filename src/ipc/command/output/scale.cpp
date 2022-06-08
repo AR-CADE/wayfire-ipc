@@ -2,63 +2,69 @@
 #include <json/value.h>
 #include <wayfire/core.hpp>
 #include <wayfire/output-layout.hpp>
-#include "commands/commands.hpp"
+#include <wayfire/output.hpp>
+#include "../command_impl.hpp"
+#include "ipc.h"
+#include <json/value.h>
+#include <wayfire/core.hpp>
 
-
-static Json::Value set_scale_bulk(Json::Value argv, Json::Value value, Json::Value ids = Json::arrayValue)
+static RETURN_STATUS set_scale(double scale, wf::output_t *output) 
 {
-    if (!value.isNumeric())
-    {
-        return ipc_json::command_return(getCmdBase(argv), argv, RETURN_INVALID_PARAMETER);
-    }
-
-    if (ids.empty())
-    {
-        return ipc_json::command_return(getCmdBase(argv), argv, RETURN_INVALID_PARAMETER);
-    }
-
+    bool found = true;
+    
     auto config = wf::get_core().output_layout->get_current_configuration();
 
     for (auto& entry : config)
     {
-        if (ids.isArray())
+        auto o = wf::get_core().output_layout->find_output(entry.first);
+
+        if (o->get_id() == output->get_id())
         {
-            auto output = wf::get_core().output_layout->find_output(entry.first);
-            
-            bool found = false;
-
-            for (auto id : ids)
-            {
-                if (id.isNumeric() && !(id.asInt() < 0) &&
-                    (id.asUInt() == output->get_id()))
-                {
-                    found = true;
-                }
-            }                    
-
-            if (found == false)
-            {
-                continue;
-            }
-        }       
-
-        entry.second.scale = value.asDouble();
+            found = true;
+            entry.second.scale = scale;
+            break;
+        } 
     }
 
-    wf::get_core().output_layout->apply_configuration(config);
+    if (found)
+    {
+        wf::get_core().output_layout->apply_configuration(config);
+    }
 
-    return ipc_json::command_return(getCmdBase(argv), argv, RETURN_SUCCESS);
+    return RETURN_SUCCESS;
 }
 
-Json::Value cmd_scale(Json::Value argv) {
-    Json::Value scale = argv.get(Json::ArrayIndex(3), 1);
-    Json::Value ids = _get_ids_at_index(argv, Json::ArrayIndex(1));
 
-    if (!scale.isNumeric())
-    {
-        return ipc_json::command_return(getCmdBase(argv), argv,
-            RETURN_INVALID_PARAMETER);
-    }
 
-    return set_scale_bulk(argv, scale, ids);
+Json::Value scale_handler(int argc, char **argv, command_handler_context *ctx)
+{
+    (void)argc;
+    (void)argv;
+
+    if (!ctx->output_config) {
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output config");
+	}
+	if (!argc) {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue, "Missing scale argument.");
+	}
+
+	char *end;
+	double scale = strtof(*argv, &end);
+	if (*end) {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue, "Invalid scale.");
+	}
+
+    auto output = command::all_output_by_name_or_id(ctx->output_config->name);
+
+    if (!output) {
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output");
+	}
+
+    RETURN_STATUS status = set_scale(scale, output);
+
+
+	ctx->leftovers.argc = argc - 1;
+	ctx->leftovers.argv = argv + 1;
+
+    return ipc_json::build_status(status);
 }

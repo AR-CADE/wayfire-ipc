@@ -13,6 +13,7 @@ server = shared_module(
     'command/sticky.cpp', 
     'command/fullscreen.cpp', 
     'command/output/dpms.cpp', 
+    'command/output/scale.cpp', 
     dependencies: [wayfire, wlroots, jsoncpp, pcre],
     install: true, install_dir: wayfire.get_variable(pkgconfig: 'plugindir'), include_directories : incdir)
 
