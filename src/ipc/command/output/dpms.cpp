@@ -35,6 +35,7 @@ Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx)
     Json::Value args = Json::arrayValue;
     args.append("output");
     args.append(ctx->output_config->name);
+    args.append("dpms");
     for (int i = 0; i < argc; ++i)
     {
         args.append(std::string(argv[i]));

@@ -45,11 +45,13 @@ void free_output_config(struct output_config *oc) {
 
 Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx);
 Json::Value scale_handler(int argc, char **argv, command_handler_context *ctx);
+Json::Value transform_handler(int argc, char **argv, command_handler_context *ctx);
 
 std::map<std::string, std::function<Json::Value(int argc, char **argv, command_handler_context *ctx)>> output_handler_map
 { 
 	{"dpms", dpms_handler},  
 	{"scale", scale_handler},  
+	{"transform", transform_handler},  
 };
 
 Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
@@ -81,7 +83,7 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
         }
 
         error.clear();
-        error = cmd_handler(argc, argv, ctx);
+        error = cmd_handler(argc - 1, argv + 1, ctx);
 
         if (error["status"] != RETURN_SUCCESS)
         {

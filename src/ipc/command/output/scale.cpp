@@ -38,8 +38,6 @@ static RETURN_STATUS set_scale(double scale, wf::output_t *output)
 
 Json::Value scale_handler(int argc, char **argv, command_handler_context *ctx)
 {
-    (void)argc;
-    (void)argv;
 
     if (!ctx->output_config) {
         return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output config");
