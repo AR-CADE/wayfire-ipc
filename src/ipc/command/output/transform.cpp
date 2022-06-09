@@ -121,7 +121,7 @@ Json::Value transform_handler(int argc, char **argv, command_handler_context *ct
         ((strcmp(argv[1],
             "clockwise") == 0) || (strcmp(argv[1], "anticlockwise") == 0)))
     {
-        if (output_config->name != nullptr)
+        if (output_config->name == nullptr)
         {
             return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
                 "Output config name not set");
