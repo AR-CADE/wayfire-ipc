@@ -43,12 +43,12 @@ Json::Value ipc_json::get_abi_version()
     return version;
 }
 
-Json::Value ipc_json::get_version() 
+Json::Value ipc_json::get_version()
 {
-	int major = 0, minor = 0, patch = 0;
-	Json::Value version;
+    int major = 0, minor = 0, patch = 0;
+    Json::Value version;
 
-	sscanf(WAYFIRE_VERSION, "%d.%d.%d", &major, &minor, &patch);
+    sscanf(WAYFIRE_VERSION, "%d.%d.%d", &major, &minor, &patch);
     version["human_readable"] = WAYFIRE_VERSION;
 
     // oups ... yet another variant ...
@@ -57,23 +57,24 @@ Json::Value ipc_json::get_version()
     version["major"] = major;
     version["minor"] = minor;
     version["patch"] = patch;
-    version["abi"] = get_abi_version();
+    version["abi"]   = get_abi_version();
 
-    /*  
-    Json::Value xml_dirs = Json::arrayValue;
-    for (std::string dir : wf::get_core().config_backend->get_xml_dirs())
-             xml_dirs.append(dir);
-             
-    version["loaded_config_file_names"] = xml_dirs; 
-    */
+    /*
+     *  Json::Value xml_dirs = Json::arrayValue;
+     *  for (std::string dir : wf::get_core().config_backend->get_xml_dirs())
+     * xml_dirs.append(dir);
+     *
+     *  version["loaded_config_file_names"] = xml_dirs;
+     */
 
-	return version;
+    return version;
 }
 
-Json::Value ipc_json::create_empty_rect() {
-	struct wlr_box empty = {0, 0, 0, 0};
+Json::Value ipc_json::create_empty_rect()
+{
+    struct wlr_box empty = {0, 0, 0, 0};
 
-	return describe_wlr_box(empty);
+    return describe_wlr_box(empty);
 }
 
 Json::Value ipc_json::wayfire_point_to_json(wf::point_t point)
@@ -124,18 +125,24 @@ Json::Value ipc_json::args_to_json(char **argv, int argc)
     return cmds;
 }
 
-const char *ipc_json::scale_filter_to_string(enum ipc_scale_filter_mode scale_filter) {
-	switch (scale_filter) {
-	case SCALE_FILTER_DEFAULT:
-		return "smart";
-	case SCALE_FILTER_LINEAR:
-		return "linear";
-	case SCALE_FILTER_NEAREST:
-		return "nearest";
-	case SCALE_FILTER_SMART:
-		return "smart";
-	}
-	return "unknown";
+const char*ipc_json::scale_filter_to_string(enum ipc_scale_filter_mode scale_filter)
+{
+    switch (scale_filter)
+    {
+      case SCALE_FILTER_DEFAULT:
+        return "smart";
+
+      case SCALE_FILTER_LINEAR:
+        return "linear";
+
+      case SCALE_FILTER_NEAREST:
+        return "nearest";
+
+      case SCALE_FILTER_SMART:
+        return "smart";
+    }
+
+    return "unknown";
 }
 
 const char*ipc_json::output_transform_description(enum wl_output_transform transform)
@@ -170,7 +177,7 @@ const char*ipc_json::output_transform_description(enum wl_output_transform trans
     return "unknown";
 }
 
-const char *ipc_json::output_adaptive_sync_status_description(
+const char*ipc_json::output_adaptive_sync_status_description(
     enum wlr_output_adaptive_sync_status status)
 {
     switch (status)
@@ -215,11 +222,11 @@ const char*ipc_json::output_subpixel_description(enum wl_output_subpixel subpixe
 }
 
 bool ipc_json::device_is_touchpad(
- nonstd::observer_ptr<wf::input_device_t> device) 
+    nonstd::observer_ptr<wf::input_device_t> device)
 {
     (void)device;
-    return false;   
-} 
+    return false;
+}
 
 const char*ipc_json::input_device_get_type_description(
     nonstd::observer_ptr<wf::input_device_t> device)
@@ -238,14 +245,14 @@ const char*ipc_json::input_device_get_type_description(
     switch (wlr_handle->type)
     {
       case WLR_INPUT_DEVICE_POINTER:
-        if (device_is_touchpad(device)) 
+        if (device_is_touchpad(device))
         {
             return "touchpad";
-        } 
-        else 
+        } else
         {
             return "pointer";
         }
+
       case WLR_INPUT_DEVICE_KEYBOARD:
         return "keyboard";
 
@@ -265,60 +272,62 @@ const char*ipc_json::input_device_get_type_description(
     return "unknown";
 }
 
-const char *ipc_json::orientation_description(wf::output_t *output) 
+const char*ipc_json::orientation_description(wf::output_t *output)
 {
     if (output != nullptr)
     {
-       return orientation_description(output->handle);
+        return orientation_description(output->handle);
     }
 
     return "none";
 }
 
-const char *ipc_json::orientation_description(wlr_output *wlr_output) 
+const char*ipc_json::orientation_description(wlr_output *wlr_output)
 {
     if (wlr_output != nullptr)
     {
-       return orientation_description(wlr_output->transform);
+        return orientation_description(wlr_output->transform);
     }
 
     return "none";
 }
 
-const char *ipc_json::orientation_description(enum wl_output_transform transform) 
+const char*ipc_json::orientation_description(enum wl_output_transform transform)
 {
     switch (transform)
     {
-        case WL_OUTPUT_TRANSFORM_180:
-        case WL_OUTPUT_TRANSFORM_NORMAL:
-        case WL_OUTPUT_TRANSFORM_FLIPPED:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-            return "horizontal";
+      case WL_OUTPUT_TRANSFORM_180:
+      case WL_OUTPUT_TRANSFORM_NORMAL:
+      case WL_OUTPUT_TRANSFORM_FLIPPED:
+      case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        return "horizontal";
 
-        case WL_OUTPUT_TRANSFORM_90:
-        case WL_OUTPUT_TRANSFORM_270:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-            return "vertical";
-        default:
-		    return "none";
+      case WL_OUTPUT_TRANSFORM_90:
+      case WL_OUTPUT_TRANSFORM_270:
+      case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+      case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        return "vertical";
+
+      default:
+        return "none";
     }
 
     return "none";
 }
 
-Json::Value ipc_json::build_status(RETURN_STATUS status, Json::Value value, const char *error)
+Json::Value ipc_json::build_status(RETURN_STATUS status, Json::Value value,
+    const char *error)
 {
     Json::Value object;
     object["success"] = !RETURN_ERROR(status);
-    object["status"] = status;
+    object["status"]  = status;
     if (object["success"] == false)
     {
         object["parse_error"] = !object["success"];
-        //TODO: RETURN_ERROR TO STRING
+        // TODO: RETURN_ERROR TO STRING
         object["error"] = "";
     }
-    
+
     if (value.isNull() == false)
     {
         object["value"] = value;
@@ -588,10 +597,11 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
     {
         std::string name(wlr_handle->name);
         std::transform(name.begin(), name.end(), name.begin(),
-            [](char c){return  c == ' ' ? '_' : c;});
-        object["identifier"] = std::to_string(wlr_handle->vendor) + ":" + std::to_string(wlr_handle->product) + ":" + name;
+            [] (char c) {return c == ' ' ? '_' : c;});
+        object["identifier"] = std::to_string(wlr_handle->vendor) + ":" +
+            std::to_string(wlr_handle->product) + ":" + name;
     }
-    
+
     object["name"]    = wlr_handle->name;
     object["vendor"]  = wlr_handle->vendor;
     object["product"] = wlr_handle->product;
@@ -602,9 +612,8 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
     {
         struct wlr_keyboard *keyboard = wlr_handle->keyboard;
 
-
         object["repeat_delay"] = keyboard_repeat_delay.value();
-        object["repeat_rate"] = keyboard_repeat_rate.value();
+        object["repeat_rate"]  = keyboard_repeat_rate.value();
 
         Json::Value layouts_arr = Json::arrayValue;
         object["xkb_layout_names"] = layouts_arr;
@@ -640,27 +649,30 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
         }
     }
 
-    if (wlr_handle->type == WLR_INPUT_DEVICE_POINTER) {
-		float sf = 1.0f;
+    if (wlr_handle->type == WLR_INPUT_DEVICE_POINTER)
+    {
+        float sf = 1.0f;
         double scroll_factor = mouse_scroll_speed.value();
-		if (!isnan(scroll_factor) && 
-				scroll_factor != std::numeric_limits<float>::min()) {
-			sf = scroll_factor;
-		}
+        if (!isnan(scroll_factor) &&
+            (scroll_factor != std::numeric_limits<float>::min()))
+        {
+            sf = scroll_factor;
+        }
 
         object["scroll_factor"] = (double)sf;
+    }
 
-	}
-
-
-    #if 0
-    if (wlr_input_device_is_libinput(wlr_handle)) 
+#if 0
+    if (wlr_input_device_is_libinput(wlr_handle))
     {
         libinput_device *libinput_dev = wlr_libinput_get_device_handle(wlr_handle);
         if (libinput_dev != nullptr)
-          object["libinput"] = describe_libinput_device(libinput_dev);
-    } 
-    #endif
+        {
+            object["libinput"] = describe_libinput_device(libinput_dev);
+        }
+    }
+
+#endif
 
     return object;
 }
@@ -684,50 +696,51 @@ Json::Value ipc_json::describe_seat(wlr_seat *seat)
     {
         devices.append(describe_input(device));
     }
+
     object["devices"] = devices;
 
     return object;
 }
 
-Json::Value ipc_json::describe_disabled_output(wf::output_t *output) 
+Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
 {
     Json::Value object;
-	wlr_output *wlr_output = output->handle;
+    wlr_output *wlr_output = output->handle;
 
-    object["type"] = "output";
-    object["name"] = wlr_output->name;
+    object["type"]    = "output";
+    object["name"]    = wlr_output->name;
     object["active"]  = false;
-    object["dpms"]  = false;
+    object["dpms"]    = false;
     object["primary"] = false;
-    object["layout"] = "output";
+    object["layout"]  = "output";
     object["orientation"] = "none";
-    object["make"] = wlr_output->make;
+    object["make"]   = wlr_output->make;
     object["model"]  = wlr_output->model;
     object["serial"] = wlr_output->serial;
-    object["nodes"] = Json::arrayValue;
+    object["nodes"]  = Json::arrayValue;
 
-	Json::Value modes_array = Json::arrayValue;
+    Json::Value modes_array = Json::arrayValue;
 
-	struct wlr_output_mode *mode;
-	wl_list_for_each(mode, &wlr_output->modes, link) {
-
-		Json::Value mode_object;
-        mode_object["width"] = mode->width;
-        mode_object["height"] = mode->height;
+    struct wlr_output_mode *mode;
+    wl_list_for_each(mode, &wlr_output->modes, link)
+    {
+        Json::Value mode_object;
+        mode_object["width"]   = mode->width;
+        mode_object["height"]  = mode->height;
         mode_object["refresh"] = mode->refresh;
         modes_array.append(mode_object);
-	}
+    }
 
     object["modes"] = modes_array;
 
     Json::Value current_mode_object;
-    current_mode_object["width"] = wlr_output->width;
-    current_mode_object["height"] = wlr_output->height;
+    current_mode_object["width"]   = wlr_output->width;
+    current_mode_object["height"]  = wlr_output->height;
     current_mode_object["refresh"] = wlr_output->refresh;
-    
+
     object["rect"] = create_empty_rect();
 
-	return object;
+    return object;
 }
 
 Json::Value ipc_json::describe_point(wf::point_t point)
@@ -746,23 +759,22 @@ Json::Value ipc_json::describe_pointf(wf::pointf_t point)
     return object;
 }
 
-Json::Value ipc_json::describe_output(wf::output_t *output) 
+Json::Value ipc_json::describe_output(wf::output_t *output)
 {
     Json::Value object;
-	wlr_output *wlr_output = output->handle;
-
+    wlr_output *wlr_output = output->handle;
 
     //
     // Node attr
     //
-    object["id"]  = output->get_id();
-    object["type"] = "output";
-    object["border"] = "none"; 
+    object["id"]     = output->get_id();
+    object["type"]   = "output";
+    object["border"] = "none";
     object["current_border_width"] = 0;
     object["orientation"] = orientation_description(output);
-    object["percent"] = Json::nullValue;
-    object["urgent"] = false;
-    object["sticky"] = false;
+    object["percent"]     = Json::nullValue;
+    object["urgent"]  = false;
+    object["sticky"]  = false;
     object["focused"] = wf::get_core().get_active_output() == output;
     object["floating_nodes"] = get_shell_view_nodes(output);
     object["focus"] = Json::arrayValue;
@@ -773,34 +785,34 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     // Output specific attr
     //
     object["active"]  = true;
-    object["dpms"]  = wlr_output->enabled;
+    object["dpms"]    = wlr_output->enabled;
     object["primary"] = false;
-    object["layout"] = "output";
+    object["layout"]  = "output";
     object["orientation"] = orientation_description(wlr_output->transform);
-    object["make"] = wlr_output->make;
-    object["name"] = wlr_output->name;
+    object["make"]   = wlr_output->make;
+    object["name"]   = wlr_output->name;
     object["model"]  = wlr_output->model;
     object["serial"] = wlr_output->serial;
     object["scale"]  = wlr_output->scale;
-    object["scale_filter"]  = "unknown";
-    object["transform"] = output_transform_description(wlr_output->transform);
+    object["scale_filter"] = "unknown";
+    object["transform"]    = output_transform_description(wlr_output->transform);
     object["adaptive_sync_status"] =
         output_adaptive_sync_status_description(wlr_output->adaptive_sync_status);
 
     wf::point_t workspace = output->workspace->get_current_workspace();
-    object["current_workspace"]  = ipc_tools::get_workspace_index(workspace, output);
+    object["current_workspace"] = ipc_tools::get_workspace_index(workspace, output);
 
-	Json::Value modes_array = Json::arrayValue;
+    Json::Value modes_array = Json::arrayValue;
 
-	struct wlr_output_mode *mode;
-	wl_list_for_each(mode, &wlr_output->modes, link) {
-
-		Json::Value mode_object;
-        mode_object["width"] = mode->width;
-        mode_object["height"] = mode->height;
+    struct wlr_output_mode *mode;
+    wl_list_for_each(mode, &wlr_output->modes, link)
+    {
+        Json::Value mode_object;
+        mode_object["width"]   = mode->width;
+        mode_object["height"]  = mode->height;
         mode_object["refresh"] = mode->refresh;
         modes_array.append(mode_object);
-	}
+    }
 
     object["modes"] = modes_array;
 
@@ -809,11 +821,11 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["subpixel_hinting"] = subpixel;
 
     Json::Value current_mode_object;
-    current_mode_object["width"] = wlr_output->width;
-    current_mode_object["height"] = wlr_output->height;
+    current_mode_object["width"]   = wlr_output->width;
+    current_mode_object["height"]  = wlr_output->height;
     current_mode_object["refresh"] = wlr_output->refresh;
-    
-    object["current_mode"] = current_mode_object;
+
+    object["current_mode"]    = current_mode_object;
     object["max_render_time"] = max_render_time.value();
     object["dynamic_repaint_delay"] = dynamic_delay.value();
 
@@ -892,7 +904,7 @@ Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surfac
         object["override_redirect"] = surface->override_redirect;
         object["pid"]     = surface->pid;
         object["pinging"] = surface->pinging;
-        //object["role"] = std::string(surface->role);
+        // object["role"] = std::string(surface->role);
         // object["title"] = std::string(surface->title);
         object["X"] = surface->x;
         object["surface_id"]  = surface->surface_id;
@@ -936,13 +948,13 @@ Json::Value ipc_json::describe_wl_client(wl_client *client)
         if (display != nullptr)
         {
             object["display"] = describe_wl_display(display);
-        }        
+        }
     }
 
     return object;
 }
 
-Json::Value ipc_json::describe_view(wayfire_view view) 
+Json::Value ipc_json::describe_view(wayfire_view view)
 {
     if (view == nullptr)
     {
@@ -954,72 +966,75 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     //
     // Node attr
     //
-    object["id"]  = view->get_id();
-    // NOTE for now we support only support the wm-actions plugin  
-    object["type"] = view->has_data("wm-actions-above") || (view->get_output()->workspace->get_view_layer(view) & (wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET)) ? "floating_con" : "con";
-    // TODO support tiling 
+    object["id"] = view->get_id();
+    // NOTE for now we support only support the wm-actions plugin
+    object["type"] = view->has_data("wm-actions-above") ||
+        (view->get_output()->workspace->get_view_layer(view) &
+            (wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET)) ? "floating_con" : "con";
+    // TODO support tiling
     object["layout"] = "stacked";
     // TODO: figure out what if the border type for the container
-    object["border"] = "none"; 
-    object["current_border_width"] = 0; 
+    object["border"] = "none";
+    object["current_border_width"] = 0;
     object["orientation"] = orientation_description(view->get_output());
     object["urgent"] = false;
     object["sticky"] = view->sticky;
     object["floating_nodes"] = get_view_nodes(view, true);
     object["focus"] = Json::arrayValue;
-    object["name"] = view->get_title();
+    object["name"]  = view->get_title();
     object["nodes"] = Json::arrayValue;
 
-    wf::output_t* output = view->get_output();
-    if (output != nullptr) 
+    wf::output_t *output = view->get_output();
+    if (output != nullptr)
     {
-        object["focused"] = (view->get_output()->get_top_view() == view) && view->is_visible();
+        object["focused"] = (view->get_output()->get_top_view() == view) &&
+            view->is_visible();
     }
 
     wayfire_view parent = view->parent;
-	if (parent != nullptr) 
+    if (parent != nullptr)
     {
         wlr_box parent_box = parent->get_bounding_box();
 
-        if (parent_box.width != 0 && parent_box.height != 0) 
+        if ((parent_box.width != 0) && (parent_box.height != 0))
         {
-            double percent = ((double)view->get_bounding_box().width / parent_box.width)
-                    * ((double)view->get_bounding_box().height / parent_box.height);
+            double percent =
+                ((double)view->get_bounding_box().width / parent_box.width) *
+                ((double)view->get_bounding_box().height / parent_box.height);
             object["percent"] = percent;
         }
-	}
+    }
 
     //
     // Container specific attr
     //
-    wl_client * client = view->get_client();
+    wl_client *client = view->get_client();
     if (client != nullptr)
     {
         /* Get pid for native view */
         pid_t wl_pid = 0;
         wl_client_get_credentials(client, &wl_pid, 0, 0);
-        object["pid"] = wl_pid;     
+        object["pid"] = wl_pid;
     }
 
     auto wlr_surface = view->get_wlr_surface();
     if (wlr_surface != nullptr)
     {
         wf::geometry_t rect;
-        rect.x          = wlr_surface->pending.dx;
-        rect.y          = wlr_surface->pending.dy;
-        rect.width      = wlr_surface->pending.width;
-        rect.height     = wlr_surface->pending.height;
-        object["rect"]  = describe_geometry(rect);
+        rect.x     = wlr_surface->pending.dx;
+        rect.y     = wlr_surface->pending.dy;
+        rect.width = wlr_surface->pending.width;
+        rect.height    = wlr_surface->pending.height;
+        object["rect"] = describe_geometry(rect);
     }
 
-    object["app_id"]        = view->get_app_id();
-    object["visible"]       = view->is_visible();
-    object["window_rect"]   = describe_wlr_box(view->get_bounding_box());
-    object["geometry"]      = describe_geometry(view->get_wm_geometry());    
-    
-    object["fullscreen_mode"]   = view->fullscreen;  
+    object["app_id"]  = view->get_app_id();
+    object["visible"] = view->is_visible();
+    object["window_rect"] = describe_wlr_box(view->get_bounding_box());
+    object["geometry"]    = describe_geometry(view->get_wm_geometry());
 
-    
+    object["fullscreen_mode"] = view->fullscreen;
+
     object["shell"] = "xdg_shell";
     object["inhibit_idle"] = false;
 
@@ -1051,7 +1066,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                         object["urgent"] = !!main_xsurf->hints_urgency;
 
                         auto clazz = main_xsurf->class_t;
-                        if (clazz != nullptr) 
+                        if (clazz != nullptr)
                         {
                             object["class"] = std::string(clazz);
                         }
@@ -1065,13 +1080,13 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                         auto title = main_xsurf->title;
                         if (title != nullptr)
                         {
-                            window_props["title"] = std::string(title);;
+                            window_props["title"] = std::string(title);
                         }
 
                         auto role = main_xsurf->role;
                         if (role != nullptr)
                         {
-                            window_props["window_role"] = std::string(role);;
+                            window_props["window_role"] = std::string(role);
                         }
 
                         if (parent != nullptr)
@@ -1091,7 +1106,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     return object;
 }
 
-Json::Value ipc_json::get_root_node() 
+Json::Value ipc_json::get_root_node()
 {
     Json::Value object;
     auto active_output = wf::get_core().get_active_output();
@@ -1104,24 +1119,24 @@ Json::Value ipc_json::get_root_node()
     //
     // Node attr
     //
-    object["id"]  = 1;
+    object["id"]     = 1;
     object["layout"] = "root";
-    object["name"] = "root";
-    object["type"] = "root";
-    object["border"] = "none"; 
+    object["name"]   = "root";
+    object["type"]   = "root";
+    object["border"] = "none";
     object["current_border_width"] = 0;
     object["orientation"] = orientation_description(active_output);
-    object["percent"] = Json::nullValue;
-    object["urgent"] = false;
-    object["sticky"] = false;
+    object["percent"]     = Json::nullValue;
+    object["urgent"]  = false;
+    object["sticky"]  = false;
     object["focused"] = true;
     object["floating_nodes"] = Json::arrayValue;
     object["focus"] = Json::arrayValue;
 
     auto wsize = active_output->workspace->get_workspace_grid_size();
-    if (wsize.width > 0 && wsize.height > 0)
+    if ((wsize.width > 0) && (wsize.height > 0))
     {
-        auto workspace = describe_workspace(wf::point_t{0,0}, active_output);
+        auto workspace = describe_workspace(wf::point_t{0, 0}, active_output);
         if (!workspace.isNull())
         {
             object["rect"] = workspace["rect"];
@@ -1135,7 +1150,7 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
     for (auto& view :
-            wf::get_core().get_all_views())
+         wf::get_core().get_all_views())
     {
         if ((view->role != wf::VIEW_ROLE_DESKTOP_ENVIRONMENT) || !view->is_mapped())
         {
@@ -1147,11 +1162,12 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
             continue;
         }
 
-        auto container = describe_view(view); 
+        auto container = describe_view(view);
         if (!container.isNull())
         {
             container["nodes"] = get_view_nodes(view);
         }
+
         nodes.append(container);
     }
 
@@ -1162,18 +1178,20 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
 {
     Json::Value nodes = Json::arrayValue;
     for (auto& view :
-            output->workspace->get_views_on_workspace(point, wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
+         output->workspace->get_views_on_workspace(point,
+             wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
     {
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
         }
 
-        auto container = describe_view(view); 
+        auto container = describe_view(view);
         if (!container.isNull())
         {
             container["nodes"] = get_view_nodes(view);
         }
+
         nodes.append(container);
     }
 
@@ -1185,7 +1203,7 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
     Json::Value nodes = Json::arrayValue;
 
     for (auto& v :
-            view->enumerate_views())
+         view->enumerate_views())
     {
         if (v == view)
         {
@@ -1197,17 +1215,17 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
             continue;
         }
 
-        if (floating == true && !v->has_data("wm-actions-above"))
+        if ((floating == true) && !v->has_data("wm-actions-above"))
         {
             continue;
         }
 
-        if (floating == false && v->has_data("wm-actions-above"))
+        if ((floating == false) && v->has_data("wm-actions-above"))
         {
             continue;
         }
 
-        auto obj = describe_view(v); 
+        auto obj = describe_view(v);
         nodes.append(obj);
     }
 
@@ -1218,18 +1236,20 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
 {
     Json::Value nodes = Json::arrayValue;
     for (auto& view :
-            output->workspace->get_views_on_workspace(point, wf::LAYER_WORKSPACE | wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
+         output->workspace->get_views_on_workspace(point,
+             wf::LAYER_WORKSPACE | wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
     {
-        if ((view->role != wf::VIEW_ROLE_TOPLEVEL) ||  !view->is_mapped())
+        if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
         }
 
-        auto container = describe_view(view); 
+        auto container = describe_view(view);
         if (!container.isNull())
         {
             container["nodes"] = get_view_nodes(view);
         }
+
         nodes.append(container);
     }
 
@@ -1245,8 +1265,8 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output)
     {
         for (int y = 0; y < wsize.height; y++)
         {
-            auto workspace = describe_workspace(wf::point_t{x,y}, output);
-            workspace["nodes"] = get_container_nodes(wf::point_t{x,y}, output);
+            auto workspace = describe_workspace(wf::point_t{x, y}, output);
+            workspace["nodes"] = get_container_nodes(wf::point_t{x, y}, output);
             nodes.append(workspace);
         }
     }
@@ -1272,7 +1292,7 @@ Json::Value ipc_json::get_tree()
         rootNodes.append(out);
     }
 
-    root["nodes"] = rootNodes; 
+    root["nodes"] = rootNodes;
     return root;
 }
 
@@ -1284,26 +1304,26 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     auto wall = std::make_unique<wf::workspace_wall_t>(output);
     assert(wall != nullptr);
 
-    auto rect = wall->get_workspace_rectangle(point);
+    auto rect    = wall->get_workspace_rectangle(point);
     bool visible = output->workspace->get_current_workspace() == point;
     bool focused = visible && (wf::get_core().get_active_output() == output);
-    int index = ipc_tools::get_workspace_index(point, output);
+    int index    = ipc_tools::get_workspace_index(point, output);
     int id = ipc_tools::get_workspace_id(output->get_id(), index);
-   
+
     Json::Value object = Json::objectValue;
 
     //
     // Node attr
     //
-    object["id"]  = id;
-    object["type"] = "workspace";
+    object["id"]     = id;
+    object["type"]   = "workspace";
     object["layout"] = "stacked";
-    object["border"] = "none"; 
-    object["current_border_width"] = 0; 
+    object["border"] = "none";
+    object["current_border_width"] = 0;
     object["orientation"] = orientation_description(output);
-    object["percent"] = Json::nullValue;
-    object["urgent"] = false;
-    object["sticky"] = false;
+    object["percent"]     = Json::nullValue;
+    object["urgent"]  = false;
+    object["sticky"]  = false;
     object["focused"] = focused;
     object["representation"] = "";
     object["floating_nodes"] = get_top_view_nodes(point, output);
@@ -1315,13 +1335,11 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     //
     object["num"] = index;
     object["fullscreen_mode"] = 1;
-    object["name"] = index;
+    object["name"]    = index;
     object["visible"] = visible;
-    object["rect"] = ipc_json::describe_geometry(rect);
-    object["output"] = output->handle->name;
+    object["rect"]    = ipc_json::describe_geometry(rect);
+    object["output"]  = output->handle->name;
     object["grid_position"] = ipc_json::wayfire_point_to_json(point);
 
     return object;
 }
-
-

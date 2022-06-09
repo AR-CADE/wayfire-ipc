@@ -10,7 +10,7 @@
 #include <wayfire/output-layout.hpp>
 #include <wayfire/output.hpp>
 
-static RETURN_STATUS signal_dpms_cmd(Json::Value argv) 
+static RETURN_STATUS signal_dpms_cmd(Json::Value argv)
 {
     auto output = wf::get_core().get_active_output();
     command_signal data;
@@ -22,15 +22,17 @@ static RETURN_STATUS signal_dpms_cmd(Json::Value argv)
 
 Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx)
 {
-    if (!ctx->output_config) 
+    if (!ctx->output_config)
     {
-		return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output config");
-	}
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            "Missing output config");
+    }
 
-	if (!(argc > 0)) 
+    if (!(argc > 0))
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue, "Missing dpms argument.");
-	}
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Missing dpms argument.");
+    }
 
     Json::Value args = Json::arrayValue;
     args.append("output");
@@ -41,9 +43,8 @@ Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx)
         args.append(std::string(argv[i]));
     }
 
-	ctx->leftovers.argc = argc - 1;
-	ctx->leftovers.argv = argv + 1;
-
+    ctx->leftovers.argc = argc - 1;
+    ctx->leftovers.argv = argv + 1;
 
     return ipc_json::build_status(signal_dpms_cmd(args));
 }

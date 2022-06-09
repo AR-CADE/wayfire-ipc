@@ -8,10 +8,10 @@
 #include <json/value.h>
 #include <wayfire/core.hpp>
 
-static RETURN_STATUS set_scale(double scale, wf::output_t *output) 
+static RETURN_STATUS set_scale(double scale, wf::output_t *output)
 {
     bool found = true;
-    
+
     auto config = wf::get_core().output_layout->get_current_configuration();
 
     for (auto& entry : config)
@@ -23,7 +23,7 @@ static RETURN_STATUS set_scale(double scale, wf::output_t *output)
             found = true;
             entry.second.scale = scale;
             break;
-        } 
+        }
     }
 
     if (found)
@@ -34,35 +34,40 @@ static RETURN_STATUS set_scale(double scale, wf::output_t *output)
     return RETURN_SUCCESS;
 }
 
-
-
 Json::Value scale_handler(int argc, char **argv, command_handler_context *ctx)
 {
+    if (!ctx->output_config)
+    {
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            "Missing output config");
+    }
 
-    if (!ctx->output_config) {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output config");
-	}
-	if (!argc) {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue, "Missing scale argument.");
-	}
+    if (!argc)
+    {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Missing scale argument.");
+    }
 
-	char *end;
-	double scale = strtof(*argv, &end);
-	if (*end) {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue, "Invalid scale.");
-	}
+    char *end;
+    double scale = strtof(*argv, &end);
+    if (*end)
+    {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Invalid scale.");
+    }
 
     auto output = command::all_output_by_name_or_id(ctx->output_config->name);
 
-    if (!output) {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue, "Missing output");
-	}
+    if (!output)
+    {
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            "Missing output");
+    }
 
     RETURN_STATUS status = set_scale(scale, output);
 
-
-	ctx->leftovers.argc = argc - 1;
-	ctx->leftovers.argv = argv + 1;
+    ctx->leftovers.argc = argc - 1;
+    ctx->leftovers.argv = argv + 1;
 
     return ipc_json::build_status(status);
 }

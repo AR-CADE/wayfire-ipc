@@ -6,7 +6,8 @@
 #include <json/value.h>
 #include <string>
 
-struct json_parser_result {
+struct json_parser_result
+{
     std::string errors;
     bool error = false;
     Json::Value root;
@@ -14,33 +15,34 @@ struct json_parser_result {
 
 class json
 {
-    public:
+  public:
 /*     static std::string json_array_to_string(Json::Value root)
-    {
-        if (root.isNull() || root.empty())
-        {
-            return "[]";
-        }
+ *   {
+ *       if (root.isNull() || root.empty())
+ *       {
+ *           return "[]";
+ *       }
+ *
+ *       std::string join = "";
+ *       for (Json::ArrayIndex i = 0; i < root.size(); i++)
+ *       {
+ *           Json::Value value = root.get(i, "");
+ *           if (value.isArray())
+ *           {
+ *               join += json_array_to_string(value);
+ *           } else
+ *           {
+ *               join += (i == 0 ? "" : ", ") + (value.isString() ?
+ *                   value.asString() :
+ *                   json_to_string(root.get(i, "")));
+ *           }
+ *       }
+ *
+ *       return "[ " + join + " ]";
+ *   } */
 
-        std::string join = "";
-        for (Json::ArrayIndex i = 0; i < root.size(); i++)
-        {
-            Json::Value value = root.get(i, "");
-            if (value.isArray())
-            {
-                join += json_array_to_string(value);
-            } else
-            {
-                join += (i == 0 ? "" : ", ") + (value.isString() ?
-                    value.asString() :
-                    json_to_string(root.get(i, "")));
-            }
-        }
-
-        return "[ " + join + " ]";
-    } */
-
-    static std::string json_to_string(Json::Value root, const std::string& ident = "  ")
+    static std::string json_to_string(Json::Value root,
+        const std::string& ident = "  ")
     {
         if (root.isString())
         {
@@ -49,12 +51,12 @@ class json
 
         Json::StreamWriterBuilder builder;
         builder["indentation"] = ident;
-        builder["emitUTF8"] = true;
+        builder["emitUTF8"]    = true;
         builder["enableYAMLCompatibility"] = true;
         return Json::writeString(builder, root.isNull() ? Json::objectValue : root);
     }
 
-    static Json::Value string_to_json(const std::string &str)
+    static Json::Value string_to_json(const std::string & str)
     {
         if (str.c_str() == nullptr)
         {
@@ -66,7 +68,8 @@ class json
         if (parse_result.error)
         {
             // LOGE("Failed to parse json string %s", parse_error.errors.c_str());
-            std::cerr << "Failed to parse json string: " << parse_result.errors << std::endl;
+            std::cerr << "Failed to parse json string: " << parse_result.errors <<
+                std::endl;
         }
 
         return parse_result.root;
@@ -80,13 +83,14 @@ class json
 
         if (str.empty())
         {
-            parse_result.error = true;
+            parse_result.error  = true;
             parse_result.errors = "String is empty .";
             return parse_result;
         }
 
         parse_result.error =
-            !reader->parse(str.c_str(), str.c_str() + str.size(), &parse_result.root, &parse_result.errors);
+            !reader->parse(str.c_str(),
+                str.c_str() + str.size(), &parse_result.root, &parse_result.errors);
         delete reader;
 
         return parse_result;

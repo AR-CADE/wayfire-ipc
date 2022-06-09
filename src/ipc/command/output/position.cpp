@@ -5,12 +5,14 @@
 #include "commands/commands.hpp"
 
 
-static Json::Value set_scale_bulk(Json::Value argv, wf::output_config::position_t position, Json::Value ids = Json::arrayValue)
+static Json::Value set_scale_bulk(Json::Value argv,
+    wf::output_config::position_t position,
+    Json::Value ids = Json::arrayValue)
 {
-
     if (ids.empty())
     {
-        return ipc_json::command_return(getCmdBase(argv), argv, RETURN_INVALID_PARAMETER);
+        return ipc_json::command_return(getCmdBase(
+            argv), argv, RETURN_INVALID_PARAMETER);
     }
 
     auto config = wf::get_core().output_layout->get_current_configuration();
@@ -20,7 +22,7 @@ static Json::Value set_scale_bulk(Json::Value argv, wf::output_config::position_
         if (ids.isArray())
         {
             auto output = wf::get_core().output_layout->find_output(entry.first);
-            
+
             bool found = false;
 
             for (auto id : ids)
@@ -30,24 +32,24 @@ static Json::Value set_scale_bulk(Json::Value argv, wf::output_config::position_
                 {
                     found = true;
                 }
-            }                    
+            }
 
             if (found == false)
             {
                 continue;
             }
-        }       
+        }
 
         entry.second.position = position;
     }
 
     wf::get_core().output_layout->apply_configuration(config);
 
-
     return ipc_json::command_return(getCmdBase(argv), argv, RETURN_SUCCESS);
 }
 
-Json::Value cmd_position(Json::Value argv) {
+Json::Value cmd_position(Json::Value argv)
+{
     Json::Value position = argv.get(Json::ArrayIndex(3), "");
     Json::Value ids = _get_ids_at_index(argv, Json::ArrayIndex(1));
 
@@ -59,7 +61,7 @@ Json::Value cmd_position(Json::Value argv) {
 
     Json::Value x = position.get("x", "");
     Json::Value y = position.get("y", "");
-    if (!x.isNumeric() || !y.isNumeric()) 
+    if (!x.isNumeric() || !y.isNumeric())
     {
         return ipc_json::command_return(getCmdBase(argv), argv,
             RETURN_INVALID_PARAMETER);

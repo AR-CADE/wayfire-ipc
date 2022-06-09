@@ -35,11 +35,11 @@
 #include <ipc/json.hpp>
 #include <ipc/tools.hpp>
 
-class ipc_server_cli 
+class ipc_server_cli
 {
   public:
     //
-    // The following uuid and group_uuid are to extend the i3 protocol 
+    // The following uuid and group_uuid are to extend the i3 protocol
     // by adding a sendtick_to and sendtick_togroup functions, to be able
     // to send an event to a specific client or a group of clients.
     //
@@ -51,10 +51,10 @@ class ipc_server_cli
     struct wl_event_source *writable_event_source = nullptr;
     int fd = 0;
     wf::compositor_core_t *core = nullptr;
-    long subscribed_events = 0;
-    size_t write_buffer_len = 0;
+    long subscribed_events   = 0;
+    size_t write_buffer_len  = 0;
     size_t write_buffer_size = 0;
-    char * write_buffer = nullptr;
+    char *write_buffer = nullptr;
     //
     // The following are for storing data between event_loop calls
     //
@@ -68,10 +68,12 @@ class ipc_server_t
     static void send_tick(const std::string& payload);
     static void send_event(const char *json_string, enum ipc_event_type event);
     static uint32_t client_count();
-  
-  //protected:
+
+    // protected:
+
   public:
     void serve();
+
   protected:
     static bool send_reply(ipc_server_cli *client, int payload_type,
         const char *payload, uint32_t payload_length);

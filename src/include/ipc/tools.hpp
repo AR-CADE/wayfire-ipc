@@ -13,9 +13,11 @@
 #include <wayfire/util/log.hpp>
 #include <wayfire/workspace-manager.hpp>
 
-#define INVALID_WORKSPACE wf::point_t{-1,-1}
+#define INVALID_WORKSPACE wf::point_t{-1, -1}
 
-#define ASSERT_VALID_WORKSPACE(w,p) assert(w != nullptr);assert(w->is_workspace_valid(point));
+#define ASSERT_VALID_WORKSPACE(w, p) \
+    assert(w != nullptr);assert(w->is_workspace_valid( \
+    point));
 
 class ipc_tools
 {
@@ -30,9 +32,9 @@ class ipc_tools
             for (int x = 0; x < wsize.width; x++)
             {
                 for (int y = 0; y < wsize.height; y++)
-                {                    
+                {
                     i++;
-                    wf::point_t coord{x,y};
+                    wf::point_t coord{x, y};
 
                     if (i == index)
                     {
@@ -40,7 +42,7 @@ class ipc_tools
                     }
                 }
             }
-        } 
+        }
 
         return INVALID_WORKSPACE;
     }
@@ -54,16 +56,17 @@ class ipc_tools
         {
             for (int y = 0; y < wsize.height; y++)
             {
-                auto point = wf::point_t{x,y};
-                auto i = get_workspace_index(point, output);
+                auto point = wf::point_t{x, y};
+                auto i     = get_workspace_index(point, output);
                 if (i == index)
                 {
                     return point;
                 }
             }
         }
+
         return INVALID_WORKSPACE;
-    } 
+    }
 
     static int get_workspace_id(uint32_t output_id, uint32_t workspace_index)
     {
@@ -75,13 +78,13 @@ class ipc_tools
     {
         assert(output != nullptr);
         ASSERT_VALID_WORKSPACE(output->workspace, point);
-        
-        auto wsize   = output->workspace->get_workspace_grid_size();
+
+        auto wsize = output->workspace->get_workspace_grid_size();
         return point.x + point.y * wsize.width + 1;
     }
 
     static std::vector<std::string> split_string(std::string s,
-       const std::string &delimiter)
+        const std::string & delimiter)
     {
         size_t pos_start = 0, pos_end, delim_len = delimiter.length();
         std::string token;
@@ -98,115 +101,121 @@ class ipc_tools
         return res;
     }
 
-    static inline const char *argsep_next_interesting(const char *src, const char *delim) 
+    static inline const char *argsep_next_interesting(const char *src,
+        const char *delim)
     {
-        const char *special = strpbrk(src, "\"'\\");
+        const char *special    = strpbrk(src, "\"'\\");
         const char *next_delim = strpbrk(src, delim);
-        if (!special) 
+        if (!special)
         {
             return next_delim;
         }
 
-        if (!next_delim) 
+        if (!next_delim)
         {
             return special;
         }
+
         return (next_delim < special) ? next_delim : special;
     }
 
-    static char *argsep(char **stringp, const char *delim, char *matched) 
+    static char *argsep(char **stringp, const char *delim, char *matched)
     {
         char *start = *stringp;
-        char *end = start;
+        char *end   = start;
         bool in_string = false;
-        bool in_char = false;
-        bool escaped = false;
+        bool in_char   = false;
+        bool escaped   = false;
         char *interesting = nullptr;
 
-        while ((interesting = (char *)argsep_next_interesting(end, delim))) 
+        while ((interesting = (char*)argsep_next_interesting(end, delim)))
         {
-            if (escaped && interesting != end) 
+            if (escaped && (interesting != end))
             {
                 escaped = false;
             }
 
-            if (*interesting == '"' && !in_char && !escaped) 
+            if ((*interesting == '"') && !in_char && !escaped)
             {
                 in_string = !in_string;
                 end = interesting + 1;
-            } 
-            else if (*interesting == '\'' && !in_string && !escaped) 
+            } else if ((*interesting == '\'') && !in_string && !escaped)
             {
                 in_char = !in_char;
-                end = interesting + 1;
-            } 
-            else if (*interesting == '\\') 
+                end     = interesting + 1;
+            } else if (*interesting == '\\')
             {
                 escaped = !escaped;
-                end = interesting + 1;
-            } 
-            else if (!in_string && !in_char && !escaped) 
+                end     = interesting + 1;
+            } else if (!in_string && !in_char && !escaped)
             {
                 // We must have matched a separator
                 end = interesting;
-                if (matched) 
+                if (matched)
                 {
                     *matched = *end;
                 }
 
-                if (end - start) 
+                if (end - start)
                 {
                     *(end++) = 0;
                     *stringp = end;
                     break;
-                } 
-                else 
+                } else
                 {
                     end = ++start;
                 }
-
-            } 
-            else 
+            } else
             {
                 end++;
             }
         }
 
-        if (!interesting) 
+        if (!interesting)
         {
             *stringp = nullptr;
-            if (matched) 
+            if (matched)
             {
                 *matched = '\0';
             }
         }
+
         return start;
     }
 
 #if STRICT_C
-    static char *join_args(char **argv, int argc) {
-        if (!(argc > 0)) {
+    static char *join_args(char **argv, int argc)
+    {
+        if (!(argc > 0))
+        {
             LOGE("argc should be positive");
             return nullptr;
         }
 
         int len = 0, i;
-        for (i = 0; i < argc; ++i) {
+        for (i = 0; i < argc; ++i)
+        {
             len += strlen(argv[i]) + 1;
         }
-        char *res = (char *)malloc(len);
+
+        char *res = (char*)malloc(len);
         len = 0;
-        for (i = 0; i < argc; ++i) {
+        for (i = 0; i < argc; ++i)
+        {
             strcpy(res + len, argv[i]);
             len += strlen(argv[i]);
             res[len++] = ' ';
         }
+
         res[len - 1] = '\0';
         return res;
     }
+
 #else
-    static std::string join_args(char **argv, int argc) {
-        if (!(argc > 0)) {
+    static std::string join_args(char **argv, int argc)
+    {
+        if (!(argc > 0))
+        {
             LOGE("argc should be positive");
             return nullptr;
         }
@@ -219,124 +228,147 @@ class ipc_tools
             {
                 res.append(" ");
             }
+
             res.append(std::string(argv[i]));
         }
 
         return res;
     }
+
 #endif
 
     constexpr static const char whitespace[] = " \f\n\r\t\v";
 
-    static char **split_args(const char *start, int *argc) 
+    static char **split_args(const char *start, int *argc)
     {
-        *argc = 0;
+        *argc     = 0;
         int alloc = 2;
-        char **argv = (char **)malloc(sizeof(char *) * alloc);
-        bool in_token = false;
+        char **argv    = (char**)malloc(sizeof(char*) * alloc);
+        bool in_token  = false;
         bool in_string = false;
-        bool in_char = false;
+        bool in_char   = false;
         bool in_brackets = false; // brackets are used for criteria
-        bool escaped = false;
-        const char *end = start;
-        if (start) {
-            while (*start) {
-                if (!in_token) {
-                    start = (end += strspn(end, whitespace));
+        bool escaped     = false;
+        const char *end  = start;
+        if (start)
+        {
+            while (*start)
+            {
+                if (!in_token)
+                {
+                    start    = (end += strspn(end, whitespace));
                     in_token = true;
                 }
-                if (*end == '"' && !in_char && !escaped) {
+
+                if ((*end == '"') && !in_char && !escaped)
+                {
                     in_string = !in_string;
-                } else if (*end == '\'' && !in_string && !escaped) {
+                } else if ((*end == '\'') && !in_string && !escaped)
+                {
                     in_char = !in_char;
-                } else if (*end == '[' && !in_string && !in_char && !in_brackets && !escaped) {
+                } else if ((*end == '[') && !in_string && !in_char && !in_brackets &&
+                           !escaped)
+                {
                     in_brackets = true;
-                } else if (*end == ']' && !in_string && !in_char && in_brackets && !escaped) {
+                } else if ((*end == ']') && !in_string && !in_char && in_brackets &&
+                           !escaped)
+                {
                     in_brackets = false;
-                } else if (*end == '\\') {
+                } else if (*end == '\\')
+                {
                     escaped = !escaped;
-                } else if (*end == '\0' || (!in_string && !in_char && !in_brackets
-                            && !escaped && strchr(whitespace, *end))) {
+                } else if ((*end == '\0') ||
+                           (!in_string && !in_char && !in_brackets &&
+                            !escaped && strchr(whitespace, *end)))
+                {
                     goto add_token;
                 }
-                if (*end != '\\') {
+
+                if (*end != '\\')
+                {
                     escaped = false;
                 }
+
                 ++end;
                 continue;
-                add_token:
-                if (end - start > 0) {
-                    char *token = (char *)malloc(end - start + 1);
+add_token:
+                if (end - start > 0)
+                {
+                    char *token = (char*)malloc(end - start + 1);
                     strncpy(token, start, end - start + 1);
                     token[end - start] = '\0';
                     argv[*argc] = token;
                     int tmp_argc = *argc;
-                    if (++*argc + 1 == alloc) {
-                       char **tmp_argv = (char **)realloc(argv, (alloc *= 2) * sizeof(char *));
+                    if (++*argc + 1 == alloc)
+                    {
+                        char **tmp_argv = (char**)realloc(argv,
+                            (alloc *= 2) *
+                            sizeof(char*));
                         if (nullptr == tmp_argv)
                         {
                             free_argv(tmp_argc, argv);
                             return nullptr;
-                        }
-                        else
+                        } else
                         {
                             argv = tmp_argv;
                         }
                     }
                 }
+
                 in_token = false;
-                escaped = false;
+                escaped  = false;
             }
         }
+
         argv[*argc] = nullptr;
         return argv;
     }
 
-    static void free_argv(int argc, char **argv) 
+    static void free_argv(int argc, char **argv)
     {
-        while (argc-- > 0) 
+        while (argc-- > 0)
         {
             free(argv[argc]);
         }
+
         free(argv);
     }
 
-    static void strip_quotes(char *str) 
+    static void strip_quotes(char *str)
     {
-        bool in_str = false;
-        bool in_chr = false;
+        bool in_str  = false;
+        bool in_chr  = false;
         bool escaped = false;
-        char *end = strchr(str,0);
-        while (*str) 
+        char *end    = strchr(str, 0);
+        while (*str)
         {
-            if (*str == '\'' && !in_str && !escaped) 
+            if ((*str == '\'') && !in_str && !escaped)
             {
                 in_chr = !in_chr;
                 goto shift_over;
-            } 
-            else if (*str == '\"' && !in_chr && !escaped) 
+            } else if ((*str == '\"') && !in_chr && !escaped)
             {
                 in_str = !in_str;
                 goto shift_over;
-            } 
-            else if (*str == '\\') 
+            } else if (*str == '\\')
             {
                 escaped = !escaped;
                 ++str;
                 continue;
             }
+
             escaped = false;
             ++str;
             continue;
-            shift_over:
-            memmove(str, str+1, end-- - str);
+shift_over:
+            memmove(str, str + 1, end-- - str);
         }
+
         *end = '\0';
     }
 
-    static ipc_event_type event_to_type(const std::string &s)
+    static ipc_event_type event_to_type(const std::string & s)
     {
-
         // Events sent from sway to clients. Events have the highest bits set.
         if (s == IPC_I3_EVENT_WORKSPACE)
         {
@@ -368,13 +400,11 @@ class ipc_tools
             return IPC_I3_EVENT_TYPE_TICK;
         }
 
-        
         // sway-specific event types
         if (s == IPC_SWAY_EVENT_INPUT)
         {
             return IPC_SWAY_EVENT_TYPE_INPUT;
         }
-
 
         //
         // wayfire specific event types

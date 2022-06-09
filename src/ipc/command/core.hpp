@@ -4,6 +4,3 @@
 #include "command_impl.hpp"
 
 #endif
-
-
-
