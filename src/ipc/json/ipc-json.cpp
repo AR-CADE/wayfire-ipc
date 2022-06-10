@@ -895,6 +895,7 @@ Json::Value ipc_json::describe_wlr_surface(wlr_surface *surface)
     return object;
 }
 
+#if HAVE_XWAYLAND
 Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surface)
 {
     Json::Value object;
@@ -927,6 +928,8 @@ Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surfac
 
     return object;
 }
+
+#endif
 
 Json::Value ipc_json::describe_wl_display(wl_display *display)
 {
@@ -1049,6 +1052,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     idle_inhibitors["application"] = "none";
     object["idle_inhibitors"] = idle_inhibitors;
 
+#if HAVE_XWAYLAND
     if (xwayland_enabled == 1)
     {
         auto main_surface = view->get_main_surface();
@@ -1108,6 +1112,8 @@ Json::Value ipc_json::describe_view(wayfire_view view)
             }
         }
     }
+
+#endif
 
     return object;
 }

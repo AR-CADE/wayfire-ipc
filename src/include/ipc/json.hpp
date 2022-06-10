@@ -39,7 +39,9 @@ class ipc_json : public json
     static Json::Value describe_pointf(wf::pointf_t point);
     static Json::Value describe_wlr_surface_state(wlr_surface_state surface_state);
     static Json::Value describe_wlr_surface(wlr_surface *surface);
+#if HAVE_XWAYLAND
     static Json::Value describe_wlr_xwayland_surface(wlr_xwayland_surface *surface);
+#endif
     static Json::Value describe_wl_client(wl_client *client);
     static Json::Value describe_wl_display(wl_display *display);
     static Json::Value create_empty_rect();

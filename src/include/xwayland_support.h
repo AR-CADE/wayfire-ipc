@@ -2,31 +2,27 @@
 #define _XWAYLAND_SUPPORT_H
 
 #include <wlroots_support.h>
+#include <wlr/config.h>
+#include <wayfire/config.h>
 
-#ifndef WF_HAS_XWAYLAND
-#define WF_HAS_XWAYLAND 1
-#elif WF_HAS_XWAYLAND != 1
-#define WF_HAS_XWAYLAND 1
+#if WLR_HAS_XWAYLAND && WF_HAS_XWAYLAND
+#define HAVE_XWAYLAND 1
+#else
+#define HAVE_XWAYLAND 0
 #endif
-
-/* 
-#ifndef HAVE_XWAYLAND
-#define HAVE_XWAYLAND 1
-#elif HAVE_XWAYLAND != 1
-#define HAVE_XWAYLAND 1
-#endif 
-*/
 
 extern "C" {
 #define class class_t
 #define static
+#if HAVE_XWAYLAND
 //#include <X11/Xatom.h>
 #include <wlr/xwayland.h>
-// #include <xcb/res.h>
-// #include <xcb/xcb.h>
+//#include <xcb/res.h>
+//#include <xcb/xcb.h>
+#endif
 #undef static 
 #undef class
-// #include <sys/socket.h>
+//#include <sys/socket.h>
 #include <wlr/types/wlr_idle.h> 
 };
 

@@ -35,7 +35,7 @@ enum criteria_token
     T_CON_ID,
     T_CON_MARK,
     T_FLOATING,
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     T_CLASS,
     T_ID,
     T_INSTANCE,
@@ -64,7 +64,7 @@ class criteria
     struct pattern *app_id   = nullptr;
     struct pattern *con_mark = nullptr;
     uint32_t con_id = 0; // internal ID
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     struct pattern *class = nullptr;
     uint32_t id; // X11 window ID
     struct pattern *instance    = nullptr;
@@ -132,13 +132,13 @@ class criteria
     bool pattern_create(struct pattern **pattern, char *value);
     static void pattern_destroy(struct pattern *pattern);
     static int regex_cmp(const char *item, const pcre *regex);
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     static bool view_has_window_type(struct sway_view *view, enum atom_name name);
 #endif
     static void unescape(char *value);
     static void skip_spaces(char **head);
     static enum criteria_token token_from_name(char *name);
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     static enum atom_name parse_window_type(const char *type);
 #endif
     static void node_for_each_matched_container(Json::Value obj,

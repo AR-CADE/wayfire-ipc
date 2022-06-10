@@ -36,7 +36,7 @@ bool criteria::is_empty()
            !this->app_id &&
            !this->con_mark &&
            !this->con_id
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
            && !this->class &&
            !this->id &&
            !this->instance &&
@@ -115,7 +115,7 @@ void criteria::destroy()
     this->shell = nullptr;
     pattern_destroy(this->app_id);
     this->app_id = nullptr;
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     pattern_destroy(this->class);
     this->class = nullptr;
     pattern_destroy(this->instance);
@@ -148,7 +148,7 @@ int criteria::regex_cmp(const char *item, const pcre *regex)
     return pcre_exec(regex, nullptr, item, strlen(item), 0, 0, nullptr, 0);
 }
 
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
 bool criteria::view_has_window_type(struct sway_view *view, enum atom_name name)
 {
     if (view->type != SWAY_VIEW_XWAYLAND)
@@ -343,7 +343,7 @@ bool criteria::matches_view(const Json::Value& view)
         return false;
     }
 
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     if (this->id)  // X11 window ID
     {
         uint32_t x11_window_id = view_get_x11_window_id(view);
@@ -694,7 +694,7 @@ Json::Value criteria::get_containers()
     return matches;
 }
 
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
 enum atom_name criteria::parse_window_type(const char *type)
 {
     if (strcasecmp(type, "normal") == 0)
@@ -745,7 +745,7 @@ enum criteria_token criteria::token_from_name(char *name)
     } else if (strcmp(name, "con_mark") == 0)
     {
         return T_CON_MARK;
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     } else if (strcmp(name, "class") == 0)
     {
         return T_CLASS;
@@ -847,7 +847,7 @@ bool criteria::parse_token(char *name, char *value)
         pattern_create(&this->con_mark, value);
         break;
 
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
       case T_CLASS:
         pattern_create(&this->class, value);
         break;
@@ -986,7 +986,7 @@ bool criteria::parse(char *raw, char **error_arg)
 
     ++head;
 
-#if HAVE_XWAYLAND
+#if HAVE_XWAYLAND && WIP
     criteria->window_type = ATOM_LAST; // default value
 #endif
     char *name = nullptr, *value = nullptr;
