@@ -57,7 +57,8 @@ static enum wl_output_transform invert_rotation_direction(
     }
 }
 
-Json::Value output_transform_handler(int argc, char **argv, command_handler_context *ctx)
+Json::Value output_transform_handler(int argc, char **argv,
+    command_handler_context *ctx)
 {
     if (!ctx->output_config)
     {

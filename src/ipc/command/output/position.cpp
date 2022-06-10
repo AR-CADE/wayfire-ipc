@@ -35,7 +35,8 @@ static RETURN_STATUS set_position(wf::output_config::position_t position,
     return RETURN_SUCCESS;
 }
 
-Json::Value output_position_handler(int argc, char **argv, command_handler_context *ctx)
+Json::Value output_position_handler(int argc, char **argv,
+    command_handler_context *ctx)
 {
     if (!ctx->output_config)
     {

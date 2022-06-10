@@ -11,6 +11,7 @@ server = shared_module(
     'command/kill.cpp', 
     'command/exit.cpp', 
     'command/sticky.cpp', 
+    'command/opacity.cpp', 
     'command/fullscreen.cpp', 
     'command/output/dpms.cpp', 
     'command/output/scale.cpp', 
