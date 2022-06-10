@@ -92,7 +92,11 @@ class wayfire_dpms
 
         for (auto& entry : config)
         {
-            entry.second.source = (entry.second.source == wf::OUTPUT_IMAGE_SOURCE_SELF) ? wf::OUTPUT_IMAGE_SOURCE_DPMS : wf::OUTPUT_IMAGE_SOURCE_SELF;
+            entry.second.source =
+                (entry.second.source ==
+                    wf::OUTPUT_IMAGE_SOURCE_SELF) ? wf::OUTPUT_IMAGE_SOURCE_DPMS : wf
+                ::
+                OUTPUT_IMAGE_SOURCE_SELF;
         }
 
         wf::get_core().output_layout->apply_configuration(config);
@@ -101,14 +105,14 @@ class wayfire_dpms
     void set_state_off(Json::Value name_or_id)
     {
         bool apply = false;
-        
+
         auto config = wf::get_core().output_layout->get_current_configuration();
 
         wf::output_t *output = nullptr;
 
-        if (!(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+        if (!(name_or_id.isString() && (name_or_id.asString() == IPC_ANY_TOCKEN)))
         {
-            std::string str_name_or_id = name_or_id.asString();   
+            std::string str_name_or_id = name_or_id.asString();
             output = command::all_output_by_name_or_id(str_name_or_id.c_str());
 
             if (!output)
@@ -121,13 +125,15 @@ class wayfire_dpms
         {
             auto o = wf::get_core().output_layout->find_output(entry.first);
 
-            if (output && !(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+            if (output &&
+                !(name_or_id.isString() &&
+                  (name_or_id.asString() == IPC_ANY_TOCKEN)))
             {
                 if (o->get_id() != output->get_id())
                 {
                     continue;
                 }
-            }             
+            }
 
             if (entry.second.source != wf::OUTPUT_IMAGE_SOURCE_DPMS)
             {
@@ -150,9 +156,9 @@ class wayfire_dpms
 
         wf::output_t *output = nullptr;
 
-        if (!(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+        if (!(name_or_id.isString() && (name_or_id.asString() == IPC_ANY_TOCKEN)))
         {
-            std::string str_name_or_id = name_or_id.asString();   
+            std::string str_name_or_id = name_or_id.asString();
             output = command::all_output_by_name_or_id(str_name_or_id.c_str());
 
             if (!output)
@@ -165,14 +171,16 @@ class wayfire_dpms
         {
             auto o = wf::get_core().output_layout->find_output(entry.first);
 
-            if (output && !(name_or_id.isString() && name_or_id.asString() == IPC_ANY_TOCKEN))
+            if (output &&
+                !(name_or_id.isString() &&
+                  (name_or_id.asString() == IPC_ANY_TOCKEN)))
             {
                 if (o->get_id() != output->get_id())
                 {
                     continue;
                 }
-            }  
- 
+            }
+
             if (entry.second.source != wf::OUTPUT_IMAGE_SOURCE_SELF)
             {
                 entry.second.source = wf::OUTPUT_IMAGE_SOURCE_SELF;
@@ -200,7 +208,7 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         {
             return false;
         }
-        
+
         /* Toggle DPMS for all outputs **/
         get_instance().toggle_state();
 
@@ -221,13 +229,11 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
     };
 
     wf::signal_connection_t on_dpms_command = [=] (wf::signal_data_t *data)
-    {     
-        
+    {
         if (!output->can_activate_plugin(grab_interface))
         {
             return;
         }
-
 
         command_signal *signal = dynamic_cast<command_signal*>(data);
         Json::Value argv = signal->argv;
@@ -237,10 +243,10 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         // argv[2] = "dpms"
         // argv[3] = "on" or "off"
         //
-        Json::Value option = argv.get(Json::ArrayIndex(3), IPC_ON_TOCKEN);
+        Json::Value option     = argv.get(Json::ArrayIndex(3), IPC_ON_TOCKEN);
         Json::Value name_or_id = argv.get(Json::ArrayIndex(1), IPC_ANY_TOCKEN);
 
-        if (option.isString() == false || option.empty())
+        if ((option.isString() == false) || option.empty())
         {
             return;
         }
@@ -248,12 +254,10 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         if (option.asString() == IPC_OFF_TOCKEN)
         {
             get_instance().set_state_off(name_or_id);
-        }
-        else 
-        {        
+        } else
+        {
             get_instance().set_state_on(name_or_id);
         }
- 
     };
 
     void update_fullscreen()
@@ -287,8 +291,8 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         auto fs_views = output->workspace->get_promoted_views(
             output->workspace->get_current_workspace());
 
-        /* Currently, the fullscreen count would always be 0 or 1,
-         * since fullscreen-layer-focused is only emitted on changes between 0 and 1
+        /* Currently, the fullscreen count would always be 0 or 1, since
+         * fullscreen-layer-focused is only emitted on changes between 0 and 1
          **/
         has_fullscreen = fs_views.size() > 0;
         update_fullscreen();
