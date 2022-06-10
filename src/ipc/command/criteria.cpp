@@ -196,7 +196,7 @@ bool criteria::matches_container(const Json::Value& container)
         //
     }
 
-    if (this->con_id)  // Internal ID
+    if (this->con_id) // Internal ID
     {
         int id = container.get("id", Json::nullValue).asInt();
 
@@ -344,7 +344,7 @@ bool criteria::matches_view(const Json::Value& view)
     }
 
 #if HAVE_XWAYLAND && WIP
-    if (this->id)  // X11 window ID
+    if (this->id) // X11 window ID
     {
         uint32_t x11_window_id = view_get_x11_window_id(view);
         if (!x11_window_id || (x11_window_id != this->id))
@@ -522,10 +522,10 @@ bool criteria::matches_view(const Json::Value& view)
         });
 
         wayfire_view target;
-        if (this->urgent == 'o')  // oldest
+        if (this->urgent == 'o') // oldest
         {
             target = urgent_views[0];
-        } else// latest
+        } else // latest
         {
             target = urgent_views[urgent_views.size() - 1];
         }

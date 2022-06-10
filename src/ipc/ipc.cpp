@@ -117,7 +117,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
   private:
 
-    void signal_event(const enum ipc_event_type &signal,
+    void signal_event(const enum ipc_event_type & signal,
         const std::string & json_string)
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
@@ -196,7 +196,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         }
     }
 
-    void signal_window_event(const enum ipc_event_type &signal,
+    void signal_window_event(const enum ipc_event_type & signal,
         wf::signal_data_t *data, const std::string & change)
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
@@ -393,7 +393,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         return object;
     }
 
-    void signal_output_event(const enum ipc_event_type &signal,
+    void signal_output_event(const enum ipc_event_type & signal,
         wf::signal_data_t *data, const std::string & change)
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
@@ -464,7 +464,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         return object;
     }
 
-    void signal_input_event(const enum ipc_event_type &signal,
+    void signal_input_event(const enum ipc_event_type & signal,
         wf::signal_data_t *data, const std::string & change)
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
@@ -592,7 +592,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         return object;
     }
 
-    void signal_workspace_event(const enum ipc_event_type &signal,
+    void signal_workspace_event(const enum ipc_event_type & signal,
         wf::signal_data_t *data, const std::string & change)
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
@@ -651,7 +651,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         return ipc_json::json_to_string(object);
     }
 
-    void signal_binding_event(const enum ipc_event_type &signal,
+    void signal_binding_event(const enum ipc_event_type & signal,
         wf::signal_data_t *data, const std::string & change = "run")
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)

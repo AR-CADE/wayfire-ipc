@@ -72,7 +72,9 @@ Json::Value ipc_json::get_version()
 
 Json::Value ipc_json::create_empty_rect()
 {
-    struct wlr_box empty = {0, 0, 0, 0};
+    struct wlr_box empty = {
+        0, 0, 0, 0
+    };
 
     return describe_wlr_box(empty);
 }

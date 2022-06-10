@@ -458,7 +458,9 @@ int main(int argc, char **argv)
 
     static const struct option long_options[] =
     {
-        {"help", no_argument, nullptr, 'h'},
+        {
+            "help", no_argument, nullptr, 'h'
+        },
         {"monitor", no_argument, nullptr, 'm'},
         {"pretty", no_argument, nullptr, 'p'},
         {"quiet", no_argument, nullptr, 'q'},
@@ -644,7 +646,9 @@ int main(int argc, char **argv)
 
     int ret = 0;
     int socketfd = ipc_open_socket(socket_path);
-    struct timeval timeout = {.tv_sec = 3, .tv_usec = 0};
+    struct timeval timeout = {
+        .tv_sec = 3, .tv_usec = 0
+    };
     ipc_set_recv_timeout(socketfd, timeout);
 #if STRICT_C
     uint32_t len = (uint32_t)std::string(command).size();

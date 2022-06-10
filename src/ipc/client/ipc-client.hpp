@@ -40,6 +40,7 @@ struct ipc_response *ipc_recv_response(int socketfd);
  * Free ipc_response struct
  */
 void free_ipc_response(struct ipc_response *response);
+
 /**
  * Sets the receive timeout for the IPC socket
  */
