@@ -2,72 +2,112 @@
 #include <json/value.h>
 #include <wayfire/core.hpp>
 #include <wayfire/output-layout.hpp>
-#include "commands/commands.hpp"
+#include <wayfire/output.hpp>
+#include "../command_impl.hpp"
+#include "ipc.h"
+#include <json/value.h>
+#include <wayfire/core.hpp>
 
-
-static Json::Value set_scale_bulk(Json::Value argv,
-    wf::output_config::position_t position,
-    Json::Value ids = Json::arrayValue)
+static RETURN_STATUS set_position(wf::output_config::position_t position,
+    wf::output_t *output)
 {
-    if (ids.empty())
-    {
-        return ipc_json::command_return(getCmdBase(
-            argv), argv, RETURN_INVALID_PARAMETER);
-    }
+    bool found = true;
 
     auto config = wf::get_core().output_layout->get_current_configuration();
 
     for (auto& entry : config)
     {
-        if (ids.isArray())
+        auto o = wf::get_core().output_layout->find_output(entry.first);
+
+        if (o->get_id() == output->get_id())
         {
-            auto output = wf::get_core().output_layout->find_output(entry.first);
-
-            bool found = false;
-
-            for (auto id : ids)
-            {
-                if (id.isNumeric() && !(id.asInt() < 0) &&
-                    (id.asUInt() == output->get_id()))
-                {
-                    found = true;
-                }
-            }
-
-            if (found == false)
-            {
-                continue;
-            }
+            found = true;
+            entry.second.position = position;
+            break;
         }
-
-        entry.second.position = position;
     }
 
-    wf::get_core().output_layout->apply_configuration(config);
+    if (found)
+    {
+        wf::get_core().output_layout->apply_configuration(config);
+    }
 
-    return ipc_json::command_return(getCmdBase(argv), argv, RETURN_SUCCESS);
+    return RETURN_SUCCESS;
 }
 
-Json::Value cmd_position(Json::Value argv)
+Json::Value output_position_handler(int argc, char **argv, command_handler_context *ctx)
 {
-    Json::Value position = argv.get(Json::ArrayIndex(3), "");
-    Json::Value ids = _get_ids_at_index(argv, Json::ArrayIndex(1));
-
-    if (!position.isObject())
+    if (!ctx->output_config)
     {
-        return ipc_json::command_return(getCmdBase(argv), argv,
-            RETURN_INVALID_PARAMETER);
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            "Missing output config");
     }
 
-    Json::Value x = position.get("x", "");
-    Json::Value y = position.get("y", "");
-    if (!x.isNumeric() || !y.isNumeric())
+    if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::command_return(getCmdBase(argv), argv,
-            RETURN_INVALID_PARAMETER);
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Output config name not set");
     }
 
-    wf::output_config::position_t p(x.asInt(), y.asInt());
+    if (!argc)
+    {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Missing position argument.");
+    }
 
-    return set_scale_bulk(argv, p, ids);
+    int32_t x = 0, y = 0;
+
+    char *end;
+    x = strtol(*argv, &end, 10);
+    if (*end)
+    {
+        // Format is 1234,4321
+        if (*end != ',')
+        {
+            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+                "Invalid position x.");
+        }
+
+        ++end;
+        y = strtol(end, &end, 10);
+        if (*end)
+        {
+            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+                "Invalid position y.");
+        }
+    } else
+    {
+        // Format is 1234 4321 (legacy)
+        argc--;
+        argv++;
+        if (!argc)
+        {
+            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+                "Missing position argument (y).");
+        }
+
+        y = strtol(*argv, &end, 10);
+        if (*end)
+        {
+            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+                "Invalid position y.");
+        }
+    }
+
+    auto output = command::all_output_by_name_or_id(ctx->output_config->name);
+
+    if (!output)
+    {
+        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            "Missing output");
+    }
+
+    wf::output_config::position_t position(x, y);
+
+    RETURN_STATUS status = set_position(position, output);
+
+    ctx->leftovers.argc = argc - 1;
+    ctx->leftovers.argv = argv + 1;
+
+    return ipc_json::build_status(status);
 }

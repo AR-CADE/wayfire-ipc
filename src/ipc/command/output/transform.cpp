@@ -57,12 +57,18 @@ static enum wl_output_transform invert_rotation_direction(
     }
 }
 
-Json::Value transform_handler(int argc, char **argv, command_handler_context *ctx)
+Json::Value output_transform_handler(int argc, char **argv, command_handler_context *ctx)
 {
     if (!ctx->output_config)
     {
         return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
             "Missing output config");
+    }
+
+    if (ctx->output_config->name == nullptr)
+    {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Output config name not set");
     }
 
     if (!argc)
@@ -107,8 +113,8 @@ Json::Value transform_handler(int argc, char **argv, command_handler_context *ct
     // anti-clockwise transforms
     transform = invert_rotation_direction(transform);
 
-    auto output_config   = ctx->output_config;
-    wf::output_t *output = command::all_output_by_name_or_id(output_config->name);
+    wf::output_t *output =
+        command::all_output_by_name_or_id(ctx->output_config->name);
     if (output == nullptr)
     {
         return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
@@ -121,13 +127,7 @@ Json::Value transform_handler(int argc, char **argv, command_handler_context *ct
         ((strcmp(argv[1],
             "clockwise") == 0) || (strcmp(argv[1], "anticlockwise") == 0)))
     {
-        if (output_config->name == nullptr)
-        {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-                "Output config name not set");
-        }
-
-        if (strcmp(output_config->name, "*") == 0)
+        if (strcmp(ctx->output_config->name, "*") == 0)
         {
             return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
                 "Cannot apply relative transform to all outputs.");
@@ -139,15 +139,15 @@ Json::Value transform_handler(int argc, char **argv, command_handler_context *ct
         }
 
         struct wlr_output *w_output = output->handle;
+        if (w_output == nullptr)
+        {
+            return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+                "Cannot apply relative transform to unknown output");
+        }
+
         transform = wlr_output_transform_compose(w_output->transform, transform);
         ctx->leftovers.argv += 1;
         ctx->leftovers.argc -= 1;
-    }
-
-    if (!output_config)
-    {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output");
     }
 
     RETURN_STATUS status = set_tranform(transform, output);

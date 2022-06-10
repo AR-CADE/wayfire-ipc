@@ -721,14 +721,17 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
 
     Json::Value modes_array = Json::arrayValue;
 
-    struct wlr_output_mode *mode;
+    struct wlr_output_mode *mode = nullptr;
     wl_list_for_each(mode, &wlr_output->modes, link)
     {
-        Json::Value mode_object;
-        mode_object["width"]   = mode->width;
-        mode_object["height"]  = mode->height;
-        mode_object["refresh"] = mode->refresh;
-        modes_array.append(mode_object);
+        if (mode != nullptr)
+        {
+            Json::Value mode_object;
+            mode_object["width"]   = mode->width;
+            mode_object["height"]  = mode->height;
+            mode_object["refresh"] = mode->refresh;
+            modes_array.append(mode_object);
+        }
     }
 
     object["modes"] = modes_array;
@@ -804,14 +807,17 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
 
     Json::Value modes_array = Json::arrayValue;
 
-    struct wlr_output_mode *mode;
+    struct wlr_output_mode *mode = nullptr;
     wl_list_for_each(mode, &wlr_output->modes, link)
     {
-        Json::Value mode_object;
-        mode_object["width"]   = mode->width;
-        mode_object["height"]  = mode->height;
-        mode_object["refresh"] = mode->refresh;
-        modes_array.append(mode_object);
+        if (mode != nullptr)
+        {
+            Json::Value mode_object;
+            mode_object["width"]   = mode->width;
+            mode_object["height"]  = mode->height;
+            mode_object["refresh"] = mode->refresh;
+            modes_array.append(mode_object);
+        }
     }
 
     object["modes"] = modes_array;

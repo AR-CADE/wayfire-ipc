@@ -20,12 +20,18 @@ static RETURN_STATUS signal_dpms_cmd(Json::Value argv)
     return RETURN_SUCCESS;
 }
 
-Json::Value dpms_handler(int argc, char **argv, command_handler_context *ctx)
+Json::Value output_dpms_handler(int argc, char **argv, command_handler_context *ctx)
 {
     if (!ctx->output_config)
     {
         return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
             "Missing output config");
+    }
+
+    if (ctx->output_config->name == nullptr)
+    {
+        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            "Output config name not set");
     }
 
     if (!(argc > 0))

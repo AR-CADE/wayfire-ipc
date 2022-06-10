@@ -15,6 +15,8 @@ server = shared_module(
     'command/output/dpms.cpp', 
     'command/output/scale.cpp', 
     'command/output/transform.cpp', 
+    'command/output/position.cpp', 
+    'command/output/mode.cpp', 
     dependencies: [wayfire, wlroots, jsoncpp, pcre],
     install: true, install_dir: wayfire.get_variable(pkgconfig: 'plugindir'), include_directories : incdir)
 

@@ -740,7 +740,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
  *
  *           cursor_position = wf::get_core().get_cursor_position();
  *           wf_ev =
- * 
+ *
  *              static_cast<wf::input_event_signal<wlr_event_pointer_button>*>(data);
  *           wlr_signal   = static_cast<wlr_event_pointer_button*>(wf_ev->event);
  *           button_state = wlr_signal->state;
