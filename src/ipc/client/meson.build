@@ -1,5 +1,5 @@
 executable('wf-msg', 'wf-msg.cpp', 'ipc-client.cpp', 
-        dependencies: [wayfire, wlroots, jsoncpp, threads],
+        dependencies: [wayfire, jsoncpp],
 		install: true,
         include_directories : incdir
 )
