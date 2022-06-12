@@ -51,23 +51,26 @@ bool criteria::is_empty()
 }
 
 // Returns error string on failure or nullptr otherwise.
-bool criteria::generate_regex(pcre2_code **regex, char *value) {
-	int errorcode;
-	PCRE2_SIZE offset;
+bool criteria::generate_regex(pcre2_code **regex, char *value)
+{
+    int errorcode;
+    PCRE2_SIZE offset;
 
-	*regex = pcre2_compile((PCRE2_SPTR)value, PCRE2_ZERO_TERMINATED, PCRE2_UTF | PCRE2_UCP, &errorcode, &offset, NULL);
-	if (!*regex) {
-		PCRE2_UCHAR buffer[256];
-		pcre2_get_error_message(errorcode, buffer, sizeof(buffer));
+    *regex = pcre2_compile((PCRE2_SPTR)value, PCRE2_ZERO_TERMINATED,
+        PCRE2_UTF | PCRE2_UCP, &errorcode, &offset, NULL);
+    if (!*regex)
+    {
+        PCRE2_UCHAR buffer[256];
+        pcre2_get_error_message(errorcode, buffer, sizeof(buffer));
 
-		const char *fmt = "Regex compilation for '%s' failed: %s";
-		int len = strlen(fmt) + strlen(value) + strlen((char*) buffer) - 3;
-		error = (char*)malloc(len);
-		snprintf(error, len, fmt, value, buffer);
-		return false;
-	}
+        const char *fmt = "Regex compilation for '%s' failed: %s";
+        int len = strlen(fmt) + strlen(value) + strlen((char*)buffer) - 3;
+        error = (char*)malloc(len);
+        snprintf(error, len, fmt, value, buffer);
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool criteria::pattern_create(struct pattern **pattern, char *value)
@@ -143,11 +146,13 @@ void criteria::destroy()
     }
 }
 
-int criteria::regex_cmp(const char *item, const pcre2_code *regex) {
-	pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regex, NULL);
-	int result = pcre2_match(regex, (PCRE2_SPTR)item, strlen(item), 0, 0, match_data, NULL);
-	pcre2_match_data_free(match_data);
-	return result;
+int criteria::regex_cmp(const char *item, const pcre2_code *regex)
+{
+    pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regex, NULL);
+    int result = pcre2_match(regex, (PCRE2_SPTR)item, strlen(
+        item), 0, 0, match_data, NULL);
+    pcre2_match_data_free(match_data);
+    return result;
 }
 
 #if HAVE_XWAYLAND && WIP
