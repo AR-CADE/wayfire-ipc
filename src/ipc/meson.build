@@ -18,7 +18,7 @@ server = shared_module(
     'command/output/transform.cpp', 
     'command/output/position.cpp', 
     'command/output/mode.cpp', 
-    dependencies: [wayfire, jsoncpp, pcre],
+    dependencies: [wayfire, jsoncpp, pcre2],
     install: true, install_dir: wayfire.get_variable(pkgconfig: 'plugindir'), include_directories : incdir)
 
 subdir('client')

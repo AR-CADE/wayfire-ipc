@@ -4,7 +4,8 @@
 
 #include <cstdint>
 #include <json/json.h>
-#include <pcre.h>
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <wayfire/view.hpp>
 #include <xwayland_support.h>
 
@@ -19,14 +20,14 @@ enum criteria_type
 
 enum pattern_type
 {
-    PATTERN_PCRE,
+    PATTERN_PCRE2,
     PATTERN_FOCUSED,
 };
 
 struct pattern
 {
     enum pattern_type match_type;
-    pcre *regex;
+    pcre2_code *regex;
 };
 
 enum criteria_token
@@ -128,10 +129,10 @@ class criteria
     bool has_container();
     bool matches_container(const Json::Value& container);
 
-    bool generate_regex(pcre **regex, char *value);
+    bool generate_regex(pcre2_code **regex, char *value);
     bool pattern_create(struct pattern **pattern, char *value);
     static void pattern_destroy(struct pattern *pattern);
-    static int regex_cmp(const char *item, const pcre *regex);
+    static int regex_cmp(const char *item, const pcre2_code *regex);
 #if HAVE_XWAYLAND && WIP
     static bool view_has_window_type(struct sway_view *view, enum atom_name name);
 #endif

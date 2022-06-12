@@ -20,7 +20,7 @@ c_comp = meson.get_compiler('c')
 
 wayfire        	= dependency('wayfire')
 jsoncpp        	= dependency('jsoncpp')
-pcre        	= dependency('libpcre')
+pcre2           = dependency('libpcre2-8')
 
 
 version = '"@0@"'.format(wayfire.version())
