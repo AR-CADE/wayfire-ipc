@@ -223,12 +223,14 @@ bool criteria::matches_view(const Json::Value& view)
 
     if (this->title)
     {
-        std::string name  = view.get("name", Json::nullValue).asString();
-        const char *title = name.c_str();
-        if (title == nullptr)
+        Json::Value name_object = view.get("name", Json::nullValue);
+        if (name_object.isNull() || !name_object.isString())
         {
             return false;
         }
+
+        std::string name  = name_object.asString();
+        const char *title = name.c_str();
 
         switch (this->title->match_type)
         {
@@ -264,12 +266,7 @@ bool criteria::matches_view(const Json::Value& view)
         }
 
         std::string view_shell_str = view_shell_ojb.asString();
-
-        const char *view_shell = view_shell_str.c_str();
-        if (!view_shell)
-        {
-            return false;
-        }
+        const char *view_shell     = view_shell_str.c_str();
 
         switch (this->shell->match_type)
         {
@@ -283,12 +280,7 @@ bool criteria::matches_view(const Json::Value& view)
             }
 
             std::string focused_shell_str = focused_shell_ojb.asString();
-
-            const char *focused_shell = focused_shell_str.c_str();
-            if (!focused_shell)
-            {
-                return false;
-            }
+            const char *focused_shell     = focused_shell_str.c_str();
 
             if (focused && strcmp(view_shell, focused_shell))
             {
@@ -313,12 +305,13 @@ bool criteria::matches_view(const Json::Value& view)
     if (this->app_id)
     {
         Json::Value app_id_obj = view.get("app_id", Json::nullValue);
-        std::string view_app_id_str = app_id_obj.asString();
-        const char *app_id = view_app_id_str.c_str();
-        if (!app_id)
+        if (app_id_obj.isNull() || !app_id_obj.isString())
         {
             return false;
         }
+
+        std::string view_app_id_str = app_id_obj.asString();
+        const char *app_id = view_app_id_str.c_str();
 
         switch (this->app_id->match_type)
         {
