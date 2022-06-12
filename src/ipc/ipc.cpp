@@ -2,8 +2,6 @@
 #include "wayfire/singleton-plugin.hpp"
 #include <sys/time.h>
 
-// #define IPC_PLUGIN_DEBUG
-
 wf::option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
 wf::option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
 wf::option_wrapper_t<std::string> xkb_options{"input/xkb_options"};
@@ -12,8 +10,8 @@ wf::option_wrapper_t<std::string> xkb_rules{"input/xkb_rules"};
 // Damn, another variant ... hoppefully we have our event_mask, in the worst case, i
 // can implement a completly useless workaroud (but mandatory ;-) ) to fix it !!!!
 wf::option_wrapper_t<std::string> xkb_variant{"input/xkb_variant"};
-// static struct wl_listener display_destroy;
-// static struct wl_event_source *fini_event_source;
+static struct wl_listener display_destroy;
+static struct wl_event_source *fini_event_source;
 
 class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 {
@@ -30,24 +28,18 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         bind_events();
     }
 
-    static void timeout_handler(int signum)
-    {
-        (void)signum;
-        ipc_server_t::handle_display_destroy(nullptr, nullptr);
-    }
-
     static void handle_display_destroy(struct wl_listener *listener,
         void *data)
     {
         (void)listener;
         (void)data;
 
-        // if (fini_event_source != nullptr)
-        // {
-        // wl_event_source_remove(fini_event_source);
-        // }
+        if (fini_event_source != nullptr)
+        {
+            wl_event_source_remove(fini_event_source);
+        }
 
-        // wl_list_remove(&display_destroy.link);
+        wl_list_remove(&display_destroy.link);
     }
 
     static int handle_fini_timeout(void *data)
@@ -78,39 +70,14 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         unbind_core_events();
 
-        //// Set a timeout of 100 ms to give so time to all  client to handle the
+        // Set a timeout of 100 ms to give so time to all clients to handle the
         // "exit" signal
-        // struct itimerval timer;
-        // timer.it_value.tv_sec = 0;
-        // timer.it_value.tv_usec = 100;
-        // timer.it_interval.tv_sec = 0;
-        // timer.it_interval.tv_usec = 0;
-        // setitimer (ITIMER_VIRTUAL, &timer, 0);
-
-        // struct sigaction sa;
-        // memset (&sa, 0, sizeof (sa));
-        // sa.sa_handler = &timeout_handler;
-        // sigaction (SIGVTALRM, &sa, 0);
-
-        // display_destroy.notify = handle_display_destroy;
-        // wl_display_add_destroy_listener(wf::get_core().display, &display_destroy);
-
-        // fini_event_source =
-        // wl_event_loop_add_timer(wf::get_core().ev_loop, handle_fini_timeout,
-        // nullptr);
-
-        // wl_event_source_timer_update(fini_event_source, 100);
-
-        /*wf::wl_timer timer;
-         *  if (!timer.is_connected())
-         *  {
-         *    timer.set_timeout(100, [&] ()
-         *    {
-         *        // Destroy plugin ipc_server_t::handle_display_destroy(nullptr,
-         * nullptr);
-         *        return false;
-         *    });
-         *  }*/
+        display_destroy.notify = handle_display_destroy;
+        wl_display_add_destroy_listener(wf::get_core().display, &display_destroy);
+        fini_event_source =
+            wl_event_loop_add_timer(wf::get_core().ev_loop, handle_fini_timeout,
+                nullptr);
+        wl_event_source_timer_update(fini_event_source, 100);
 
         singleton_plugin_t::fini();
     }
