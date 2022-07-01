@@ -292,7 +292,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
             goto cleanup;
         }
 
-        auto handler = core_handler(argc, (const char**)argv);
+        auto handler = core_handler(argc, const_cast<const char**>(argv));
         if (!handler)
         {
             auto output = wf::get_core().get_active_output();
