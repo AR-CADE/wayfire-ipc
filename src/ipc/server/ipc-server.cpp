@@ -339,7 +339,7 @@ int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *dat
         return 0;
     }
 
-    LOGD("Client ", client->fd, " writable", client->fd);
+    LOGD("Client ", client->fd, " writable");
 
     ssize_t written =
         write(client->fd, client->write_buffer, client->write_buffer_len);
