@@ -181,7 +181,7 @@ bool ipc_server_t::send_reply(ipc_server_cli *client, int payload_type,
     }
 
     char *new_buffer =
-        (char*)realloc(client->write_buffer, client->write_buffer_size);
+        static_cast<char*>(realloc(client->write_buffer, client->write_buffer_size));
     if (!new_buffer)
     {
         LOGE("Unable to reallocate ipc client write buffer");
@@ -284,7 +284,7 @@ int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
 
     client->write_buffer_size = 128;
     client->write_buffer_len  = 0;
-    client->write_buffer = (char*)malloc(client->write_buffer_size);
+    client->write_buffer = static_cast<char*>(malloc(client->write_buffer_size));
 
     LOGD("New client: fd ", client_fd);
     ipc_client_list.push_back(client);
@@ -318,7 +318,7 @@ void ipc_server_t::setup_user_sockaddr()
 int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *data)
 {
     (void)client_fd;
-    ipc_server_cli *client = (ipc_server_cli*)data;
+    ipc_server_cli *client = static_cast<ipc_server_cli*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {
@@ -369,7 +369,7 @@ int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *dat
 
 int ipc_server_t::client_handle_readable(int client_fd, uint32_t mask, void *data)
 {
-    ipc_server_cli *client = (ipc_server_cli*)data;
+    ipc_server_cli *client = static_cast<ipc_server_cli*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {

@@ -39,7 +39,7 @@ char *get_socketpath(void)
     }
 
     int path_size  = 108;
-    char *sun_path = (char*)malloc(path_size + 1);
+    char *sun_path = static_cast<char*>(malloc(path_size + 1));
     bzero(sun_path, path_size + 1);
 
     if (path_size <=
@@ -101,7 +101,7 @@ struct ipc_response *ipc_recv_response(int socketfd)
     }
 
     struct ipc_response *response =
-        (struct ipc_response*)malloc(sizeof(struct ipc_response));
+        static_cast<struct ipc_response*>(malloc(sizeof(struct ipc_response)));
     if (!response)
     {
         LOGE("Unable to allocate memory for IPC response");
@@ -112,7 +112,7 @@ struct ipc_response *ipc_recv_response(int socketfd)
     memcpy(&response->type, data + sizeof(ipc_magic) + sizeof(uint32_t),
         sizeof(uint32_t));
 
-    char *payload = (char*)malloc(response->size + 1);
+    char *payload = static_cast<char*>(malloc(response->size + 1));
     if (!payload)
     {
         free(response);
