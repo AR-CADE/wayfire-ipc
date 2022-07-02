@@ -15,12 +15,12 @@ enum expected_args
     EXPECTED_EQUAL_TO,
 };
 
-enum config_dpms
-{
-    DPMS_IGNORE,
-    DPMS_ON,
-    DPMS_OFF,
-};
+// enum config_dpms
+// {
+// DPMS_IGNORE,
+// DPMS_ON,
+// DPMS_OFF,
+// };
 
 /**
  * Size and position configuration for a particular output.
@@ -47,7 +47,7 @@ struct output_config
     // char *background;
     // char *background_option;
     // char *background_fallback;
-    enum config_dpms dpms_state;
+    // enum config_dpms dpms_state;
 };
 
 struct leftovers_t

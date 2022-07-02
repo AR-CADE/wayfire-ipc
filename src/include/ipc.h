@@ -88,6 +88,7 @@ typedef int RETURN_STATUS;
 #define IPC_METHOD_VIEW_CLOSE "close"
 #define IPC_METHOD_VIEW_TILE_REQUEST "tile_request"
 
+#define IPC_METHOD_OUTPUT_POWER "power"
 #define IPC_METHOD_OUTPUT_DPMS "dpms"
 #define IPC_METHOD_OUTPUT_SCALE "scale"
 

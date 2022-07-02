@@ -6,68 +6,68 @@
 #include <ipc/command.h>
 #include <ipc/json.hpp>
 
-class wayfire_dpms
+class wayfire_power
 {
-    wf::option_wrapper_t<int> dpms_timeout{"dpms/dpms_timeout"};
-    wf::wl_listener_wrapper on_idle_dpms, on_resume_dpms;
-    wlr_idle_timeout *timeout_dpms = nullptr;
+    wf::option_wrapper_t<int> power_timeout{"power/power_timeout"};
+    wf::wl_listener_wrapper on_idle_power, on_resume_power;
+    wlr_idle_timeout *timeout_power = nullptr;
 
   public:
     std::optional<wf::idle_inhibitor_t> hotkey_inhibitor;
 
-    wayfire_dpms()
+    wayfire_power()
     {
-        dpms_timeout.set_callback([=] ()
+        power_timeout.set_callback([=] ()
         {
-            create_dpms_timeout(1000 * dpms_timeout);
+            create_power_timeout(1000 * power_timeout);
         });
-        create_dpms_timeout(1000 * dpms_timeout);
+        create_power_timeout(1000 * power_timeout);
     }
 
-    wayfire_dpms(const wayfire_dpms&) = delete;
-    wayfire_dpms& operator =(const wayfire_dpms&) = delete;
-    wayfire_dpms(wayfire_dpms&&) = delete;
-    wayfire_dpms& operator =(wayfire_dpms&&) = delete;
+    wayfire_power(const wayfire_power&) = delete;
+    wayfire_power& operator =(const wayfire_power&) = delete;
+    wayfire_power(wayfire_power&&) = delete;
+    wayfire_power& operator =(wayfire_power&&) = delete;
 
-    void destroy_dpms_timeout()
+    void destroy_power_timeout()
     {
-        if (timeout_dpms)
+        if (timeout_power)
         {
-            on_idle_dpms.disconnect();
-            on_resume_dpms.disconnect();
-            wlr_idle_timeout_destroy(timeout_dpms);
+            on_idle_power.disconnect();
+            on_resume_power.disconnect();
+            wlr_idle_timeout_destroy(timeout_power);
         }
 
-        timeout_dpms = nullptr;
+        timeout_power = nullptr;
     }
 
-    void create_dpms_timeout(int timeout_sec)
+    void create_power_timeout(int timeout_sec)
     {
-        destroy_dpms_timeout();
+        destroy_power_timeout();
         if (timeout_sec <= 0)
         {
             return;
         }
 
-        timeout_dpms = wlr_idle_timeout_create(wf::get_core().protocols.idle,
+        timeout_power = wlr_idle_timeout_create(wf::get_core().protocols.idle,
             wf::get_core().get_current_seat(), timeout_sec);
 
-        on_idle_dpms.set_callback([&] (void*)
+        on_idle_power.set_callback([&] (void*)
         {
             set_state(wf::OUTPUT_IMAGE_SOURCE_SELF, wf::OUTPUT_IMAGE_SOURCE_DPMS);
         });
-        on_idle_dpms.connect(&timeout_dpms->events.idle);
+        on_idle_power.connect(&timeout_power->events.idle);
 
-        on_resume_dpms.set_callback([&] (void*)
+        on_resume_power.set_callback([&] (void*)
         {
             set_state(wf::OUTPUT_IMAGE_SOURCE_DPMS, wf::OUTPUT_IMAGE_SOURCE_SELF);
         });
-        on_resume_dpms.connect(&timeout_dpms->events.resume);
+        on_resume_power.connect(&timeout_power->events.resume);
     }
 
-    ~wayfire_dpms()
+    ~wayfire_power()
     {
-        destroy_dpms_timeout();
+        destroy_power_timeout();
     }
 
     /* Change all outputs with state from to state to */
@@ -195,9 +195,9 @@ class wayfire_dpms
     }
 };
 
-class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
+class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
 {
-    wf::option_wrapper_t<bool> disable_on_fullscreen{"dpms/disable_on_fullscreen"};
+    wf::option_wrapper_t<bool> disable_on_fullscreen{"power/disable_on_fullscreen"};
 
     std::optional<wf::idle_inhibitor_t> fullscreen_inhibitor;
     bool has_fullscreen = false;
@@ -209,7 +209,7 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
             return false;
         }
 
-        /* Toggle DPMS for all outputs **/
+        /* Toggle power for all outputs **/
         get_instance().toggle_state();
 
         return true;
@@ -228,7 +228,7 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         update_fullscreen();
     };
 
-    wf::signal_connection_t on_dpms_command = [=] (wf::signal_data_t *data)
+    wf::signal_connection_t on_power_command = [=] (wf::signal_data_t *data)
     {
         if (!output->can_activate_plugin(grab_interface))
         {
@@ -240,7 +240,7 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         //
         // argv[0] = "output"
         // argv[1] = eg. "*" or 1 or "eDP-1"
-        // argv[2] = "dpms"
+        // argv[2] = "power"
         // argv[3] = "on" or "off"
         //
         Json::Value option     = argv.get(Json::ArrayIndex(3), IPC_ON_TOCKEN);
@@ -276,13 +276,13 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
 
     void init() override
     {
-        grab_interface->name = "dpms";
+        grab_interface->name = "power";
         grab_interface->capabilities = 0;
 
         singleton_plugin_t::init();
 
         output->add_activator(
-            wf::option_wrapper_t<wf::activatorbinding_t>{"dpms/toggle"},
+            wf::option_wrapper_t<wf::activatorbinding_t>{"power/toggle"},
             &toggle);
         output->connect_signal("fullscreen-layer-focused",
             &fullscreen_state_changed);
@@ -297,16 +297,16 @@ class wayfire_dpms_singleton : public wf::singleton_plugin_t<wayfire_dpms>
         has_fullscreen = fs_views.size() > 0;
         update_fullscreen();
 
-        output->connect_signal("dpms-command", &on_dpms_command);
+        output->connect_signal("power-command", &on_power_command);
     }
 
     void fini() override
     {
         output->rem_binding(&toggle);
         output->disconnect_signal(&fullscreen_state_changed);
-        output->disconnect_signal(&on_dpms_command);
+        output->disconnect_signal(&on_power_command);
         singleton_plugin_t::fini();
     }
 };
 
-DECLARE_WAYFIRE_PLUGIN(wayfire_dpms_singleton);
+DECLARE_WAYFIRE_PLUGIN(wayfire_power_singleton);

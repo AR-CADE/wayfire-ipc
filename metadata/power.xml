@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <wayfire>
-	<plugin name="dpms">
+	<plugin name="power">
 		<_short>Display Power Management</_short>
-		<_long>A plugin for dpms settings.</_long>
+		<_long>A plugin for power settings.</_long>
 		<category>Desktop</category>
 		<!-- Key-bindings -->
 		<option name="toggle" type="activator">
-			<_short>Toggle</_short>
-			<_long>Toggle dpms for all outputs.  Pressing again reactivates.</_long>
+			<_short>Toggle outputs</_short>
+			<_long>Toggle power for all outputs.  Pressing again reactivates.</_long>
 			<default>none</default>
 		</option>
-		<!-- DPMS -->
-		<option name="dpms_timeout" type="int">
-			<_short>DPMS timeout</_short>
+		<!-- POWER -->
+		<option name="power_timeout" type="int">
+			<_short>Outputs power timeout</_short>
 			<_long>Enters power saving mode after the specified seconds of inactivity.  Setting the value to **-1** disables power saving.</_long>
 			<default>-1</default>
 		</option>

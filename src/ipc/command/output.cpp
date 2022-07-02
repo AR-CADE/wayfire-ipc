@@ -53,7 +53,8 @@ void free_output_config(struct output_config *oc)
     free(oc);
 }
 
-Json::Value output_dpms_handler(int argc, char **argv, command_handler_context *ctx);
+Json::Value output_power_handler(int argc, char **argv,
+    command_handler_context *ctx);
 Json::Value output_scale_handler(int argc, char **argv,
     command_handler_context *ctx);
 Json::Value output_transform_handler(int argc, char **argv,
@@ -65,7 +66,8 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 std::map<std::string, std::function<Json::Value(int argc, char**argv,
     command_handler_context*ctx)>> output_handler_map
 {
-    {"dpms", output_dpms_handler},
+    {"dpms", output_power_handler},
+    {"power", output_power_handler},
     {"scale", output_scale_handler},
     {"transform", output_transform_handler},
     {"position", output_position_handler},
