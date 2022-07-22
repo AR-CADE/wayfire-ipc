@@ -713,6 +713,7 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
     object["name"]    = wlr_output->name;
     object["active"]  = false;
     object["dpms"]    = false;
+    object["power"]   = false;
     object["primary"] = false;
     object["layout"]  = "output";
     object["orientation"] = "none";
@@ -791,6 +792,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     //
     object["active"]  = true;
     object["dpms"]    = wlr_output->enabled;
+    object["power"]   = wlr_output->enabled;
     object["primary"] = false;
     object["layout"]  = "output";
     object["orientation"] = orientation_description(wlr_output->transform);
