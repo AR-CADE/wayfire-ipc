@@ -23,7 +23,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         singleton_plugin_t::init();
 
         get_instance().serve();
-        signal_shutdown_event();
 
         bind_events();
     }
