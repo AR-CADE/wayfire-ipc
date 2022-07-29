@@ -43,8 +43,11 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     static int handle_fini_timeout(void *data)
     {
-        (void)data;
+        ipc_t* instance = static_cast<ipc_t*>(data);
+
         ipc_server_t::handle_display_destroy(nullptr, nullptr);
+
+        instance->terminate();
         return 0;
     }
 
@@ -69,15 +72,18 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         unbind_core_events();
 
-        // Set a timeout of 100 ms to give so time to all clients to handle the
-        // "exit" signal
+        // Set a timeout of 100 ms to give some time to all clients to handle the
+        // "exit" signal before disconnecting them and finish this instance of plugin
         display_destroy.notify = handle_display_destroy;
         wl_display_add_destroy_listener(wf::get_core().display, &display_destroy);
         fini_event_source =
             wl_event_loop_add_timer(wf::get_core().ev_loop, handle_fini_timeout,
-                nullptr);
+                this);
         wl_event_source_timer_update(fini_event_source, 100);
 
+    }
+
+    void terminate() {
         singleton_plugin_t::fini();
     }
 
