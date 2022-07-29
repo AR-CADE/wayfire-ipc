@@ -43,7 +43,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     static int handle_fini_timeout(void *data)
     {
-        ipc_t* instance = static_cast<ipc_t*>(data);
+        ipc_t *instance = static_cast<ipc_t*>(data);
 
         ipc_server_t::handle_display_destroy(nullptr, nullptr);
 
@@ -80,10 +80,10 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             wl_event_loop_add_timer(wf::get_core().ev_loop, handle_fini_timeout,
                 this);
         wl_event_source_timer_update(fini_event_source, 100);
-
     }
 
-    void terminate() {
+    void terminate()
+    {
         singleton_plugin_t::fini();
     }
 
