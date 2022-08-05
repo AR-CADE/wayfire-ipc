@@ -2,40 +2,6 @@ name: CI
 
 on: [push, pull_request]
 jobs:
-  test_musl_gcc:
-    name: "Test with with GCC/musl/libstdc++/BFD on Alpine Linux"
-    runs-on: ubuntu-latest
-    container: alpine:edge
-    steps:
-    - run: apk --no-cache add git gcc g++ binutils pkgconf meson ninja musl-dev wayland-dev wayland-protocols libinput-dev libevdev-dev libxkbcommon-dev pixman-dev glm-dev libdrm-dev mesa-dev cairo-dev pango-dev eudev-dev libxml2-dev glibmm-dev libseat-dev jsoncpp-dev pcre2-dev
-    - name: Wayfire
-      uses: actions/checkout@v2
-      with:
-        repository: WayfireWM/wayfire
-        path: wayfire
-    - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
-    - name: Wayfire IPC
-      uses: actions/checkout@v2
-      with:
-        path: wayfire-ipc
-    - run: cd wayfire-ipc && meson build && ninja -v -Cbuild
-  test_musl_gcc_xwayland:
-    name: "Test with with GCC/musl/libstdc++/BFD on Alpine Linux with Xwayland"
-    runs-on: ubuntu-latest
-    container: alpine:edge
-    steps:
-    - run: apk --no-cache add git gcc g++ binutils pkgconf meson ninja musl-dev wayland-dev wayland-protocols libinput-dev libevdev-dev libxkbcommon-dev pixman-dev glm-dev libdrm-dev mesa-dev cairo-dev pango-dev eudev-dev libxml2-dev glibmm-dev libseat-dev libxcb-dev xcb-util-wm-dev xwayland jsoncpp-dev pcre2-dev
-    - name: Wayfire
-      uses: actions/checkout@v2
-      with:
-        repository: WayfireWM/wayfire
-        path: wayfire
-    - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
-    - name: Wayfire IPC
-      uses: actions/checkout@v2
-      with:
-        path: wayfire-ipc
-    - run: cd wayfire-ipc && meson build && ninja -v -Cbuild
   test_glibc_llvm:
     name: "Test with clang/glibc/libc++/lld on Arch Linux"
     runs-on: ubuntu-latest
@@ -45,6 +11,27 @@ jobs:
     - run: sed -i 's/SigLevel    = Required DatabaseOptional/SigLevel    = Optional TrustAll/' /etc/pacman.conf
     - run: pacman --noconfirm --noprogressbar -Syyu
     - run: pacman --noconfirm --noprogressbar -Sy git clang lld libc++ pkgconf meson ninja wayland wayland-protocols libinput libxkbcommon pixman glm libdrm libglvnd cairo pango systemd scdoc base-devel seatd jsoncpp pcre2
+
+    - name: Wayfire
+      uses: actions/checkout@v2
+      with:
+        repository: WayfireWM/wayfire
+        path: wayfire
+    - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
+    - name: Wayfire IPC
+      uses: actions/checkout@v2
+      with:
+        path: wayfire-ipc
+    - run: cd wayfire-ipc && meson build && ninja -v -Cbuild
+  test_glibc_llvm_xwayland:
+    name: "Test with clang/glibc/libc++/lld on Arch Linux with Xwayland"
+    runs-on: ubuntu-latest
+    container:
+        image: archlinux:latest
+    steps:
+    - run: sed -i 's/SigLevel    = Required DatabaseOptional/SigLevel    = Optional TrustAll/' /etc/pacman.conf
+    - run: pacman --noconfirm --noprogressbar -Syyu
+    - run: pacman --noconfirm --noprogressbar -Sy git clang lld libc++ pkgconf meson ninja wayland wayland-protocols libinput libxkbcommon pixman glm libdrm libglvnd cairo pango systemd scdoc base-devel seatd jsoncpp pcre2 xorg-xwayland xcb-util xcb-util-cursor xcb-util-errors xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm 
 
     - name: Wayfire
       uses: actions/checkout@v2
