@@ -30,23 +30,19 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     static void handle_display_destroy(struct wl_listener *listener,
         void *data)
     {
-        (void)listener;
-        (void)data;
-
         if (fini_event_source != nullptr)
         {
             wl_event_source_remove(fini_event_source);
         }
 
         wl_list_remove(&display_destroy.link);
+
+        ipc_server_t::handle_display_destroy(listener, data);
     }
 
     static int handle_fini_timeout(void *data)
     {
         ipc_t *instance = static_cast<ipc_t*>(data);
-
-        ipc_server_t::handle_display_destroy(nullptr, nullptr);
-
         instance->terminate();
         return 0;
     }
@@ -84,6 +80,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     void terminate()
     {
+        ipc_t::handle_display_destroy(nullptr, nullptr);
         singleton_plugin_t::fini();
     }
 
