@@ -2,7 +2,7 @@ name: CI
 
 on: [push, pull_request]
 jobs:
-  test_glibc_llvm:
+  test_arch:
     name: "Test with clang/glibc/libc++/lld on Arch Linux"
     runs-on: ubuntu-latest
     container:
@@ -23,7 +23,7 @@ jobs:
       with:
         path: wayfire-ipc
     - run: cd wayfire-ipc && meson build && ninja -v -Cbuild
-  test_glibc_llvm_xwayland:
+  test_arch_xwayland:
     name: "Test with clang/glibc/libc++/lld on Arch Linux with Xwayland"
     runs-on: ubuntu-latest
     container:
