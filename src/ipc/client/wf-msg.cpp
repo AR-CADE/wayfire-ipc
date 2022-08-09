@@ -384,6 +384,15 @@ static void pretty_print_tree(Json::Value obj, int indent)
             pretty_print_tree(node, indent + 1);
         }
     }
+
+    Json::Value floating_nodes_obj = obj.get("floating_nodes", Json::nullValue);
+    if ((floating_nodes_obj.isNull() == false) && floating_nodes_obj.isArray())
+    {
+        for (auto& node : floating_nodes_obj)
+        {
+            pretty_print_tree(node, indent + 1);
+        }
+    }
 }
 
 static void pretty_print(int type, Json::Value resp)
