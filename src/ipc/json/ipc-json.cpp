@@ -190,8 +190,8 @@ const char*ipc_json::output_adaptive_sync_status_description(
       case WLR_OUTPUT_ADAPTIVE_SYNC_ENABLED:
         return "enabled";
 
-      case WLR_OUTPUT_ADAPTIVE_SYNC_UNKNOWN:
-        return "unknown";
+      default:
+        break;
     }
 
     return nullptr;
