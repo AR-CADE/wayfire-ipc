@@ -723,29 +723,8 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
     object["serial"] = wlr_output->serial;
     object["nodes"]  = Json::arrayValue;
 
-    Json::Value modes_array = Json::arrayValue;
-
-    struct wlr_output_mode *mode = nullptr;
-    wl_list_for_each(mode, &wlr_output->modes, link)
-    {
-        if (mode != nullptr)
-        {
-            Json::Value mode_object;
-            mode_object["width"]   = mode->width;
-            mode_object["height"]  = mode->height;
-            mode_object["refresh"] = mode->refresh;
-            modes_array.append(mode_object);
-        }
-    }
-
-    object["modes"] = modes_array;
-
-    Json::Value current_mode_object;
-    current_mode_object["width"]   = wlr_output->width;
-    current_mode_object["height"]  = wlr_output->height;
-    current_mode_object["refresh"] = wlr_output->refresh;
-
-    object["rect"] = create_empty_rect();
+    object["modes"] = Json::arrayValue;
+    object["rect"]  = create_empty_rect();
 
     return object;
 }
@@ -764,6 +743,16 @@ Json::Value ipc_json::describe_pointf(wf::pointf_t point)
     object["x"] = point.x;
     object["y"] = point.y;
     return object;
+}
+
+Json::Value ipc_json::describe_output_mode(struct wlr_output_mode *mode)
+{
+    Json::Value mode_object;
+    mode_object["width"]   = mode->width;
+    mode_object["height"]  = mode->height;
+    mode_object["refresh"] = mode->refresh;
+    mode_object["picture_aspect_ratio"] = Json::nullValue;
+    return mode_object;
 }
 
 Json::Value ipc_json::describe_output(wf::output_t *output)
@@ -818,10 +807,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     {
         if (mode != nullptr)
         {
-            Json::Value mode_object;
-            mode_object["width"]   = mode->width;
-            mode_object["height"]  = mode->height;
-            mode_object["refresh"] = mode->refresh;
+            Json::Value mode_object = describe_output_mode(mode);
             modes_array.append(mode_object);
         }
     }
@@ -833,9 +819,15 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["subpixel_hinting"] = subpixel;
 
     Json::Value current_mode_object;
-    current_mode_object["width"]   = wlr_output->width;
-    current_mode_object["height"]  = wlr_output->height;
-    current_mode_object["refresh"] = wlr_output->refresh;
+    if (wlr_output->current_mode != nullptr)
+    {
+        current_mode_object = describe_output_mode(wlr_output->current_mode);
+    } else
+    {
+        current_mode_object["width"]   = wlr_output->width;
+        current_mode_object["height"]  = wlr_output->height;
+        current_mode_object["refresh"] = wlr_output->refresh;
+    }
 
     object["current_mode"]    = current_mode_object;
     object["max_render_time"] = max_render_time.value();

@@ -58,6 +58,7 @@ class ipc_json : public json
     static Json::Value get_view_nodes(wayfire_view view, bool floating = false);
     static Json::Value get_top_view_nodes(wf::point_t point, wf::output_t *output);
     static Json::Value get_shell_view_nodes(wf::output_t *output);
+    static Json::Value describe_output_mode(struct wlr_output_mode *mode);
 
   private:
     static Json::Value get_root_node();
