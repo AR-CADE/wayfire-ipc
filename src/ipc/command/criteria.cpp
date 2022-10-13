@@ -129,8 +129,15 @@ void criteria::destroy()
     pattern_destroy(this->con_mark);
     if (this->workspace != nullptr)
     {
+        pattern_destroy(this->workspace);
         free(this->workspace);
         this->workspace = nullptr;
+    }
+
+    if (this->target != nullptr)
+    {
+        free(this->target);
+        this->target = nullptr;
     }
 
     if (this->cmdlist != nullptr)
