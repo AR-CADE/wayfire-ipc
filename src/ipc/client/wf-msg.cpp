@@ -287,10 +287,20 @@ static void pretty_print_output(Json::Value o)
             Json::Value mode_width   = mode.get("width", Json::nullValue);
             Json::Value mode_height  = mode.get("height", Json::nullValue);
             Json::Value mode_refresh = mode.get("refresh", Json::nullValue);
+            Json::Value mode_picture_aspect_ratio = mode.get("picture_aspect_ratio",
+                Json::nullValue);
 
-            printf("    %dx%d @ %.3f Hz\n", mode_width.asInt(),
+            printf("    %dx%d @ %.3f Hz", mode_width.asInt(),
                 mode_height.asInt(),
                 (double)mode_refresh.asInt() / 1000);
+
+            if ((mode_picture_aspect_ratio.isNull() == false) &&
+                (mode_picture_aspect_ratio.asString() != "none"))
+            {
+                printf(" (%s)", mode_picture_aspect_ratio.asString().c_str());
+            }
+
+            printf("\n");
         }
     }
 
