@@ -127,12 +127,9 @@ void criteria::destroy()
     this->window_role = nullptr;
 #endif
     pattern_destroy(this->con_mark);
-    if (this->workspace != nullptr)
-    {
-        pattern_destroy(this->workspace);
-        free(this->workspace);
-        this->workspace = nullptr;
-    }
+    this->con_mark = nullptr;
+    pattern_destroy(this->workspace);
+    this->workspace = nullptr;
 
     if (this->target != nullptr)
     {
