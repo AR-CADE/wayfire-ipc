@@ -207,6 +207,7 @@ static void pretty_print_output(Json::Value o)
     Json::Value focused = o.get("focused", Json::nullValue);
     Json::Value active  = o.get("active", Json::nullValue);
     Json::Value ws = o.get("current_workspace", Json::nullValue);
+    Json::Value non_desktop = o.get("non_desktop", Json::nullValue);
 
     Json::Value make   = o.get("make", Json::nullValue);
     Json::Value model  = o.get("model", Json::nullValue);
@@ -228,7 +229,15 @@ static void pretty_print_output(Json::Value o)
     Json::Value height  = current_mode.get("height", Json::nullValue);
     Json::Value refresh = current_mode.get("refresh", Json::nullValue);
 
-    if (active.asBool() == true)
+    if (non_desktop.asBool() == true)
+    {
+        printf(
+            "Output %s '%s %s %s' (non-desktop)\n",
+            name.asString().c_str(),
+            make.asString().c_str(),
+            model.asString().c_str(),
+            serial.asString().c_str());
+    } else if (active.asBool() == true)
     {
         printf(
             "Output %s '%s %s %s'%s\n"

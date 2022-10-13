@@ -709,7 +709,7 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
     Json::Value object;
     wlr_output *wlr_output = output->handle;
 
-    object["non_desktop"]  = false;
+    object["non_desktop"] = false;
     object["type"]    = "output";
     object["name"]    = wlr_output->name;
     object["active"]  = false;
@@ -791,7 +791,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     //
     // Output specific attr
     //
-    object["non_desktop"]  = false;
+    object["non_desktop"] = false;
     object["active"]  = true;
     object["dpms"]    = wlr_output->enabled;
     object["power"]   = wlr_output->enabled;
