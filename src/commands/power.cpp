@@ -296,6 +296,7 @@ class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
              **/
             has_fullscreen = true;
         }
+
         update_fullscreen();
 
         output->connect_signal("power-command", &on_power_command);
