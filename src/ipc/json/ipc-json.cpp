@@ -995,7 +995,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     if (output != nullptr)
     {
         object["focused"] = (view->get_output()->get_top_view() == view) &&
-            view->is_visible();
+            view->get_transformed_node()->is_enabled();
     }
 
     wayfire_view parent = view->parent;
@@ -1036,7 +1036,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     }
 
     object["app_id"]  = view->get_app_id();
-    object["visible"] = view->is_visible();
+    object["visible"] = view->get_transformed_node()->is_enabled();
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
     object["geometry"]    = describe_geometry(view->get_wm_geometry());
 
