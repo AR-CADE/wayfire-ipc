@@ -22,6 +22,30 @@
 class ipc_tools
 {
   public:
+    static wf::point_t closest_valid_ws(wf::point_t workspace)
+    {
+        auto grid =
+            wf::get_core().get_active_output()->workspace->get_workspace_grid_size();
+        workspace.x = wf::clamp(workspace.x, 0, grid.width - 1);
+        workspace.y = wf::clamp(workspace.y, 0, grid.height - 1);
+        return workspace;
+    }
+
+    static wf::point_t get_view_main_workspace(wayfire_view view)
+    {
+        auto og = wf::get_core().get_active_output()->get_screen_size();
+        auto ws =
+            wf::get_core().get_active_output()->workspace->get_current_workspace();
+
+        auto wm = view->transform_region(view->get_wm_geometry());
+        wf::point_t workspace = {
+            ws.x + (int)std::floor((wm.x + wm.width / 2.0) / og.width),
+            ws.y + (int)std::floor((wm.y + wm.height / 2.0) / og.height)
+        };
+
+        return closest_valid_ws(workspace);
+    }
+
     static wf::point_t convert_workspace_index_to_coords(int index)
     {
         int i = 0;

@@ -9,6 +9,7 @@
 #include <wayfire/output.hpp>
 #include <wayfire/workspace-manager.hpp>
 #include "criteria.hpp"
+#include "ipc/tools.hpp"
 #include <ipc/json.hpp>
 
 // strcmp that also handles null pointers.
@@ -550,10 +551,7 @@ bool criteria::matches_view(const Json::Value& view)
         {
             if ((uint32_t)id != v->get_id())
             {
-                wf::point_t ws =
-                    wf::get_core().get_active_output()->workspace->
-                    get_view_main_workspace(
-                        v);
+                wf::point_t ws = ipc_tools::get_view_main_workspace(v);
                 Json::Value workspace = ipc_json::describe_workspace(ws,
                     v->get_output());
                 workspace_name = workspace.get("name", Json::nullValue);
@@ -573,8 +571,7 @@ bool criteria::matches_view(const Json::Value& view)
         {
             if (focused)
             {
-                wf::point_t focused_ws =
-                    focused->get_output()->workspace->get_view_main_workspace(focused);
+                wf::point_t focused_ws = ipc_tools::get_view_main_workspace(focused);
                 Json::Value focused_workspace = ipc_json::describe_workspace(
                     focused_ws, focused->get_output());
                 Json::Value focused_workspace_name = focused_workspace.get("name",

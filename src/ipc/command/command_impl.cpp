@@ -189,10 +189,7 @@ static void set_config_node(const Json::Value& node, bool node_overridden,
         {
             if ((uint32_t)id != view->get_id())
             {
-                wf::point_t ws =
-                    wf::get_core().get_active_output()->workspace->
-                    get_view_main_workspace(
-                        view);
+                wf::point_t ws = ipc_tools::get_view_main_workspace(view);
                 handler_context->workspace = ipc_json::describe_workspace(ws,
                     view->get_output());
             }
