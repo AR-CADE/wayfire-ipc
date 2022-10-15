@@ -152,12 +152,15 @@ static void pretty_print_input(Json::Value i)
         vendor.asInt());
 
     Json::Value kbdlayout = i.get("xkb_active_layout_name", Json::nullValue);
-    if (!kbdlayout.isNull())
+    if (kbdlayout.isNull())
+    {
+        printf("  Active Keyboard Layout: (unnamed)\n");
+    } else
     {
         std::string str    = ipc_json::json_to_string(kbdlayout);
         const char *layout = str.c_str();
         printf("  Active Keyboard Layout: %s\n",
-            layout != nullptr ? layout : "(unnamed)");
+            layout);
     }
 
     Json::Value libinput = i.get("libinput", Json::nullValue);
