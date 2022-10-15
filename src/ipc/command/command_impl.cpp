@@ -154,7 +154,7 @@ void ipc_command::close_view_container_child(Json::Value container)
     Json::Value nodes_obj = container.get("nodes", Json::nullValue);
     if ((nodes_obj.isNull() == false) && nodes_obj.isArray())
     {
-        for (auto& node : nodes_obj)
+        for (const auto& node : nodes_obj)
         {
             close_view_container_child(node);
         }
@@ -345,7 +345,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         {
             Json::Value fail_res = Json::nullValue;
 
-            for (auto& container : containers)
+            for (const auto& container : containers)
             {
                 set_config_node(container, true, &handler_context);
 

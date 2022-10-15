@@ -398,7 +398,7 @@ static void pretty_print_tree(Json::Value obj, int indent)
     Json::Value nodes_obj = obj.get("nodes", Json::nullValue);
     if ((nodes_obj.isNull() == false) && nodes_obj.isArray())
     {
-        for (auto& node : nodes_obj)
+        for (const auto& node : nodes_obj)
         {
             pretty_print_tree(node, indent + 1);
         }
@@ -407,7 +407,7 @@ static void pretty_print_tree(Json::Value obj, int indent)
     Json::Value floating_nodes_obj = obj.get("floating_nodes", Json::nullValue);
     if ((floating_nodes_obj.isNull() == false) && floating_nodes_obj.isArray())
     {
-        for (auto& node : floating_nodes_obj)
+        for (const auto& node : floating_nodes_obj)
         {
             pretty_print_tree(node, indent + 1);
         }
@@ -448,7 +448,7 @@ static void pretty_print(int type, Json::Value resp)
 
     if (resp.isArray())
     {
-        for (auto& obj : resp)
+        for (const auto& obj : resp)
         {
             switch (type)
             {
