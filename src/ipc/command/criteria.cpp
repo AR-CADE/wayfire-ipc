@@ -235,14 +235,14 @@ bool criteria::matches_view(const Json::Value& view)
         }
 
         std::string name  = name_object.asString();
-        const char *title = name.c_str();
+        const char *title_str = name.c_str();
 
         switch (this->title->match_type)
         {
           case PATTERN_FOCUSED:
         {
             std::string focused_title_str = focused->get_title();
-            if (focused && lenient_strcmp(title, focused_title_str.c_str()))
+            if (focused && lenient_strcmp(title_str, focused_title_str.c_str()))
             {
                 return false;
             }
@@ -252,7 +252,7 @@ bool criteria::matches_view(const Json::Value& view)
 
           case PATTERN_PCRE2:
         {
-            if (regex_cmp(title, this->title->regex) != 0)
+            if (regex_cmp(title_str, this->title->regex) != 0)
             {
                 return false;
             }
@@ -316,14 +316,14 @@ bool criteria::matches_view(const Json::Value& view)
         }
 
         std::string view_app_id_str = app_id_obj.asString();
-        const char *app_id = view_app_id_str.c_str();
+        const char *app_id_str = view_app_id_str.c_str();
 
         switch (this->app_id->match_type)
         {
           case PATTERN_FOCUSED:
         {
             std::string focused_app_id_str = focused->get_app_id();
-            if (focused && lenient_strcmp(app_id, focused_app_id_str.c_str()))
+            if (focused && lenient_strcmp(app_id_str, focused_app_id_str.c_str()))
             {
                 return false;
             }
@@ -333,7 +333,7 @@ bool criteria::matches_view(const Json::Value& view)
 
           case PATTERN_PCRE2:
         {
-            if (regex_cmp(app_id, this->app_id->regex) != 0)
+            if (regex_cmp(app_id_str, this->app_id->regex) != 0)
             {
                 return false;
             }
@@ -491,8 +491,8 @@ bool criteria::matches_view(const Json::Value& view)
 
     if (this->urgent)
     {
-        Json::Value urgent = view.get("urgent", Json::nullValue);
-        if (urgent.isNull() || !urgent.isBool() || (urgent.asBool() == false))
+        Json::Value is_urgent = view.get("urgent", Json::nullValue);
+        if (is_urgent.isNull() || !is_urgent.isBool() || (is_urgent.asBool() == false))
         {
             return false;
         }
@@ -526,17 +526,17 @@ bool criteria::matches_view(const Json::Value& view)
             return 0;
         });
 
-        wayfire_view target;
+        wayfire_view urgent_target;
         if (this->urgent == 'o') // oldest
         {
-            target = urgent_views[0];
+            urgent_target = urgent_views[0];
         } else // latest
         {
-            target = urgent_views[urgent_views.size() - 1];
+            urgent_target = urgent_views[urgent_views.size() - 1];
         }
 
         int id = view.get("id", Json::nullValue).asInt();
-        if ((uint32_t)id != target->get_id())
+        if ((uint32_t)id != urgent_target->get_id())
         {
             return false;
         }
@@ -551,10 +551,10 @@ bool criteria::matches_view(const Json::Value& view)
         {
             if ((uint32_t)id != v->get_id())
             {
-                wf::point_t ws = ipc_tools::get_view_main_workspace(v);
-                Json::Value workspace = ipc_json::describe_workspace(ws,
+                wf::point_t point = ipc_tools::get_view_main_workspace(v);
+                Json::Value ws = ipc_json::describe_workspace(point,
                     v->get_output());
-                workspace_name = workspace.get("name", Json::nullValue);
+                workspace_name = ws.get("name", Json::nullValue);
             }
         }
 
@@ -605,9 +605,9 @@ bool criteria::matches_view(const Json::Value& view)
 
     if (this->pid)
     {
-        int pid = view.get("pid", Json::nullValue).asInt();
+        int view_pid = view.get("pid", Json::nullValue).asInt();
 
-        if (this->pid != pid)
+        if (this->pid != view_pid)
         {
             return false;
         }
@@ -675,9 +675,9 @@ Json::Value criteria::get_containers()
 
     for (const auto& container : containers)
     {
-        std::string type = container.get("type", Json::nullValue).asString();
+        std::string container_type = container.get("type", Json::nullValue).asString();
 
-        if ((type == "con") || (type == "floating_con"))
+        if ((container_type == "con") || (container_type == "floating_con"))
         {
             if (matches_view(container))
             {
