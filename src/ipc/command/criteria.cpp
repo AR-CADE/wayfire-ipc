@@ -77,7 +77,7 @@ bool criteria::generate_regex(pcre2_code **regex, char *value)
 
 bool criteria::pattern_create(struct pattern **pattern, char *value)
 {
-    *pattern = (struct pattern*)calloc(1, sizeof(struct pattern));
+    *pattern = static_cast<struct pattern*>(calloc(1, sizeof(struct pattern)));
     if (!*pattern)
     {
         LOGE("Failed to allocate pattern");
