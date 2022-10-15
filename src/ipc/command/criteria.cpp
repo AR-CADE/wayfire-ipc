@@ -65,8 +65,9 @@ bool criteria::generate_regex(pcre2_code **regex, char *value)
         pcre2_get_error_message(errorcode, buffer, sizeof(buffer));
 
         const char *fmt = "Regex compilation for '%s' failed: %s";
-        int len = strlen(fmt) + strlen(value) + strlen((char*)buffer) - 3;
-        error = (char*)malloc(len);
+        int len = strlen(fmt) + strlen(value) + strlen(
+            reinterpret_cast<char*>(buffer)) - 3;
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, value, buffer);
         return false;
     }
@@ -234,7 +235,7 @@ bool criteria::matches_view(const Json::Value& view)
             return false;
         }
 
-        std::string name  = name_object.asString();
+        std::string name = name_object.asString();
         const char *title_str = name.c_str();
 
         switch (this->title->match_type)
@@ -492,7 +493,8 @@ bool criteria::matches_view(const Json::Value& view)
     if (this->urgent)
     {
         Json::Value is_urgent = view.get("urgent", Json::nullValue);
-        if (is_urgent.isNull() || !is_urgent.isBool() || (is_urgent.asBool() == false))
+        if (is_urgent.isNull() || !is_urgent.isBool() ||
+            (is_urgent.asBool() == false))
         {
             return false;
         }
@@ -552,7 +554,7 @@ bool criteria::matches_view(const Json::Value& view)
             if ((uint32_t)id != v->get_id())
             {
                 wf::point_t point = ipc_tools::get_view_main_workspace(v);
-                Json::Value ws = ipc_json::describe_workspace(point,
+                Json::Value ws    = ipc_json::describe_workspace(point,
                     v->get_output());
                 workspace_name = ws.get("name", Json::nullValue);
             }
@@ -675,7 +677,8 @@ Json::Value criteria::get_containers()
 
     for (const auto& container : containers)
     {
-        std::string container_type = container.get("type", Json::nullValue).asString();
+        std::string container_type =
+            container.get("type", Json::nullValue).asString();
 
         if ((container_type == "con") || (container_type == "floating_con"))
         {
@@ -796,7 +799,7 @@ bool criteria::parse_token(char *name, char *value)
     {
         const char *fmt = "Token '%s' is not recognized";
         int len = strlen(fmt) + strlen(name) - 1;
-        error = (char*)malloc(len);
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, name);
         return false;
     }
@@ -806,7 +809,7 @@ bool criteria::parse_token(char *name, char *value)
     {
         const char *fmt = "Token '%s' requires a value";
         int len = strlen(fmt) + strlen(name) - 1;
-        error = (char*)malloc(len);
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, name);
         return false;
     }
@@ -944,7 +947,7 @@ void criteria::unescape(char *value)
         return;
     }
 
-    char *copy     = (char*)calloc(strlen(value) + 1, 1);
+    char *copy     = static_cast<char*>(calloc(strlen(value) + 1, 1));
     char *readhead = value;
     char *writehead = copy;
     while (*readhead)
@@ -1003,7 +1006,7 @@ bool criteria::parse(char *raw, char **error_arg)
             ++head;
         }
 
-        name = (char*)calloc(head - namestart + 1, 1);
+        name = static_cast<char*>(calloc(head - namestart + 1, 1));
         if (head != namestart)
         {
             memcpy(name, namestart, head - namestart);
@@ -1046,7 +1049,7 @@ bool criteria::parse(char *raw, char **error_arg)
                 }
             }
 
-            value = (char*)calloc(head - valuestart + 1, 1);
+            value = static_cast<char*>(calloc(head - valuestart + 1, 1));
             memcpy(value, valuestart, head - valuestart);
             if (in_quotes)
             {
@@ -1094,7 +1097,7 @@ bool criteria::parse(char *raw, char **error_arg)
 
     ++head;
     int len = head - raw;
-    this->raw = (char*)calloc(len + 1, 1);
+    this->raw = static_cast<char*>(calloc(len + 1, 1));
     memcpy(this->raw, raw, len);
     return true;
 }
