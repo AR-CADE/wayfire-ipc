@@ -653,7 +653,7 @@ void criteria::node_for_each_matched_container(Json::Value obj,
     Json::Value nodes_obj = obj.get("nodes", Json::nullValue);
     if ((nodes_obj.isNull() == false) && nodes_obj.isArray())
     {
-        for (auto& node : nodes_obj)
+        for (const auto& node : nodes_obj)
         {
             node_for_each_matched_container(node, containers);
         }
