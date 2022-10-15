@@ -64,8 +64,9 @@ bool criteria::generate_regex(pcre2_code **regex, char *value)
         pcre2_get_error_message(errorcode, buffer, sizeof(buffer));
 
         const char *fmt = "Regex compilation for '%s' failed: %s";
-        int len = strlen(fmt) + strlen(value) + strlen((char*)buffer) - 3;
-        error = (char*)malloc(len);
+        int len = strlen(fmt) + strlen(value) + strlen(
+            reinterpret_cast<char*>(buffer)) - 3;
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, value, buffer);
         return false;
     }
@@ -801,7 +802,7 @@ bool criteria::parse_token(char *name, char *value)
     {
         const char *fmt = "Token '%s' is not recognized";
         int len = strlen(fmt) + strlen(name) - 1;
-        error = (char*)malloc(len);
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, name);
         return false;
     }
@@ -811,7 +812,7 @@ bool criteria::parse_token(char *name, char *value)
     {
         const char *fmt = "Token '%s' requires a value";
         int len = strlen(fmt) + strlen(name) - 1;
-        error = (char*)malloc(len);
+        error = static_cast<char*>(malloc(len));
         snprintf(error, len, fmt, name);
         return false;
     }
@@ -949,7 +950,7 @@ void criteria::unescape(char *value)
         return;
     }
 
-    char *copy     = (char*)calloc(strlen(value) + 1, 1);
+    char *copy     = static_cast<char*>(calloc(strlen(value) + 1, 1));
     char *readhead = value;
     char *writehead = copy;
     while (*readhead)
@@ -1008,7 +1009,7 @@ bool criteria::parse(char *raw, char **error_arg)
             ++head;
         }
 
-        name = (char*)calloc(head - namestart + 1, 1);
+        name = static_cast<char*>(calloc(head - namestart + 1, 1));
         if (head != namestart)
         {
             memcpy(name, namestart, head - namestart);
@@ -1051,7 +1052,7 @@ bool criteria::parse(char *raw, char **error_arg)
                 }
             }
 
-            value = (char*)calloc(head - valuestart + 1, 1);
+            value = static_cast<char*>(calloc(head - valuestart + 1, 1));
             memcpy(value, valuestart, head - valuestart);
             if (in_quotes)
             {
@@ -1099,7 +1100,7 @@ bool criteria::parse(char *raw, char **error_arg)
 
     ++head;
     int len = head - raw;
-    this->raw = (char*)calloc(len + 1, 1);
+    this->raw = static_cast<char*>(calloc(len + 1, 1));
     memcpy(this->raw, raw, len);
     return true;
 }
