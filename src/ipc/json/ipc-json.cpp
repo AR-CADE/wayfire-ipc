@@ -612,7 +612,7 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
 
     if (wlr_handle->type == WLR_INPUT_DEVICE_KEYBOARD)
     {
-        struct wlr_keyboard *keyboard = wlr_handle->keyboard;
+        struct wlr_keyboard *keyboard = wlr_keyboard_from_input_device(wlr_handle);
 
         object["repeat_delay"] = keyboard_repeat_delay.value();
         object["repeat_rate"]  = keyboard_repeat_rate.value();
@@ -919,9 +919,9 @@ Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surfac
         object["has_utf8_title"] = surface->has_utf8_title;
         object["height"] = surface->height;
         object["width"]  = surface->width;
-        object["hints_urgency"] = surface->hints_urgency;
-        object["saved_height"]  = surface->saved_height;
-        object["saved_width"]   = surface->saved_width;
+        object["urgent"] = surface->hints->flags & XCB_ICCCM_WM_HINT_X_URGENCY;
+        object["saved_height"] = surface->saved_height;
+        object["saved_width"]  = surface->saved_width;
     }
 
     return object;
@@ -1071,7 +1071,8 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                         Json::Value window_props;
 
                         object["window"] = main_xsurf->window_id;
-                        object["urgent"] = !!main_xsurf->hints_urgency;
+                        object["urgent"] = main_xsurf->hints->flags &
+                            XCB_ICCCM_WM_HINT_X_URGENCY;
 
                         auto clazz = main_xsurf->class_t;
                         if (clazz != nullptr)

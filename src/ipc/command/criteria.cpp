@@ -5,6 +5,7 @@
 #include <vector>
 #include <wayfire/core.hpp>
 #include <wayfire/util/log.hpp>
+#include <wayfire/plugins/common/util.hpp>
 #include <wayfire/view.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/workspace-manager.hpp>
@@ -516,10 +517,13 @@ bool criteria::matches_view(const Json::Value& view)
         std::sort(urgent_views.begin(), urgent_views.end(),
             [] (wayfire_view a, wayfire_view b)
         {
-            if (a->last_focus_timestamp < b->last_focus_timestamp)
+            uint64_t a_last_focus_timestamp = get_focus_timestamp(a);
+            uint64_t b_last_focus_timestamp = get_focus_timestamp(b);
+
+            if (a_last_focus_timestamp < b_last_focus_timestamp)
             {
                 return -1;
-            } else if (a->last_focus_timestamp > b->last_focus_timestamp)
+            } else if (a_last_focus_timestamp > b_last_focus_timestamp)
             {
                 return 1;
             }
