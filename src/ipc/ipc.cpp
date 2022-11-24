@@ -1,7 +1,6 @@
 #include <ipc/server.hpp>
 #include "wayfire/singleton-plugin.hpp"
 #include <sys/time.h>
-#include <wayfire/scene.hpp>
 
 wf::option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
 wf::option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
