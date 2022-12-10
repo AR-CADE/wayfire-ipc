@@ -45,14 +45,9 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
             "opacity float invalid");
     }
 
-    wf::view_2D *transform_2d = nullptr;
-
-    auto transform = view->get_transformer("opacity");
-    if (transform)
-    {
-        transform_2d =
-            dynamic_cast<wf::view_2D*>(transform.get());
-    }
+    auto transform_2d =
+        view->get_transformed_node()->get_transformer<wf::scene::view_2d_transformer_t>(
+            "opacity");
 
     if (!strcasecmp(argv[0], "plus"))
     {
@@ -79,7 +74,7 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
     {
         if (transform_2d)
         {
-            view->pop_transformer("opacity");
+            view->get_transformed_node()->rem_transformer("opacity");
         }
     } else
     {
@@ -88,11 +83,11 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
             transform_2d->alpha = alpha;
         } else
         {
-            wf::view_2D *new_transform_2d = new wf::view_2D(view,
-                wf::TRANSFORMER_HIGHLEVEL);
+            auto new_transform_2d =
+                std::make_shared<wf::scene::view_2d_transformer_t>(view);
             new_transform_2d->alpha = alpha;
-            view->add_transformer(std::unique_ptr<wf::view_2D>(
-                new_transform_2d), "opacity");
+            view->get_transformed_node()->add_transformer(
+                new_transform_2d, wf::TRANSFORMER_HIGHLEVEL, "opacity");
         }
     }
 
