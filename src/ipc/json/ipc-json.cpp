@@ -608,11 +608,10 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
     object["vendor"]  = wlr_handle->vendor;
     object["product"] = wlr_handle->product;
     object["type"]    = input_device_get_type_description(device);
-    object["name"]    = wlr_handle->name;
 
     if (wlr_handle->type == WLR_INPUT_DEVICE_KEYBOARD)
     {
-        struct wlr_keyboard *keyboard = wlr_handle->keyboard;
+        struct wlr_keyboard *keyboard = wlr_keyboard_from_input_device(wlr_handle);
 
         object["repeat_delay"] = keyboard_repeat_delay.value();
         object["repeat_rate"]  = keyboard_repeat_rate.value();
@@ -707,20 +706,31 @@ Json::Value ipc_json::describe_seat(wlr_seat *seat)
 Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
 {
     Json::Value object;
+
+    if (!output)
+    {
+        return object;
+    }
+
     wlr_output *wlr_output = output->handle;
+
+    if (!wlr_output)
+    {
+        return object;
+    }
 
     object["non_desktop"] = false;
     object["type"]    = "output";
-    object["name"]    = wlr_output->name;
+    object["name"]    = wlr_output->name ? wlr_output->name : "";
     object["active"]  = false;
     object["dpms"]    = false;
     object["power"]   = false;
     object["primary"] = false;
     object["layout"]  = "output";
     object["orientation"] = "none";
-    object["make"]   = wlr_output->make;
-    object["model"]  = wlr_output->model;
-    object["serial"] = wlr_output->serial;
+    object["make"]   = wlr_output->make ? wlr_output->make : "";
+    object["model"]  = wlr_output->model ? wlr_output->model : "";
+    object["serial"] = wlr_output->serial ? wlr_output->serial : "";
     object["nodes"]  = Json::arrayValue;
 
     object["modes"] = Json::arrayValue;
@@ -748,6 +758,12 @@ Json::Value ipc_json::describe_pointf(wf::pointf_t point)
 Json::Value ipc_json::describe_output_mode(struct wlr_output_mode *mode)
 {
     Json::Value mode_object;
+
+    if (!mode)
+    {
+        return mode_object;
+    }
+
     mode_object["width"]   = mode->width;
     mode_object["height"]  = mode->height;
     mode_object["refresh"] = mode->refresh;
@@ -758,7 +774,18 @@ Json::Value ipc_json::describe_output_mode(struct wlr_output_mode *mode)
 Json::Value ipc_json::describe_output(wf::output_t *output)
 {
     Json::Value object;
+
+    if (!output)
+    {
+        return object;
+    }
+
     wlr_output *wlr_output = output->handle;
+
+    if (!wlr_output)
+    {
+        return object;
+    }
 
     //
     // Node attr
@@ -787,10 +814,10 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["primary"] = false;
     object["layout"]  = "output";
     object["orientation"] = orientation_description(wlr_output->transform);
-    object["make"]   = wlr_output->make;
-    object["name"]   = wlr_output->name;
-    object["model"]  = wlr_output->model;
-    object["serial"] = wlr_output->serial;
+    object["make"]   = wlr_output->make ? wlr_output->make : "";
+    object["name"]   = wlr_output->name ? wlr_output->name : "";
+    object["model"]  = wlr_output->model ? wlr_output->model : "";
+    object["serial"] = wlr_output->serial ? wlr_output->serial : "";
     object["scale"]  = wlr_output->scale;
     object["scale_filter"] = "unknown";
     object["transform"]    = output_transform_description(wlr_output->transform);
@@ -919,9 +946,9 @@ Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surfac
         object["has_utf8_title"] = surface->has_utf8_title;
         object["height"] = surface->height;
         object["width"]  = surface->width;
-        object["hints_urgency"] = surface->hints_urgency;
-        object["saved_height"]  = surface->saved_height;
-        object["saved_width"]   = surface->saved_width;
+        object["urgent"] = surface->hints->flags & XCB_ICCCM_WM_HINT_X_URGENCY;
+        object["saved_height"] = surface->saved_height;
+        object["saved_width"]  = surface->saved_width;
     }
 
     return object;
@@ -1071,7 +1098,8 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                         Json::Value window_props;
 
                         object["window"] = main_xsurf->window_id;
-                        object["urgent"] = !!main_xsurf->hints_urgency;
+                        object["urgent"] = main_xsurf->hints->flags &
+                            XCB_ICCCM_WM_HINT_X_URGENCY;
 
                         auto clazz = main_xsurf->class_t;
                         if (clazz != nullptr)
@@ -1348,7 +1376,8 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     object["name"]    = index;
     object["visible"] = visible;
     object["rect"]    = ipc_json::describe_geometry(rect);
-    object["output"]  = output->handle->name;
+    object["output"]  = output->handle &&
+        output->handle->name ? output->handle->name : "";
     object["grid_position"] = ipc_json::wayfire_point_to_json(point);
 
     return object;

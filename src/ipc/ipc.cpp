@@ -18,8 +18,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
   public:
     void init() override
     {
-        grab_interface->name = "ipc";
-        grab_interface->capabilities = 0;
         singleton_plugin_t::init();
 
         get_instance().serve();
