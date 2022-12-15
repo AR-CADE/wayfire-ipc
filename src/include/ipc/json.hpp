@@ -6,6 +6,7 @@
 #include <wayfire/geometry.hpp>
 #include <wayfire/output.hpp>
 #include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_compositor.h>
 #include <xwayland_support.h>
 
 class ipc_json : public json
