@@ -755,7 +755,23 @@ Json::Value ipc_json::describe_pointf(wf::pointf_t point)
     return object;
 }
 
-Json::Value ipc_json::describe_output_mode(struct wlr_output_mode *mode)
+const char *ipc_json::describe_output_mode_aspect_ratio(enum wlr_output_mode_aspect_ratio aspect_ratio) {
+	switch (aspect_ratio) {
+	case WLR_OUTPUT_MODE_ASPECT_RATIO_NONE:
+		return "none";
+	case WLR_OUTPUT_MODE_ASPECT_RATIO_4_3:
+		return "4:3";
+	case WLR_OUTPUT_MODE_ASPECT_RATIO_16_9:
+		return "16:9";
+	case WLR_OUTPUT_MODE_ASPECT_RATIO_64_27:
+		return "64:27";
+	case WLR_OUTPUT_MODE_ASPECT_RATIO_256_135:
+		return "256:135";
+	}
+	return "unknown";
+}
+
+Json::Value ipc_json::describe_output_mode(const struct wlr_output_mode *mode)
 {
     Json::Value mode_object;
 
@@ -767,7 +783,7 @@ Json::Value ipc_json::describe_output_mode(struct wlr_output_mode *mode)
     mode_object["width"]   = mode->width;
     mode_object["height"]  = mode->height;
     mode_object["refresh"] = mode->refresh;
-    mode_object["picture_aspect_ratio"] = Json::nullValue;
+    mode_object["picture_aspect_ratio"] = describe_output_mode_aspect_ratio(mode->picture_aspect_ratio);
     return mode_object;
 }
 

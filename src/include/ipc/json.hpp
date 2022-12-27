@@ -59,8 +59,8 @@ class ipc_json : public json
     static Json::Value get_view_nodes(wayfire_view view, bool floating = false);
     static Json::Value get_top_view_nodes(wf::point_t point, wf::output_t *output);
     static Json::Value get_shell_view_nodes(wf::output_t *output);
-    static Json::Value describe_output_mode(struct wlr_output_mode *mode);
-
+    static Json::Value describe_output_mode(const struct wlr_output_mode *mode);
+    static const char *describe_output_mode_aspect_ratio(enum wlr_output_mode_aspect_ratio aspect_ratio);
   private:
     static Json::Value get_root_node();
 };
