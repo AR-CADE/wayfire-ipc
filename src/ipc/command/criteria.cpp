@@ -268,7 +268,7 @@ bool criteria::matches_view(const Json::Value& view)
         Json::Value view_shell_ojb = view.get("shell", Json::nullValue);
         if (view_shell_ojb.isNull() || !view_shell_ojb.isString())
         {
-            return false;
+            view_shell_ojb = "";
         }
 
         std::string view_shell_str = view_shell_ojb.asString();
@@ -313,7 +313,7 @@ bool criteria::matches_view(const Json::Value& view)
         Json::Value app_id_obj = view.get("app_id", Json::nullValue);
         if (app_id_obj.isNull() || !app_id_obj.isString())
         {
-            return false;
+            app_id_obj = "";
         }
 
         std::string view_app_id_str = app_id_obj.asString();
@@ -364,7 +364,7 @@ bool criteria::matches_view(const Json::Value& view)
         const char *class = view_get_class(view);
         if (!class)
         {
-            return false;
+            class = "";
         }
 
         switch (this->class->match_type)
@@ -392,7 +392,7 @@ bool criteria::matches_view(const Json::Value& view)
         const char *instance = view_get_instance(view);
         if (!instance)
         {
-            return false;
+            instance = "";
         }
 
         switch (this->instance->match_type)
@@ -420,7 +420,7 @@ bool criteria::matches_view(const Json::Value& view)
         const char *window_role = view_get_window_role(view);
         if (!window_role)
         {
-            return false;
+            window_role = "";
         }
 
         switch (this->window_role->match_type)
