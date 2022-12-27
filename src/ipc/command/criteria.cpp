@@ -232,7 +232,7 @@ bool criteria::matches_view(const Json::Value& view)
         Json::Value name_object = view.get("name", Json::nullValue);
         if (name_object.isNull() || !name_object.isString())
         {
-            return false;
+            name_object = "";
         }
 
         std::string name = name_object.asString();
