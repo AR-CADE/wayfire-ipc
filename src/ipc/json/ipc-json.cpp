@@ -1105,60 +1105,56 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 #if HAVE_XWAYLAND
     if (xwayland_enabled == 1)
     {
-        auto main_surface = view->get_main_surface();
-        if (main_surface != nullptr)
+        auto main_wlr_surface = view->get_wlr_surface();
+        if (main_wlr_surface != nullptr)
         {
-            auto main_wlr_surface = main_surface->get_wlr_surface();
-            if (main_wlr_surface != nullptr)
+            if (wlr_surface_is_xwayland_surface(main_wlr_surface))
             {
-                if (wlr_surface_is_xwayland_surface(main_wlr_surface))
+                object["is_xwayland"] = true;
+                object["shell"] = "xwayland";
+
+                struct wlr_xwayland_surface *main_xsurf =
+                    wlr_xwayland_surface_from_wlr_surface(main_wlr_surface);
+                if (main_xsurf != nullptr)
                 {
-                    object["is_xwayland"] = true;
-                    object["shell"] = "xwayland";
+                    Json::Value window_props;
 
-                    struct wlr_xwayland_surface *main_xsurf =
-                        wlr_xwayland_surface_from_wlr_surface(main_wlr_surface);
-                    if (main_xsurf != nullptr)
+                    object["window"] = main_xsurf->window_id;
+                    object["urgent"] = main_xsurf->hints->flags &
+                        XCB_ICCCM_WM_HINT_X_URGENCY;
+
+                    auto clazz = main_xsurf->class_t;
+                    if (clazz != nullptr)
                     {
-                        Json::Value window_props;
-
-                        object["window"] = main_xsurf->window_id;
-                        object["urgent"] = main_xsurf->hints->flags &
-                            XCB_ICCCM_WM_HINT_X_URGENCY;
-
-                        auto clazz = main_xsurf->class_t;
-                        if (clazz != nullptr)
-                        {
-                            object["class"] = std::string(clazz);
-                        }
-
-                        auto instance = main_xsurf->instance;
-                        if (instance != nullptr)
-                        {
-                            window_props["instance"] = std::string(instance);
-                        }
-
-                        auto title = main_xsurf->title;
-                        if (title != nullptr)
-                        {
-                            window_props["title"] = std::string(title);
-                        }
-
-                        auto role = main_xsurf->role;
-                        if (role != nullptr)
-                        {
-                            window_props["window_role"] = std::string(role);
-                        }
-
-                        if (parent != nullptr)
-                        {
-                            window_props["transient_for"] = parent->get_id();
-                        }
-
-                        window_props["type"] = "unknown";
-
-                        object["window_properties"] = window_props;
+                        object["class"] = std::string(clazz);
                     }
+
+                    auto instance = main_xsurf->instance;
+                    if (instance != nullptr)
+                    {
+                        window_props["instance"] = std::string(instance);
+                    }
+
+                    auto title = main_xsurf->title;
+                    if (title != nullptr)
+                    {
+                        window_props["title"] = std::string(title);
+                    }
+
+                    auto role = main_xsurf->role;
+                    if (role != nullptr)
+                    {
+                        window_props["window_role"] = std::string(role);
+                    }
+
+                    if (parent != nullptr)
+                    {
+                        window_props["transient_for"] = parent->get_id();
+                    }
+
+                    window_props["type"] = "unknown";
+
+                    object["window_properties"] = window_props;
                 }
             }
         }
