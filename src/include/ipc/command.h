@@ -80,15 +80,4 @@ public:
 };
 
 
-#include <wayfire/signal-definitions.hpp>
-
-/* A public signal, shared by the ipc server plugin & ipc commands plugin
- *
- */
-
-struct command_signal : public wf::signal_data_t
-{
-    Json::Value argv = Json::arrayValue;
-};
-
 #endif

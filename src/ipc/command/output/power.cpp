@@ -1,5 +1,6 @@
 #include "../command_impl.hpp"
-#include "ipc.h"
+#include <ipc.h>
+#include <signals/power-signals.hpp>
 #include <cstdint>
 #include <cstdio>
 #include <json/json.h>
@@ -13,9 +14,9 @@
 static RETURN_STATUS signal_power_cmd(Json::Value argv)
 {
     auto output = wf::get_core().get_active_output();
-    command_signal data;
+    power_command_signal data;
     data.argv = argv;
-    output->emit_signal("power-command", &data);
+    output->emit(&data);
 
     return RETURN_SUCCESS;
 }

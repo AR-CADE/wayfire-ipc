@@ -1,7 +1,10 @@
 #include <json/value.h>
+#include <signals/power-signals.hpp>
 #include <wayfire/output.hpp>
-#include <wayfire/singleton-plugin.hpp>
+#include "wayfire/per-output-plugin.hpp"
+#include "wayfire/plugins/common/shared-core-data.hpp"
 #include <wayfire/output-layout.hpp>
+#include <wayfire/signal-definitions.hpp>
 #include <wayfire/workspace-manager.hpp>
 #include <ipc/command.h>
 #include <ipc/json.hpp>
@@ -195,31 +198,38 @@ class wayfire_power
     }
 };
 
-class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
+class wayfire_power_plugin : public wf::per_output_plugin_instance_t
 {
     wf::option_wrapper_t<bool> disable_on_fullscreen{"power/disable_on_fullscreen"};
 
     std::optional<wf::idle_inhibitor_t> fullscreen_inhibitor;
     bool has_fullscreen = false;
+    wf::shared_data::ref_ptr_t<wayfire_power> get_instance;
+
+    wf::plugin_activation_data_t grab_interface = {
+        .name = "power",
+        .capabilities = 0,
+    };
 
     wf::activator_callback toggle = [=] (auto)
     {
-        if (!output->can_activate_plugin(grab_interface))
+        if (!output->can_activate_plugin(&grab_interface))
         {
             return false;
         }
 
         /* Toggle power for all outputs **/
-        get_instance().toggle_state();
+        get_instance->toggle_state();
 
         return true;
     };
 
-    wf::signal_connection_t fullscreen_state_changed{[this] (wf::signal_data_t *data)
-        {
-            has_fullscreen = data != nullptr;
-            update_fullscreen();
-        }
+    wf::signal::connection_t<wf::fullscreen_layer_focused_signal>
+    fullscreen_state_changed =
+        [=] (wf::fullscreen_layer_focused_signal *ev)
+    {
+        this->has_fullscreen = ev->has_promoted;
+        update_fullscreen();
     };
 
     wf::config::option_base_t::updated_callback_t disable_on_fullscreen_changed =
@@ -228,15 +238,16 @@ class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
         update_fullscreen();
     };
 
-    wf::signal_connection_t on_power_command = [=] (wf::signal_data_t *data)
+
+    wf::signal::connection_t<power_command_signal> on_power_command =
+        [=] (power_command_signal *ev)
     {
-        if (!output->can_activate_plugin(grab_interface))
+        if (!output->can_activate_plugin(&grab_interface))
         {
             return;
         }
 
-        command_signal *signal = dynamic_cast<command_signal*>(data);
-        Json::Value argv = signal->argv;
+        Json::Value argv = ev->argv;
         //
         // argv[0] = "output"
         // argv[1] = eg. "*" or 1 or "eDP-1"
@@ -253,10 +264,10 @@ class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
 
         if (option.asString() == IPC_OFF_TOCKEN)
         {
-            get_instance().set_state_off(name_or_id);
+            get_instance->set_state_off(name_or_id);
         } else
         {
-            get_instance().set_state_on(name_or_id);
+            get_instance->set_state_on(name_or_id);
         }
     };
 
@@ -274,18 +285,13 @@ class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
         }
     }
 
+  public:
     void init() override
     {
-        grab_interface->name = "power";
-        grab_interface->capabilities = 0;
-
-        singleton_plugin_t::init();
-
         output->add_activator(
             wf::option_wrapper_t<wf::activatorbinding_t>{"power/toggle"},
             &toggle);
-        output->connect_signal("fullscreen-layer-focused",
-            &fullscreen_state_changed);
+        output->connect(&fullscreen_state_changed);
         disable_on_fullscreen.set_callback(disable_on_fullscreen_changed);
 
         if (output->get_active_view() && output->get_active_view()->fullscreen)
@@ -299,16 +305,15 @@ class wayfire_power_singleton : public wf::singleton_plugin_t<wayfire_power>
 
         update_fullscreen();
 
-        output->connect_signal("power-command", &on_power_command);
+        output->connect(&on_power_command);
     }
 
     void fini() override
     {
         output->rem_binding(&toggle);
-        output->disconnect_signal(&fullscreen_state_changed);
-        output->disconnect_signal(&on_power_command);
-        singleton_plugin_t::fini();
+        output->disconnect(&fullscreen_state_changed);
+        output->disconnect(&on_power_command);
     }
 };
 
-DECLARE_WAYFIRE_PLUGIN(wayfire_power_singleton);
+DECLARE_WAYFIRE_PLUGIN(wf::per_output_plugin_t<wayfire_power_plugin>);

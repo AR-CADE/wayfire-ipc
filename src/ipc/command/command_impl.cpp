@@ -295,22 +295,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         auto handler = core_handler(argc, const_cast<const char**>(argv));
         if (!handler)
         {
-            auto output = wf::get_core().get_active_output();
-            command_signal data;
-            Json::Value obj;
-            for (int i = 0; i < argc; ++i)
-            {
-                obj.append(argv[i]);
-            }
-
-            data.argv = obj;
-            auto arg = obj.get(Json::ArrayIndex(0), Json::nullValue);
-            if (!arg.isNull() && !arg.empty() && arg.isString())
-            {
-                output->emit_signal(arg.asString() + "-command", &data);
-            }
-
-            std::string error = "Unknown command " + arg.asString();
+            std::string error = "Unknown command " + std::string(argv[0]);
             res_list.append(ipc_json::build_status(RETURN_SUCCESS, Json::nullValue,
                 error.c_str()));
             ipc_tools::free_argv(argc, argv);
