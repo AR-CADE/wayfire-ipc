@@ -45,12 +45,14 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing mode argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Missing mode argument.");
     }
 
     int32_t use_custom_mode = -1;
@@ -74,7 +76,8 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         // Format is 1234x4321
         if (*end != 'x')
         {
-            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Invalid mode width.");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                "Invalid mode width.");
         }
 
         ++end;
@@ -102,13 +105,15 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         argv++;
         if (!argc)
         {
-            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing mode argument (height).");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                "Missing mode argument (height).");
         }
 
         height = strtol(*argv, &end, 10);
         if (*end)
         {
-            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Invalid mode height.");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                "Invalid mode height.");
         }
     }
 
@@ -156,7 +161,8 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 
         if (selected_mode == nullptr)
         {
-            return ipc_json::command_result(RETURN_ABORTED, "The specified mode is invalid or not found in the list of available modes of the specified output, use *--custom* to force this mode if you know what you're doing");
+            return ipc_json::command_result(RETURN_ABORTED,
+                "The specified mode is invalid or not found in the list of available modes of the specified output, use *--custom* to force this mode if you know what you're doing");
         }
     }
 

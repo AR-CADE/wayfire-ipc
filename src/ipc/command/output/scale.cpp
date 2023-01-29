@@ -43,12 +43,14 @@ Json::Value output_scale_handler(int argc, char **argv, command_handler_context 
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing scale argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Missing scale argument.");
     }
 
     char *end;

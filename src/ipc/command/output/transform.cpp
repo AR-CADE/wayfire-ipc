@@ -67,12 +67,14 @@ Json::Value output_transform_handler(int argc, char **argv,
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing transform argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Missing transform argument.");
     }
 
     enum wl_output_transform transform;
@@ -103,7 +105,8 @@ Json::Value output_transform_handler(int argc, char **argv,
         transform = WL_OUTPUT_TRANSFORM_FLIPPED_270;
     } else
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Invalid output transform.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Invalid output transform.");
     }
 
     // Sway uses clockwise transforms, while WL_OUTPUT_TRANSFORM_* describe
@@ -114,7 +117,8 @@ Json::Value output_transform_handler(int argc, char **argv,
         command::all_output_by_name_or_id(ctx->output_config->name);
     if (output == nullptr)
     {
-        return ipc_json::command_result(RETURN_ABORTED, "Cannot apply relative transform to unknown output");
+        return ipc_json::command_result(RETURN_ABORTED,
+            "Cannot apply relative transform to unknown output");
     }
 
     ctx->leftovers.argc = argc - 1;
@@ -125,7 +129,8 @@ Json::Value output_transform_handler(int argc, char **argv,
     {
         if (strcmp(ctx->output_config->name, "*") == 0)
         {
-            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Cannot apply relative transform to all outputs.");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                "Cannot apply relative transform to all outputs.");
         }
 
         if (strcmp(argv[1], "anticlockwise") == 0)
@@ -136,7 +141,8 @@ Json::Value output_transform_handler(int argc, char **argv,
         struct wlr_output *w_output = output->handle;
         if (w_output == nullptr)
         {
-            return ipc_json::command_result(RETURN_ABORTED, "Cannot apply relative transform to unknown output");
+            return ipc_json::command_result(RETURN_ABORTED,
+                "Cannot apply relative transform to unknown output");
         }
 
         transform = wlr_output_transform_compose(w_output->transform, transform);

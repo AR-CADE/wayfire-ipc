@@ -29,12 +29,14 @@ Json::Value output_power_handler(int argc, char **argv, command_handler_context 
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Output config name not set");
     }
 
     if (!(argc > 0))
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing power argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Missing power argument.");
     }
 
     Json::Value args = Json::arrayValue;

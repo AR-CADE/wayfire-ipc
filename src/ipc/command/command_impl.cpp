@@ -235,7 +235,8 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
 
                 if (!parsed)
                 {
-                    res_list.append(ipc_json::command_result(RETURN_INVALID_PARAMETER, error));
+                    res_list.append(ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                        error));
                     free(error);
                     goto cleanup;
                 }
@@ -333,7 +334,8 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
             }
         } else if ((containers.size() == 0) || !containers.isArray())
         {
-            res_list.append(ipc_json::command_result(RETURN_ABORTED, "No matching node."));
+            res_list.append(ipc_json::command_result(RETURN_ABORTED,
+                "No matching node."));
         } else
         {
             Json::Value fail_res = Json::nullValue;

@@ -18,7 +18,8 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
 
     if (!wf::get_core().output_layout->get_num_outputs())
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Can't run this command while there's no outputs connected.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Can't run this command while there's no outputs connected.");
     }
 
     Json::Value con = ctx->container;
@@ -40,7 +41,8 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
     float alpha = 0;
     if (*err)
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "opacity float invalid");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "opacity float invalid");
     }
 
     wf::view_2D *transform_2d = nullptr;
@@ -60,7 +62,8 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
         val = alpha - val;
     } else if ((argc > 1) && strcasecmp(argv[0], "set"))
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Expected: set|plus|minus <0..1>");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "Expected: set|plus|minus <0..1>");
     } else
     {
         alpha = val;
@@ -68,7 +71,8 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
 
     if ((val < 0) || (val > 1))
     {
-        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "opacity value out of bounds");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
+            "opacity value out of bounds");
     }
 
     if (val == 1)
