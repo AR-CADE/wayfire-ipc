@@ -317,27 +317,17 @@ const char*ipc_json::orientation_description(enum wl_output_transform transform)
     return "none";
 }
 
-Json::Value ipc_json::build_status(RETURN_STATUS status, Json::Value value,
-    const char *error)
+Json::Value ipc_json::command_result(RETURN_STATUS status, const char *error)
 {
     Json::Value object;
-    object["success"] = !RETURN_ERROR(status);
-    object["status"]  = status;
+    object["success"] = (bool)!RETURN_ERROR(status);
     if (object["success"] == false)
     {
-        object["parse_error"] = !object["success"];
-        // TODO: RETURN_ERROR TO STRING
-        object["error"] = "";
-    }
-
-    if (value.isNull() == false)
-    {
-        object["value"] = value;
-    }
-
-    if (error != nullptr)
-    {
-        object["error"] = std::string(error);
+        object["parse_error"] = status == RETURN_INVALID_PARAMETER;
+        if (error != nullptr)
+        {
+            object["error"] = std::string(error);
+        }
     }
 
     return object;

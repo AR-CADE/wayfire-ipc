@@ -40,20 +40,17 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 {
     if (!ctx->output_config)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output config");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output config");
     }
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-            "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-            "Missing mode argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing mode argument.");
     }
 
     int32_t use_custom_mode = -1;
@@ -77,8 +74,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         // Format is 1234x4321
         if (*end != 'x')
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-                "Invalid mode width.");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Invalid mode width.");
         }
 
         ++end;
@@ -87,8 +83,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         {
             if (*end != '@')
             {
-                return ipc_json::build_status(RETURN_INVALID_PARAMETER,
-                    Json::nullValue,
+                return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                     "Invalid mode height.");
             }
 
@@ -96,8 +91,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
             refresh_rate = strtof(end, &end);
             if (strcasecmp("Hz", end) != 0)
             {
-                return ipc_json::build_status(RETURN_INVALID_PARAMETER,
-                    Json::nullValue,
+                return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                     "Invalid mode refresh rate.");
             }
         }
@@ -108,15 +102,13 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         argv++;
         if (!argc)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-                "Missing mode argument (height).");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing mode argument (height).");
         }
 
         height = strtol(*argv, &end, 10);
         if (*end)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-                "Invalid mode height.");
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Invalid mode height.");
         }
     }
 
@@ -124,8 +116,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 
     if (!output || !output->handle)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output");
     }
 
     struct wlr_output_mode *selected_mode = nullptr;
@@ -165,8 +156,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
 
         if (selected_mode == nullptr)
         {
-            return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-                "The specified mode is invalid or not found in the list of available modes of the specified output, use *--custom* to force this mode if you know what you're doing");
+            return ipc_json::command_result(RETURN_ABORTED, "The specified mode is invalid or not found in the list of available modes of the specified output, use *--custom* to force this mode if you know what you're doing");
         }
     }
 
@@ -175,5 +165,5 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
     ctx->leftovers.argc = argc - 1;
     ctx->leftovers.argv = argv + 1;
 
-    return ipc_json::build_status(status);
+    return ipc_json::command_result(status);
 }

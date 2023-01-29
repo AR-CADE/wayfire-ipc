@@ -24,20 +24,17 @@ Json::Value output_power_handler(int argc, char **argv, command_handler_context 
 {
     if (!ctx->output_config)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output config");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output config");
     }
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-            "Output config name not set");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Output config name not set");
     }
 
     if (!(argc > 0))
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-            "Missing power argument.");
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER, "Missing power argument.");
     }
 
     Json::Value args = Json::arrayValue;
@@ -52,5 +49,5 @@ Json::Value output_power_handler(int argc, char **argv, command_handler_context 
     ctx->leftovers.argc = argc - 1;
     ctx->leftovers.argv = argv + 1;
 
-    return ipc_json::build_status(signal_power_cmd(args));
+    return ipc_json::command_result(signal_power_cmd(args));
 }

@@ -20,5 +20,5 @@ Json::Value exit_handler(int argc, char **argv, command_handler_context *ctx)
 
     wf::get_core().shutdown();
 
-    return ipc_json::build_status(RETURN_SUCCESS);
+    return ipc_json::command_result(RETURN_SUCCESS);
 }

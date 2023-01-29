@@ -29,8 +29,7 @@ class ipc_json : public json
     static Json::Value get_version();
     static Json::Value describe_seat(wlr_seat *seat);
     static Json::Value args_to_json(char **argv, int argc);
-    static Json::Value build_status(RETURN_STATUS status,
-        Json::Value value = Json::nullValue,
+    static Json::Value command_result(RETURN_STATUS status,
         const char *error = nullptr);
     static Json::Value describe_view(wayfire_view view);
     static Json::Value describe_dimension(wf::dimensions_t dimension);

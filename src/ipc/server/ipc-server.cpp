@@ -213,9 +213,9 @@ void ipc_server_t::send_status(ipc_server_cli *client,
     enum ipc_payload_type payload_type,
     RETURN_STATUS status)
 {
-    Json::Value msg = ipc_json::build_status(status);
-    std::string msg_string = ipc_json::json_to_string(msg);
-    send_reply(client, payload_type, msg_string.c_str(), msg_string.size());
+    std::string msg =
+        !RETURN_ERROR(status) ? "{\"success\": true}" : "{\"success\": false}";
+    send_reply(client, payload_type, msg.c_str(), msg.size());
 }
 
 void ipc_server_t::handle_display_destroy(struct wl_listener *listener, void *data)
