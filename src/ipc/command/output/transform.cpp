@@ -62,19 +62,18 @@ Json::Value output_transform_handler(int argc, char **argv,
 {
     if (!ctx->output_config)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output config");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output config");
     }
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Missing transform argument.");
     }
 
@@ -106,7 +105,7 @@ Json::Value output_transform_handler(int argc, char **argv,
         transform = WL_OUTPUT_TRANSFORM_FLIPPED_270;
     } else
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Invalid output transform.");
     }
 
@@ -118,7 +117,7 @@ Json::Value output_transform_handler(int argc, char **argv,
         command::all_output_by_name_or_id(ctx->output_config->name);
     if (output == nullptr)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+        return ipc_json::command_result(RETURN_ABORTED,
             "Cannot apply relative transform to unknown output");
     }
 
@@ -130,7 +129,7 @@ Json::Value output_transform_handler(int argc, char **argv,
     {
         if (strcmp(ctx->output_config->name, "*") == 0)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                 "Cannot apply relative transform to all outputs.");
         }
 
@@ -142,7 +141,7 @@ Json::Value output_transform_handler(int argc, char **argv,
         struct wlr_output *w_output = output->handle;
         if (w_output == nullptr)
         {
-            return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            return ipc_json::command_result(RETURN_ABORTED,
                 "Cannot apply relative transform to unknown output");
         }
 
@@ -153,5 +152,5 @@ Json::Value output_transform_handler(int argc, char **argv,
 
     RETURN_STATUS status = set_tranform(transform, output);
 
-    return ipc_json::build_status(status);
+    return ipc_json::command_result(status);
 }

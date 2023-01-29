@@ -15,7 +15,7 @@ Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx)
 
     if (!wf::get_core().output_layout->get_num_outputs())
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Can't run this command while there's no outputs connected.");
     }
 
@@ -23,7 +23,7 @@ Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx)
 
     if (con.isNull())
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "No current container");
     }
 
@@ -33,5 +33,5 @@ Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx)
 
     view->set_sticky(sticky);
 
-    return ipc_json::build_status(RETURN_SUCCESS);
+    return ipc_json::command_result(RETURN_SUCCESS);
 }

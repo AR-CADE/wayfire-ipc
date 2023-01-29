@@ -64,8 +64,7 @@ Json::Value ipc_command::checkarg(int argc, const char *name,
             error_name.asString() + std::to_string(val) + " argument" +
             std::string(val != 1 ? "s" : "") + ", got " + std::to_string(argc) + ")";
 
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
-            error.c_str());
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER, error.c_str());
     }
 
     return error_name;
@@ -219,7 +218,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
 
     if (exec == nullptr)
     {
-        return ipc_json::build_status(RETURN_OUT_OF_RESOURCES);
+        return ipc_json::command_result(RETURN_OUT_OF_RESOURCES);
     }
 
     handler_context.seat = seat;
@@ -239,8 +238,8 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
 
                 if (!parsed)
                 {
-                    res_list.append(ipc_json::build_status(RETURN_INVALID_PARAMETER,
-                        Json::nullValue, error));
+                    res_list.append(ipc_json::command_result(RETURN_INVALID_PARAMETER,
+                        error));
                     free(error);
                     goto cleanup;
                 }
@@ -286,7 +285,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
 
         if (!(argc > 0))
         {
-            res_list.append(ipc_json::build_status(RETURN_INVALID_PARAMETER));
+            res_list.append(ipc_json::command_result(RETURN_INVALID_PARAMETER));
             ipc_tools::free_argv(argc, argv);
 
             goto cleanup;
@@ -296,8 +295,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         if (!handler)
         {
             std::string error = "Unknown command " + std::string(argv[0]);
-            res_list.append(ipc_json::build_status(RETURN_SUCCESS, Json::nullValue,
-                error.c_str()));
+            res_list.append(ipc_json::command_result(RETURN_SUCCESS, error.c_str()));
             ipc_tools::free_argv(argc, argv);
             goto cleanup;
         }
@@ -324,7 +322,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
             }
         } else if ((containers.size() == 0) || !containers.isArray())
         {
-            res_list.append(ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
+            res_list.append(ipc_json::command_result(RETURN_ABORTED,
                 "No matching node."));
         } else
         {
@@ -358,7 +356,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
                 }
             }
 
-            res_list.append(!fail_res.isNull() ? fail_res : ipc_json::build_status(
+            res_list.append(!fail_res.isNull() ? fail_res : ipc_json::command_result(
                 RETURN_SUCCESS));
         }
 

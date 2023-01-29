@@ -17,7 +17,7 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
 
     if (!wf::get_core().output_layout->get_num_outputs())
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Can't run this command while there's no outputs connected.");
     }
 
@@ -25,14 +25,14 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
 
     if (con.isNull())
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER);
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER);
     }
 
     wayfire_view view = ipc_command::container_get_view(con);
 
     if (view == nullptr)
     {
-        return ipc_json::build_status(RETURN_NOT_FOUND);
+        return ipc_json::command_result(RETURN_NOT_FOUND);
     }
 
     bool is_fullscreen = view->fullscreen;
@@ -48,5 +48,5 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
 
     view->fullscreen_request(view->get_output(), enable);
 
-    return ipc_json::build_status(RETURN_SUCCESS);
+    return ipc_json::command_result(RETURN_SUCCESS);
 }

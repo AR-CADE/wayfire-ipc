@@ -40,19 +40,18 @@ Json::Value output_position_handler(int argc, char **argv,
 {
     if (!ctx->output_config)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output config");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output config");
     }
 
     if (ctx->output_config->name == nullptr)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Output config name not set");
     }
 
     if (!argc)
     {
-        return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+        return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Missing position argument.");
     }
 
@@ -65,7 +64,7 @@ Json::Value output_position_handler(int argc, char **argv,
         // Format is 1234,4321
         if (*end != ',')
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                 "Invalid position x.");
         }
 
@@ -73,7 +72,7 @@ Json::Value output_position_handler(int argc, char **argv,
         y = strtol(end, &end, 10);
         if (*end)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                 "Invalid position y.");
         }
     } else
@@ -83,14 +82,14 @@ Json::Value output_position_handler(int argc, char **argv,
         argv++;
         if (!argc)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                 "Missing position argument (y).");
         }
 
         y = strtol(*argv, &end, 10);
         if (*end)
         {
-            return ipc_json::build_status(RETURN_INVALID_PARAMETER, Json::nullValue,
+            return ipc_json::command_result(RETURN_INVALID_PARAMETER,
                 "Invalid position y.");
         }
     }
@@ -99,8 +98,7 @@ Json::Value output_position_handler(int argc, char **argv,
 
     if (!output)
     {
-        return ipc_json::build_status(RETURN_ABORTED, Json::nullValue,
-            "Missing output");
+        return ipc_json::command_result(RETURN_ABORTED, "Missing output");
     }
 
     wf::output_config::position_t position(x, y);
@@ -110,5 +108,5 @@ Json::Value output_position_handler(int argc, char **argv,
     ctx->leftovers.argc = argc - 1;
     ctx->leftovers.argv = argv + 1;
 
-    return ipc_json::build_status(status);
+    return ipc_json::command_result(status);
 }

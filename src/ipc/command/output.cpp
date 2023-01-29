@@ -86,7 +86,7 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
 
     auto output_config = new_output_config(argv[0]);
     ctx->output_config = output_config;
-    error = ipc_json::build_status(RETURN_INVALID_PARAMETER);
+    error = ipc_json::command_result(RETURN_INVALID_PARAMETER);
 
     argc--;
     argv++;
@@ -119,7 +119,7 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
     ctx->leftovers.argc = 0;
     ctx->leftovers.argv = nullptr;
 
-    return ipc_json::build_status(RETURN_SUCCESS);
+    return ipc_json::command_result(RETURN_SUCCESS);
 
 fail:
     ctx->output_config = nullptr;
