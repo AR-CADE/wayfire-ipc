@@ -1,6 +1,6 @@
 #include <ipc/server.hpp>
 #include <json/value.h>
-#include "command/command_impl.hpp"
+#include "commands/command_impl.hpp"
 
 static struct wl_event_source *ipc_event_source;
 static std::vector<ipc_server_cli*> ipc_client_list;
