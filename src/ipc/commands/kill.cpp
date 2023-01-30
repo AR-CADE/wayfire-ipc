@@ -1,4 +1,4 @@
-#include "command/command_impl.hpp"
+#include "command_impl.hpp"
 #include "ipc.h"
 #include <json/value.h>
 #include <wayfire/core.hpp>
