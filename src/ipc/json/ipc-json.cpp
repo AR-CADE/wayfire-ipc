@@ -1,4 +1,5 @@
 #include "ipc.h"
+#include <cstddef>
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
 #include <json/value.h>
@@ -1111,8 +1112,16 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                     Json::Value window_props;
 
                     object["window"] = main_xsurf->window_id;
-                    object["urgent"] = main_xsurf->hints->flags &
-                        XCB_ICCCM_WM_HINT_X_URGENCY;
+
+                    auto hints = main_xsurf->hints;
+                    if (hints != nullptr)
+                    {
+                        object["urgent"] = hints->flags &
+                            XCB_ICCCM_WM_HINT_X_URGENCY;
+                    } else
+                    {
+                        object["urgent"] = false;
+                    }
 
                     auto clazz = main_xsurf->class_t;
                     if (clazz != nullptr)
