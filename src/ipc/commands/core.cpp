@@ -10,6 +10,7 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
 Json::Value exit_handler(int argc, char **argv, command_handler_context *ctx);
 Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx);
 Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx);
+Json::Value workspace_handler(int argc, char **argv, command_handler_context *ctx);
 
 std::map<std::string, std::function<Json::Value(int argc, char**argv,
     command_handler_context*ctx)>> core_handler_map
@@ -20,6 +21,7 @@ std::map<std::string, std::function<Json::Value(int argc, char**argv,
     {"exit", exit_handler},
     {"sticky", sticky_handler},
     {"opacity", opacity_handler},
+    {"workspace", workspace_handler}
 };
 
 std::function<Json::Value(int argc, char**argv,
