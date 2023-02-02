@@ -13,6 +13,7 @@ server = shared_module(
     'commands/sticky.cpp', 
     'commands/opacity.cpp', 
     'commands/fullscreen.cpp', 
+    'commands/workspace.cpp', 
     'commands/output/power.cpp', 
     'commands/output/scale.cpp', 
     'commands/output/transform.cpp', 
