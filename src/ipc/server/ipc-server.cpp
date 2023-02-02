@@ -1,5 +1,6 @@
 #include <ipc/server.hpp>
 #include <json/value.h>
+#include <vector>
 #include "commands/command_impl.hpp"
 
 static struct wl_event_source *ipc_event_source;
@@ -594,6 +595,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
       case IPC_GET_WORKSPACES:
     {
         Json::Value workspaces = Json::arrayValue;
+        std::vector<Json::Value> vector;
 
         auto outputs = wf::get_core().output_layout->get_outputs();
         for (wf::output_t *output : outputs)
@@ -605,9 +607,36 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
                 {
                     Json::Value workspace = ipc_json::describe_workspace(
                         wf::point_t{x, y}, output);
-                    workspaces.append(workspace);
+                    vector.push_back(workspace);
                 }
             }
+        }
+
+        std::sort(vector.begin(), vector.end(),
+            [] (Json::Value workspace_a, Json::Value workspace_b)
+            {
+                Json::Value workspace_a_id = workspace_a.get("id", Json::nullValue);
+                Json::Value workspace_b_id = workspace_b.get("id", Json::nullValue);
+
+                if (workspace_a_id.isNull() || !workspace_a_id.isInt())
+                {
+                    return false;
+                }
+
+                if (workspace_b_id.isNull() || !workspace_b_id.isInt())
+                {
+                    return false;
+                }
+
+                int a_id = workspace_a_id.asInt();
+                int b_id = workspace_b_id.asInt();
+
+                return a_id < b_id;
+            });
+
+        for (auto& workspace : vector)
+        {
+            workspaces.append(workspace);
         }
 
         std::string json_string = ipc_json::json_to_string(workspaces);
