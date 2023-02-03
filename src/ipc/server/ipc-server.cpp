@@ -216,7 +216,7 @@ void ipc_server_t::send_status(ipc_server_cli *client,
     RETURN_STATUS status)
 {
     std::string msg =
-        !RETURN_ERROR(status) ? "{\"success\": true}" : "{\"success\": false}";
+        status == RETURN_SUCCESS ? "{\"success\": true}" : "{\"success\": false}";
     send_reply(client, payload_type, msg.c_str(), msg.size());
 }
 
