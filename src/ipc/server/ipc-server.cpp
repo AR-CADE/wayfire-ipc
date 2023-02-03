@@ -596,48 +596,17 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
       case IPC_GET_WORKSPACES:
     {
         Json::Value workspaces = Json::arrayValue;
-        std::vector<Json::Value> vector;
 
         auto outputs = wf::get_core().output_layout->get_outputs();
         for (wf::output_t *output : outputs)
         {
-            auto wsize = output->workspace->get_workspace_grid_size();
-            for (int x = 0; x < wsize.width; x++)
+            auto nodes = ipc_json::get_workspaces_nodes(output, false);
+
+            for (Json::ArrayIndex i = 0; i < nodes.size(); i++)
             {
-                for (int y = 0; y < wsize.height; y++)
-                {
-                    Json::Value workspace = ipc_json::describe_workspace(
-                        wf::point_t{x, y}, output);
-                    vector.push_back(workspace);
-                }
+                Json::Value workspace = nodes.get(i, Json::nullValue);
+                workspaces.append(workspace);
             }
-        }
-
-        std::sort(vector.begin(), vector.end(),
-            [] (Json::Value workspace_a, Json::Value workspace_b)
-            {
-                Json::Value workspace_a_id = workspace_a.get("id", Json::nullValue);
-                Json::Value workspace_b_id = workspace_b.get("id", Json::nullValue);
-
-                if (workspace_a_id.isNull() || !workspace_a_id.isInt())
-                {
-                    return false;
-                }
-
-                if (workspace_b_id.isNull() || !workspace_b_id.isInt())
-                {
-                    return false;
-                }
-
-                int a_id = workspace_a_id.asInt();
-                int b_id = workspace_b_id.asInt();
-
-                return a_id < b_id;
-            });
-
-        for (auto& workspace : vector)
-        {
-            workspaces.append(workspace);
         }
 
         std::string json_string = ipc_json::json_to_string(workspaces);
