@@ -367,6 +367,130 @@ shift_over:
         *end = '\0';
     }
 
+    static int unescape_string(char *string)
+    {
+        /* TODO: More C string escapes */
+        int len = strlen(string);
+        int i;
+        for (i = 0; string[i]; ++i)
+        {
+            if (string[i] == '\\')
+            {
+                switch (string[++i])
+                {
+                  case '0':
+                    string[i - 1] = '\0';
+                    return i - 1;
+
+                  case 'a':
+                    string[i - 1] = '\a';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'b':
+                    string[i - 1] = '\b';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'f':
+                    string[i - 1] = '\f';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'n':
+                    string[i - 1] = '\n';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'r':
+                    string[i - 1] = '\r';
+                    string[i]     = '\0';
+                    break;
+
+                  case 't':
+                    string[i - 1] = '\t';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'v':
+                    string[i - 1] = '\v';
+                    string[i]     = '\0';
+                    break;
+
+                  case '\\':
+                    string[i] = '\0';
+                    break;
+
+                  case '\'':
+                    string[i - 1] = '\'';
+                    string[i]     = '\0';
+                    break;
+
+                  case '\"':
+                    string[i - 1] = '\"';
+                    string[i]     = '\0';
+                    break;
+
+                  case '?':
+                    string[i - 1] = '?';
+                    string[i]     = '\0';
+                    break;
+
+                  case 'x':
+                {
+                    unsigned char c = 0;
+                    if ((string[i + 1] >= '0') && (string[i + 1] <= '9'))
+                    {
+                        c = string[i + 1] - '0';
+                        if ((string[i + 2] >= '0') && (string[i + 2] <= '9'))
+                        {
+                            c *= 0x10;
+                            c += string[i + 2] - '0';
+                            string[i + 2] = '\0';
+                        }
+
+                        string[i + 1] = '\0';
+                    }
+
+                    string[i]     = '\0';
+                    string[i - 1] = c;
+                }
+                }
+            }
+        }
+
+        // Shift characters over nullspaces
+        int shift = 0;
+        for (i = 0; i < len; ++i)
+        {
+            if (string[i] == 0)
+            {
+                shift++;
+                continue;
+            }
+
+            string[i - shift] = string[i];
+        }
+
+        string[len - shift] = 0;
+        return len - shift;
+    }
+
+    static void strip_whitespace(char *str)
+    {
+        size_t len   = strlen(str);
+        size_t start = strspn(str, whitespace);
+        memmove(str, &str[start], len + 1 - start);
+
+        if (*str)
+        {
+            for (len -= start + 1; isspace(str[len]); --len)
+            {}
+
+            str[len + 1] = '\0';
+        }
+    }
+
     static ipc_event_type event_to_type(const std::string & s)
     {
         // Events sent from sway to clients. Events have the highest bits set.
