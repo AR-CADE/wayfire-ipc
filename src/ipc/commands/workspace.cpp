@@ -18,7 +18,7 @@ wf::point_t workspace_by_number(int index, wf::output_t *output)
 
 wf::point_t workspace_prev(int index, wf::point_t current, wf::output_t *output)
 {
-    auto prev = ipc_tools::get_workspace_at_index(index, output);
+    auto prev = ipc_tools::get_workspace_at_index(index - 1, output);
 
     if (prev != INVALID_WORKSPACE)
     {
@@ -30,7 +30,7 @@ wf::point_t workspace_prev(int index, wf::point_t current, wf::output_t *output)
 
 wf::point_t workspace_next(int index, wf::point_t current, wf::output_t *output)
 {
-    auto next = ipc_tools::get_workspace_at_index(index, output);
+    auto next = ipc_tools::get_workspace_at_index(index + 1, output);
 
     if (next != INVALID_WORKSPACE)
     {
@@ -43,28 +43,33 @@ wf::point_t workspace_next(int index, wf::point_t current, wf::output_t *output)
 wf::point_t workspace_by_name(const char *name, wf::output_t *output)
 {
     wf::point_t current = output->workspace->get_current_workspace();
-    int workspace_index = std::stoi(name);
 
     if (strcmp(name, "prev") == 0)
     {
+        int workspace_index = ipc_tools::get_workspace_index(current, output);
         return workspace_prev(workspace_index, current, output);
     } else if (strcmp(name, "prev_on_output") == 0)
     {
+        // unsupported
         return current;
     } else if (strcmp(name, "next") == 0)
     {
+        int workspace_index = ipc_tools::get_workspace_index(current, output);
         return workspace_next(workspace_index, current, output);
     } else if (strcmp(name, "next_on_output") == 0)
     {
+        // unsupported
         return current;
     } else if (strcmp(name, "current") == 0)
     {
         return current;
     } else if (strcasecmp(name, "back_and_forth") == 0)
     {
+        // unsupported
         return current;
     } else
     {
+        int workspace_index = std::stoi(name);
         return workspace_by_number(workspace_index, output);
     }
 }
