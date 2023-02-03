@@ -702,10 +702,6 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
                 {
                     client->subscribed_events |=
                         event_mask(IPC_I3_EVENT_TYPE_WINDOW);
-                } else if (event == IPC_I3_EVENT_BINDING)
-                {
-                    client->subscribed_events |=
-                        event_mask(IPC_I3_EVENT_TYPE_BINDING);
                 } else if (event == IPC_I3_EVENT_TICK)
                 {
                     client->subscribed_events |= event_mask(IPC_I3_EVENT_TYPE_TICK);
