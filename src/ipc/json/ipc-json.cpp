@@ -320,7 +320,8 @@ const char*ipc_json::orientation_description(enum wl_output_transform transform)
 Json::Value ipc_json::command_result(RETURN_STATUS status, const char *error)
 {
     Json::Value object;
-    object["success"] = (bool)!RETURN_ERROR(status);
+    object["success"] = (bool)(status == RETURN_SUCCESS);
+    object["status"]  = status;
     if (object["success"] == false)
     {
         object["parse_error"] = status == RETURN_INVALID_PARAMETER;
