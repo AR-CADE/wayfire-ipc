@@ -1285,7 +1285,8 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
     return nodes;
 }
 
-Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output)
+Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
+    bool describe_container_nodes)
 {
     Json::Value nodes = Json::arrayValue;
     std::vector<Json::Value> vector;
@@ -1296,13 +1297,17 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output)
         for (int y = 0; y < wsize.height; y++)
         {
             auto workspace = describe_workspace(wf::point_t{x, y}, output);
-            workspace["nodes"] = get_container_nodes(wf::point_t{x, y}, output);
+            if (describe_container_nodes)
+            {
+                workspace["nodes"] = get_container_nodes(wf::point_t{x, y}, output);
+            }
+
             vector.push_back(workspace);
         }
     }
 
     std::sort(vector.begin(), vector.end(),
-    [] (Json::Value workspace_a, Json::Value workspace_b)
+        [] (Json::Value workspace_a, Json::Value workspace_b)
     {
         Json::Value workspace_a_id = workspace_a.get("id", Json::nullValue);
         Json::Value workspace_b_id = workspace_b.get("id", Json::nullValue);

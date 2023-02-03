@@ -53,7 +53,8 @@ class ipc_json : public json
     static Json::Value get_tree();
     static const char *scale_filter_to_string(
         enum ipc_scale_filter_mode scale_filter);
-    static Json::Value get_workspaces_nodes(wf::output_t *output);
+    static Json::Value get_workspaces_nodes(wf::output_t *output,
+        bool describe_container_nodes = true);
     static Json::Value get_container_nodes(wf::point_t point, wf::output_t *output);
     static Json::Value get_view_nodes(wayfire_view view, bool floating = false);
     static Json::Value get_top_view_nodes(wf::point_t point, wf::output_t *output);
