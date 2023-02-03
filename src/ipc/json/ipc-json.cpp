@@ -1319,6 +1319,7 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
 Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
+    std::vector<Json::Value> vector;
 
     auto wsize = output->workspace->get_workspace_grid_size();
     for (int x = 0; x < wsize.width; x++)
@@ -1327,8 +1328,35 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output)
         {
             auto workspace = describe_workspace(wf::point_t{x, y}, output);
             workspace["nodes"] = get_container_nodes(wf::point_t{x, y}, output);
-            nodes.append(workspace);
+            vector.push_back(workspace);
         }
+    }
+
+    std::sort(vector.begin(), vector.end(),
+    [] (Json::Value workspace_a, Json::Value workspace_b)
+    {
+        Json::Value workspace_a_id = workspace_a.get("id", Json::nullValue);
+        Json::Value workspace_b_id = workspace_b.get("id", Json::nullValue);
+
+        if (workspace_a_id.isNull() || !workspace_a_id.isInt())
+        {
+            return false;
+        }
+
+        if (workspace_b_id.isNull() || !workspace_b_id.isInt())
+        {
+            return false;
+        }
+
+        int a_id = workspace_a_id.asInt();
+        int b_id = workspace_b_id.asInt();
+
+        return a_id < b_id;
+    });
+
+    for (auto& workspace : vector)
+    {
+        nodes.append(workspace);
     }
 
     return nodes;
