@@ -72,7 +72,6 @@ class command_handler_context
     struct leftovers_t leftovers;
 };
 
-Json::Value cmd_core(Json::Value argv);
 std::function<Json::Value(int argc, char**argv,
     command_handler_context*ctx)> core_handler(int argc, const char **argv);
 
