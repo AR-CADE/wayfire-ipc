@@ -1,4 +1,5 @@
 #include <ipc/server.hpp>
+#include "ipc.h"
 #include "wayfire/singleton-plugin.hpp"
 #include <sys/time.h>
 
@@ -388,7 +389,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     wf::signal_connection_t output_added = [=] (wf::signal_data_t *data)
     {
         bind_output_events(get_signaled_output(data));
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data, "new");
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data, /*"new"*/ "unspecified");
         // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_ADDED, data,
         // IPC_WF_EVENT_OUTPUT_ADDED);
     };
@@ -396,7 +397,17 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     wf::signal_connection_t output_removed = [=] (wf::signal_data_t *data)
     {
         // should we explicitly disconnect the event handler
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data, "close");
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data,
+            /*"close"*/ "unspecified");
+        // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_REMOVED, data,
+        // IPC_WF_EVENT_OUTPUT_REMOVED);
+    };
+
+    wf::signal_connection_t output_config_changed = [=] (wf::signal_data_t *data)
+    {
+        // should we explicitly disconnect the event handler
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data,
+            /*"update"*/ "unspecified");
         // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_REMOVED, data,
         // IPC_WF_EVENT_OUTPUT_REMOVED);
     };
@@ -891,6 +902,9 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             &output_added);
         wf::get_core().output_layout->connect_signal(IPC_WF_EVENT_OUTPUT_REMOVED,
             &output_removed);
+        wf::get_core().output_layout->connect_signal(
+            IPC_WF_EVENT_OUTPUT_CONFIGURATION_CHANGED,
+            &output_config_changed);
         wf::get_core().connect_signal(IPC_WF_EVENT_VIEW_HINTS_CHANGED,
             &view_hints_changed);
         wf::get_core().connect_signal("input-device-added", &input_device_added);
@@ -930,6 +944,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         wf::get_core().disconnect_signal(&view_pre_moved_to_output);
         wf::get_core().output_layout->disconnect_signal(&output_added);
         wf::get_core().output_layout->disconnect_signal(&output_removed);
+        wf::get_core().output_layout->disconnect_signal(&output_config_changed);
         wf::get_core().disconnect_signal(&view_hints_changed);
         wf::get_core().disconnect_signal(&input_device_added);
         wf::get_core().disconnect_signal(&input_device_removed);
