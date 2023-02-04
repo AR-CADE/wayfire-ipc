@@ -209,6 +209,7 @@ static void pretty_print_output(Json::Value o)
     Json::Value rect    = o.get("rect", Json::nullValue);
     Json::Value focused = o.get("focused", Json::nullValue);
     Json::Value active  = o.get("active", Json::nullValue);
+    Json::Value power  = o.get("power", Json::nullValue);
     Json::Value ws = o.get("current_workspace", Json::nullValue);
     Json::Value non_desktop = o.get("non_desktop", Json::nullValue);
 
@@ -245,6 +246,7 @@ static void pretty_print_output(Json::Value o)
         printf(
             "Output %s '%s %s %s'%s\n"
             "  Current mode: %dx%d @ %.3f Hz\n"
+			"  Power: %s\n"
             "  Position: %d,%d\n"
             "  Scale factor: %f\n"
             "  Scale filter: %s\n"
@@ -259,6 +261,7 @@ static void pretty_print_output(Json::Value o)
             width.asInt(),
             height.asInt(),
             (double)refresh.asInt() / 1000,
+            power.asBool() ? "on" : "off",
             x.asInt(), y.asInt(),
             scale.asDouble(),
             scale_filter.asString().c_str(),
