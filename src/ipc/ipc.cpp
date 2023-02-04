@@ -1,4 +1,5 @@
 #include <ipc/server.hpp>
+#include <ipc/config.h>
 #include <signals/wm-actions-signals.hpp>
 #include "wayfire/per-output-plugin.hpp"
 #include "wayfire/plugins/common/shared-core-data.hpp"
@@ -331,7 +332,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         Json::Value object;
         object["change"] = change;
-        object["output"] = ipc_json::describe_output(output);
+        // object["output"] = ipc_json::describe_output(output);
 
         return object;
     }
@@ -365,14 +366,25 @@ class ipc_t : public wf::per_output_plugin_instance_t
         [=] (wf::output_added_signal *ev)
     {
         bind_output_events(ev->output);
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output, "new");
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output,
+            /*"new"*/ "unspecified");
     };
 
     wf::signal::connection_t<wf::output_removed_signal> on_output_removed =
         [=] (wf::output_removed_signal *ev)
     {
         unbind_output_events(ev->output);
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output, "close");
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output,
+            /*"close"*/ "unspecified");
+    };
+
+    wf::signal::connection_t<wf::output_configuration_changed_signal>
+    on_output_configuration_changed =
+        [=] (wf::output_configuration_changed_signal *ev)
+    {
+        unbind_output_events(ev->output);
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output,
+            /*"change"*/ "unspecified");
     };
 
     Json::Value input_json_data(nonstd::observer_ptr<wf::input_device_t> device,
@@ -644,6 +656,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         wf::get_core().connect(&on_view_pre_moved_to_output);
         wf::get_core().output_layout->connect(&on_output_added);
         wf::get_core().output_layout->connect(&on_output_removed);
+        wf::get_core().output_layout->connect(&on_output_configuration_changed);
         wf::get_core().connect(&on_view_hints_changed);
         wf::get_core().connect(&on_input_device_added);
         wf::get_core().connect(&on_input_device_removed);
@@ -654,6 +667,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         wf::get_core().disconnect(&on_view_pre_moved_to_output);
         wf::get_core().output_layout->disconnect(&on_output_added);
         wf::get_core().output_layout->disconnect(&on_output_removed);
+        wf::get_core().output_layout->disconnect(&on_output_configuration_changed);
         wf::get_core().disconnect(&on_view_hints_changed);
         wf::get_core().disconnect(&on_input_device_added);
         wf::get_core().disconnect(&on_input_device_removed);

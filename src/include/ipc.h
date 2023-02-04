@@ -173,7 +173,7 @@ enum RETURN_STATUS {
 #define IPC_I3_EVENT_TICK "tick"
 
 #define IPC_SWAY_EVENT_INPUT "input"
-#define IPC_SWAY_EVENT_OUTPUT "output"
+#define IPC_I3_EVENT_OUTPUT "output"
 
 #define event_mask(ev) (1 << (ev & 0x8F))
 

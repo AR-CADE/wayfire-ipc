@@ -680,6 +680,10 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
                 {
                     client->subscribed_events |=
                         event_mask(IPC_SWAY_EVENT_TYPE_INPUT);
+                } else if (event == IPC_I3_EVENT_OUTPUT)
+                {
+                    client->subscribed_events |=
+                        event_mask(IPC_I3_EVENT_TYPE_OUTPUT);
                 } else
                 {
                     client->subscribed_events = IPC_WF_EVENT_TYPE_NONE;
