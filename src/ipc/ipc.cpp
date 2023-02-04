@@ -638,7 +638,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     {
         wf::get_core().output_layout->disconnect_signal(&output_added);
         wf::get_core().output_layout->disconnect_signal(&output_removed);
-        wf::get_core().output_layout->disconnect_signal(&output_config_changed);
+        wf::get_core().output_layout->disconnect_signal(&output_layout_config_changed);
         wf::get_core().disconnect_signal(&view_hints_changed);
         wf::get_core().disconnect_signal(&input_device_added);
         wf::get_core().disconnect_signal(&input_device_removed);
