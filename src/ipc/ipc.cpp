@@ -312,10 +312,10 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     Json::Value output_json_data(wf::signal_data_t *data, const std::string & change)
     {
-        if (data == nullptr)
-        {
-            return Json::nullValue;
-        }
+        // if (data == nullptr)
+        // {
+        //     return Json::nullValue;
+        // }
 
         if (ipc_server_t::client_count() == 0)
         {
@@ -346,10 +346,10 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             return;
         }
 
-        if (data == nullptr)
-        {
-            return;
-        }
+        // if (data == nullptr)
+        // {
+        //     return;
+        // }
 
         if (!ipc_server_t::has_event_listeners(signal))
         {
@@ -375,9 +375,10 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             /*"close"*/ "unspecified");
     };
 
-    wf::signal_connection_t output_config_changed = [=] (wf::signal_data_t *data)
+    wf::signal_connection_t output_layout_config_changed = [=] (wf::signal_data_t *data)
     {
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data,
+        (void)data;
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, nullptr,
             /*"update"*/ "unspecified");
     };
 
@@ -674,8 +675,8 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         wf::get_core().output_layout->connect_signal(IPC_WF_EVENT_OUTPUT_REMOVED,
             &output_removed);
         wf::get_core().output_layout->connect_signal(
-            IPC_WF_EVENT_OUTPUT_CONFIGURATION_CHANGED,
-            &output_config_changed);
+            IPC_WF_EVENT_OUTPUT_LAYOUT_CONFIGURATION_CHANGED,
+            &output_layout_config_changed);
         wf::get_core().connect_signal(IPC_WF_EVENT_VIEW_HINTS_CHANGED,
             &view_hints_changed);
         wf::get_core().connect_signal("input-device-added", &input_device_added);

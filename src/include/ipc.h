@@ -143,6 +143,7 @@ enum RETURN_STATUS {
 #define IPC_WF_EVENT_OUTPUT_ADDED "output-added"
 #define IPC_WF_EVENT_OUTPUT_REMOVED "output-removed"
 #define IPC_WF_EVENT_OUTPUT_CONFIGURATION_CHANGED "output-configuration-changed"
+#define IPC_WF_EVENT_OUTPUT_LAYOUT_CONFIGURATION_CHANGED "configuration-changed"
 #define IPC_WF_EVENT_VIEW_MAPPED "view-mapped"
 #define IPC_WF_EVENT_VIEW_ABOVE_CHANGED "wm-actions-above-changed"
 #define IPC_WF_EVENT_VIEW_APP_ID_CHANGED "app-id-changed"
