@@ -265,9 +265,9 @@ class ipc_t : public wf::per_output_plugin_instance_t
         (void)output;
         // if (output == nullptr)
         // {
-        //     LOGE("Output is null.");
+        // LOGE("Output is null.");
 
-        //     return Json::nullValue;
+        // return Json::nullValue;
         // }
 
         if (ipc_server_t::client_count() == 0)
@@ -292,7 +292,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         // if (output == nullptr)
         // {
-        //     return;
+        // return;
         // }
 
         if (!ipc_server_t::has_event_listeners(signal))
@@ -606,7 +606,8 @@ class ipc_t : public wf::per_output_plugin_instance_t
     {
         wf::get_core().output_layout->disconnect(&on_output_added);
         wf::get_core().output_layout->disconnect(&on_output_removed);
-        wf::get_core().output_layout->disconnect(&on_output_layout_configuration_changed);
+        wf::get_core().output_layout->disconnect(
+            &on_output_layout_configuration_changed);
         wf::get_core().disconnect(&on_view_hints_changed);
         wf::get_core().disconnect(&on_input_device_added);
         wf::get_core().disconnect(&on_input_device_removed);
