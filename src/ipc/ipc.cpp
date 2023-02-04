@@ -301,7 +301,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     // wf::signal_connection_t view_above_changed = [=] (wf::signal_data_t *data)
     // {
-    //     signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
+    // signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
     // };
 
     wf::signal_connection_t view_hints_changed = [=] (wf::signal_data_t *data)
