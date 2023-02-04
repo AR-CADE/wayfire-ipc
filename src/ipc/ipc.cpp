@@ -318,12 +318,13 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
     Json::Value output_json_data(wf::output_t *output, const std::string & change)
     {
-        if (output == nullptr)
-        {
-            LOGE("Output is null.");
+        (void)output;
+        // if (output == nullptr)
+        // {
+        //     LOGE("Output is null.");
 
-            return Json::nullValue;
-        }
+        //     return Json::nullValue;
+        // }
 
         if (ipc_server_t::client_count() == 0)
         {
@@ -345,10 +346,10 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (output == nullptr)
-        {
-            return;
-        }
+        // if (output == nullptr)
+        // {
+        //     return;
+        // }
 
         if (!ipc_server_t::has_event_listeners(signal))
         {
@@ -378,12 +379,12 @@ class ipc_t : public wf::per_output_plugin_instance_t
             /*"close"*/ "unspecified");
     };
 
-    wf::signal::connection_t<wf::output_configuration_changed_signal>
-    on_output_configuration_changed =
-        [=] (wf::output_configuration_changed_signal *ev)
+    wf::signal::connection_t<wf::output_layout_configuration_changed_signal>
+    on_output_layout_configuration_changed =
+        [=] (wf::output_layout_configuration_changed_signal *ev)
     {
-        unbind_output_events(ev->output);
-        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, ev->output,
+        (void)ev;
+        signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, nullptr,
             /*"change"*/ "unspecified");
     };
 
@@ -656,7 +657,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         wf::get_core().connect(&on_view_pre_moved_to_output);
         wf::get_core().output_layout->connect(&on_output_added);
         wf::get_core().output_layout->connect(&on_output_removed);
-        wf::get_core().output_layout->connect(&on_output_configuration_changed);
+        wf::get_core().output_layout->connect(&on_output_layout_configuration_changed);
         wf::get_core().connect(&on_view_hints_changed);
         wf::get_core().connect(&on_input_device_added);
         wf::get_core().connect(&on_input_device_removed);
@@ -667,7 +668,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         wf::get_core().disconnect(&on_view_pre_moved_to_output);
         wf::get_core().output_layout->disconnect(&on_output_added);
         wf::get_core().output_layout->disconnect(&on_output_removed);
-        wf::get_core().output_layout->disconnect(&on_output_configuration_changed);
+        wf::get_core().output_layout->disconnect(&on_output_layout_configuration_changed);
         wf::get_core().disconnect(&on_view_hints_changed);
         wf::get_core().disconnect(&on_input_device_added);
         wf::get_core().disconnect(&on_input_device_removed);

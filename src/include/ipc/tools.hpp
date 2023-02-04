@@ -499,7 +499,7 @@ shift_over:
             return IPC_I3_EVENT_TYPE_WORKSPACE;
         }
 
-        if (s == IPC_SWAY_EVENT_OUTPUT)
+        if (s == IPC_I3_EVENT_OUTPUT)
         {
             return IPC_I3_EVENT_TYPE_OUTPUT;
         }
