@@ -278,7 +278,7 @@ static void pretty_print_output(Json::Value o)
     } else
     {
         printf(
-            "Output %s '%s %s %s' (inactive)\n",
+            "Output %s '%s %s %s' (disabled)\n",
             name.asString().c_str(),
             make.asString().c_str(),
             model.asString().c_str(),
