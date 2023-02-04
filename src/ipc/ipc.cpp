@@ -1,5 +1,4 @@
 #include <ipc/server.hpp>
-#include <ipc/config.h>
 #include <signals/wm-actions-signals.hpp>
 #include "wayfire/per-output-plugin.hpp"
 #include "wayfire/plugins/common/shared-core-data.hpp"
