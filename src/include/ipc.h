@@ -139,33 +139,6 @@ enum RETURN_STATUS {
 
 
 /*************** Events ****************/
-#define IPC_WF_EVENT_WORKSPACE_CHANGED "workspace-changed"
-#define IPC_WF_EVENT_OUTPUT_ADDED "output-added"
-#define IPC_WF_EVENT_OUTPUT_REMOVED "output-removed"
-#define IPC_WF_EVENT_OUTPUT_CONFIGURATION_CHANGED "output-configuration-changed"
-#define IPC_WF_EVENT_VIEW_MAPPED "view-mapped"
-#define IPC_WF_EVENT_VIEW_ABOVE_CHANGED "wm-actions-above-changed"
-#define IPC_WF_EVENT_VIEW_APP_ID_CHANGED "app-id-changed"
-#define IPC_WF_EVENT_VIEW_TITLE_CHANGED "title-changed"
-#define IPC_WF_EVENT_VIEW_GEOMETRY_CHANGED "view-geometry-changed"
-#define IPC_WF_EVENT_VIEW_UNMAPPED "view-unmapped"
-#define IPC_WF_EVENT_VIEW_TILED "view-tiled"
-#define IPC_WF_EVENT_VIEW_LAYER_ATTACHED "view-layer-attached"
-#define IPC_WF_EVENT_VIEW_LAYER_DETACHED "view-layer-detached"
-#define IPC_WF_EVENT_VIEW_FOCUSED "view-focused"
-#define IPC_WF_EVENT_VIEW_HINTS_CHANGED "view-hints-changed"
-#define IPC_WF_EVENT_VIEW_PRE_MOVED_TO_OUTPUT "view-pre-moved-to-output"
-#define IPC_WF_EVENT_VIEW_MOVED_TO_OUTPUT "view-moved-to-output"
-#define IPC_WF_EVENT_POINTER_BUTTON "pointer_button"
-#define IPC_WF_EVENT_TABLET_BUTTON "tablet_button"
-
-#define IPC_WF_EVENT_VIEW_MINIMIZED "view-minimized"
-#define IPC_WF_EVENT_VIEW_FULLSCREENED "view-fullscreen"
-#define IPC_WF_EVENT_VIEW_CHANGE_WORKSPACE "view-change-workspace"
-#define IPC_WF_EVENT_VIEW_ATTACHED "view-attached"
-#define IPC_WF_EVENT_VIEW_DETACHED "view-detached"
-#define IPC_WF_EVENT_VIEW_SET_STICKY "view-set-sticky"
-
 #define IPC_I3_EVENT_WORKSPACE "workspace"
 #define IPC_I3_EVENT_SHUTDOWN "shutdown"
 #define IPC_I3_EVENT_WINDOW "window"
