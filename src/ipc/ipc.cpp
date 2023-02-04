@@ -322,14 +322,14 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             return Json::nullValue;
         }
 
-        auto output = get_signaled_output(data);
+        // auto output = get_signaled_output(data);
 
-        if (output == nullptr)
-        {
-            LOGE("Output is null.");
+        // if (output == nullptr)
+        // {
+        // LOGE("Output is null.");
 
-            return Json::nullValue;
-        }
+        // return Json::nullValue;
+        // }
 
         Json::Value object;
         object["change"] = change;
