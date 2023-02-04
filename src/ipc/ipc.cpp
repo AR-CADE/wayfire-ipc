@@ -51,21 +51,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         /* Notify exit */
         signal_shutdown_event();
 
-        auto views = wf::get_core().get_all_views();
-
-        for (wayfire_view view : views)
-        {
-            unbind_view_events(view);
-        }
-
-        auto outputs = wf::get_core().output_layout->get_outputs();
-
-        for (wf::output_t *output : outputs)
-        {
-            unbind_output_events(output);
-        }
-
-        unbind_core_events();
+        unbind_events();
 
         // Set a timeout of 100 ms to give some time to all clients to handle the
         // "exit" signal before disconnecting them and finish this instance of plugin
@@ -542,13 +528,45 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         //
         bind_core_events();
 
-        // When the configuration options change, mark them as dirty.
-        // They are applied at the config-reloaded signal.
+        //
+        // Connect options change signal
+        //
         xkb_model.set_callback([=] () { xkb_change(); });
         xkb_variant.set_callback([=] () { xkb_change(); });
         xkb_layout.set_callback([=] () { xkb_change(); });
         xkb_options.set_callback([=] () { xkb_change(); });
         xkb_rules.set_callback([=] () { xkb_change(); });
+    }
+
+    void unbind_events()
+    {
+        auto views = wf::get_core().get_all_views();
+
+        for (wayfire_view view : views)
+        {
+            unbind_view_events(view);
+        }
+
+        auto outputs = wf::get_core().output_layout->get_outputs();
+
+        for (wf::output_t *output : outputs)
+        {
+            unbind_output_events(output);
+        }
+
+        //
+        // Disconnect core signals
+        //
+        unbind_core_events();
+
+        //
+        // Disconnect options change signal
+        //
+        xkb_model.set_callback(nullptr);
+        xkb_variant.set_callback(nullptr);
+        xkb_layout.set_callback(nullptr);
+        xkb_options.set_callback(nullptr);
+        xkb_rules.set_callback(nullptr);
     }
 
     void bind_output_events(wf::output_t *output)
