@@ -193,20 +193,15 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     {
         bind_view_events(wf::get_signaled_view(data));
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "new");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_MAPPED, data,
-        // IPC_WF_EVENT_VIEW_MAPPED);
     };
 
     wf::signal_connection_t view_unmapped = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "close");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_UNMAPPED, data,
-        // IPC_WF_EVENT_VIEW_UNMAPPED);
     };
 
     wf::signal_connection_t view_tiled = [=] (wf::signal_data_t *data)
     {
-        // signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
         signal_window_event(IPC_WF_EVENT_TYPE_VIEW_TILED, data,
             IPC_WF_EVENT_VIEW_TILED);
     };
@@ -214,8 +209,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     wf::signal_connection_t view_minimized = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_MINIMIZED, data,
-        // IPC_WF_EVENT_VIEW_MINIMIZED);
     };
 
     wf::signal_connection_t view_fullscreened = [=] (wf::signal_data_t *data)
@@ -235,8 +228,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         if (view->fullscreen != signal->state)
         {
             signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "fullscreen_mode");
-            // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_FULLSCREENED, data,
-            // IPC_WF_EVENT_VIEW_FULLSCREENED);
         }
     };
 
@@ -255,15 +246,11 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     wf::signal_connection_t view_focused = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_FOCUSED, data,
-        // IPC_WF_EVENT_VIEW_FOCUSED);
     };
 
     wf::signal_connection_t view_change_workspace = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_CHANGE_WORKSPACE, data,
-        // IPC_WF_EVENT_VIEW_CHANGE_WORKSPACE);
     };
 
     wf::signal_connection_t view_pre_moved_to_output = [=] (wf::signal_data_t *data)
@@ -305,31 +292,21 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     wf::signal_connection_t view_title_changed = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "title");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_TITLE_CHANGED, data,
-        // IPC_WF_EVENT_VIEW_TITLE_CHANGED);
     };
 
     wf::signal_connection_t view_geometry_changed = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
-
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_GEOMETRY_CHANGED, data,
-        // IPC_WF_EVENT_VIEW_GEOMETRY_CHANGED);
     };
 
-    wf::signal_connection_t view_above_changed = [=] (wf::signal_data_t *data)
-    {
-        // signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
-
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_ABOVE_CHANGED, data,
-            IPC_WF_EVENT_VIEW_ABOVE_CHANGED);
-    };
+    // wf::signal_connection_t view_above_changed = [=] (wf::signal_data_t *data)
+    // {
+    //     signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
+    // };
 
     wf::signal_connection_t view_hints_changed = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "urgent");
-        // signal_window_event(IPC_WF_EVENT_TYPE_VIEW_HINTS_CHANGED, data,
-        // IPC_WF_EVENT_VIEW_HINTS_CHANGED);
     };
 
 
@@ -356,7 +333,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         Json::Value object;
         object["change"] = change;
-        object["output"] = ipc_json::describe_output(output);
+        // object["output"] = ipc_json::describe_output(output);
 
         return object;
     }
@@ -390,26 +367,18 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     {
         bind_output_events(get_signaled_output(data));
         signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data, /*"new"*/ "unspecified");
-        // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_ADDED, data,
-        // IPC_WF_EVENT_OUTPUT_ADDED);
     };
 
     wf::signal_connection_t output_removed = [=] (wf::signal_data_t *data)
     {
-        // should we explicitly disconnect the event handler
         signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data,
             /*"close"*/ "unspecified");
-        // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_REMOVED, data,
-        // IPC_WF_EVENT_OUTPUT_REMOVED);
     };
 
     wf::signal_connection_t output_config_changed = [=] (wf::signal_data_t *data)
     {
-        // should we explicitly disconnect the event handler
         signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, data,
             /*"update"*/ "unspecified");
-        // signal_output_event(IPC_WF_EVENT_TYPE_OUTPUT_REMOVED, data,
-        // IPC_WF_EVENT_OUTPUT_REMOVED);
     };
 
     Json::Value input_json_data(wf::signal_data_t *data, const std::string & change)
@@ -521,14 +490,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         if (change == "focus")
         {
             signal = *(static_cast<wf::workspace_changed_signal*>(data));
-            // signal.output =
-            // static_cast<wf::workspace_changed_signal*>(data)->output;
-            // signal.new_viewport =
-            // static_cast<wf::workspace_changed_signal*>(data)->new_viewport;
-            // signal.old_viewport =
-            // static_cast<wf::workspace_changed_signal*>(data)->old_viewport;
-            // signal.carried_out =
-            // static_cast<wf::workspace_changed_signal*>(data)->carried_out;
         }
 
         if (change == "reload")
@@ -605,160 +566,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         signal_workspace_event(IPC_I3_EVENT_TYPE_WORKSPACE, data, "reload");
     };
 
-    std::string binding_json_data(wf::signal_data_t *data,
-        const std::string & change = "run")
-    {
-        if (data == nullptr)
-        {
-            return nullptr;
-        }
-
-        if (ipc_server_t::client_count() == 0)
-        {
-            return nullptr;
-        }
-
-        Json::Value object;
-        object["change"] = change;
-
-        if (change == "run")
-        {
-            // object["binding"] = ;
-        }
-
-        return ipc_json::json_to_string(object);
-    }
-
-    void signal_binding_event(const enum ipc_event_type & signal,
-        wf::signal_data_t *data, const std::string & change = "run")
-    {
-        if (signal == IPC_WF_EVENT_TYPE_NONE)
-        {
-            return;
-        }
-
-        if (data == nullptr)
-        {
-            return;
-        }
-
-        if (!ipc_server_t::has_event_listeners(signal))
-        {
-            return;
-        }
-
-        Json::Value json = binding_json_data(data, change);
-        if (json.isNull() == false)
-        {
-            signal_event(signal, ipc_json::json_to_string(json));
-        }
-    }
-
-/*     wf::signal_connection_t output_configuration_changed{
- *       [=] (wf::signal_data_t *data)
- *       {
- *           (void)data;
- *
- *           if (client_count() == 0)
- *           {
- *               return;
- *           }
- *
- *           Json::Value object;
- *           std::string json_string = ipc_json::json_to_string(object);
- *           send_event(json_string.c_str(),
- * IPC_WF_EVENT_TYPE_OUTPUT_CONFIGURATION_CHANGED);
- *       }
- *   };
- *
- *   wf::signal_connection_t view_moved_to_output{[=] (wf::signal_data_t *data)
- *       {
- *
- *           wf::view_moved_to_output_signal *signal;
- *           wayfire_view view;
- *
- *           if (client_count() == 0)
- *           {
- *               return;
- *           }
- *
- *           signal = static_cast<wf::view_moved_to_output_signal*>(data);
- *           view   = signal->view;
- *
- *           if (!view)
- *           {
- *               LOGE("view_moved_to_output no view");
- *               return;
- *           }
- *
- *           Json::Value object;
- *           object["view"] = ipc_json::describe_view(view);
- *           object["old_output"] = ipc_json::describe_output(signal->old_output);
- *           object["new_output"] = ipc_json::describe_output(signal->new_output);
- *
- *           std::string json_string = ipc_json::json_to_string(object);
- *           send_event(json_string.c_str(), IPC_WF_EVENT_TYPE_VIEW_MOVED_TO_OUTPUT);
- *       }
- *   };
- *
- *
- *   wf::signal_connection_t pointer_button{[=] (wf::signal_data_t *data)
- *       {
- *           wf::pointf_t cursor_position;
- *           wf::input_event_signal<wlr_event_pointer_button> *wf_ev;
- *           wlr_event_pointer_button *wlr_signal;
- *           wlr_button_state button_state;
- *           bool button_released;
- *           uint32_t button;
- *
- *           if (client_count() == 0)
- *           {
- *               return;
- *           }
- *
- *           cursor_position = wf::get_core().get_cursor_position();
- *           wf_ev =
- *
- *              static_cast<wf::input_event_signal<wlr_event_pointer_button>*>(data);
- *           wlr_signal   = static_cast<wlr_event_pointer_button*>(wf_ev->event);
- *           button_state = wlr_signal->state;
- *           button = wlr_signal->button;
- *           button_released = (button_state == WLR_BUTTON_RELEASED);
- *
- *           // if (find_view_under_action && button_released) {
- *           // GVariant *_signal_data;
- *           // wayfire_view view;
- *           // view = core.get_view_at(cursor_position);
- *           // _signal_data = g_variant_new("(u)", view ? view->get_id() : 0);
- *           // g_variant_ref(_signal_data);
- *           // bus_emit_signal("view_pressed", _signal_data);
- *           // }
- *
- *           Json::Value object;
- *           object["cursor_position"] = ipc_json::describe_pointf(cursor_position);
- *           object["button"] = button;
- *           object["button_released"] = button_released;
- *           std::string json_string = ipc_json::json_to_string(object);
- *           send_event(json_string.c_str(), IPC_WF_EVENT_TYPE_POINTER_BUTTON);
- *       }
- *   };
- *
- *   wf::signal_connection_t tablet_button{[=] (wf::signal_data_t *data)
- *       {
- *           (void)data;
- *
- *           if (client_count() == 0)
- *           {
- *               return;
- *           }
- *
- *           Json::Value object;
- *           std::string json_string = ipc_json::json_to_string(object);
- *           send_event(json_string.c_str(), IPC_WF_EVENT_TYPE_TABLET_BUTTON);
- *       }
- *   }; */
-
-
     void bind_events()
     {
         auto outputs = wf::get_core().output_layout->get_outputs();
@@ -810,21 +617,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             &wm_actions_above_changed);
         output->connect_signal(IPC_WF_EVENT_VIEW_CHANGE_WORKSPACE,
             &view_change_workspace);
-
-        // output->connect_signal(IPC_WF_EVENT_VIEW_LAYER_ATTACHED,
-        // &view_layer_attached);
-        // output->connect_signal(IPC_WF_EVENT_VIEW_LAYER_DETACHED,
-        // &view_layer_detached);
-        // output->connect_signal(IPC_WF_EVENT_VIEW_ATTACHED, &view_attached);
-        // output->connect_signal(IPC_WF_EVENT_VIEW_DETACHED, &view_detached);
-        // output->connect_signal(IPC_WF_EVENT_VIEW_ABOVE_CHANGED, &view_focused);
-        // output->connect_signal(IPC_WF_EVENT_OUTPUT_CONFIGURATION_CHANGED,
-        // &output_configuration_changed);
-        // output->connect_signal("configuration-changed",
-        // &on_output_config_changed);
-        // output->connect_signal("workarea-changed", &on_workarea_changed);
-        // output->connect_signal("scale-update", &update_cb);
-
         output->connect_signal("workspace-grid-changed", &workspace_grid_changed);
         output->connect_signal(IPC_WF_EVENT_WORKSPACE_CHANGED, &workspace_changed);
     }
@@ -841,23 +633,11 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         output->disconnect_signal(&view_tiled);
         output->disconnect_signal(&view_focused);
         output->disconnect_signal(&view_geometry_changed);
-
         output->disconnect_signal(&view_minimized);
         output->disconnect_signal(&view_fullscreened);
         output->disconnect_signal(&view_set_sticky);
         output->disconnect_signal(&wm_actions_above_changed);
         output->disconnect_signal(&view_change_workspace);
-
-        // output->disconnect_signal(&view_layer_attached);
-        // output->disconnect_signal(&view_layer_detached);
-        // output->disconnect_signal(&view_attached);
-        // output->disconnect_signal(&view_detached);
-        // output->disconnect_signal(&view_focused);
-        // output->disconnect_signal(&output_configuration_changed);
-        // output->disconnect_signal(&on_output_config_changed);
-        // output->disconnect_signal(&on_workarea_changed);
-        // output->disconnect_signal(&update_cb);
-
         output->disconnect_signal(&workspace_grid_changed);
         output->disconnect_signal(&workspace_changed);
     }
@@ -872,11 +652,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         view->connect_signal(IPC_WF_EVENT_VIEW_TITLE_CHANGED, &view_title_changed);
         view->connect_signal(IPC_WF_EVENT_VIEW_GEOMETRY_CHANGED,
             &view_geometry_changed);
-
-        // view->connect_signal("fullscreen", &view_fullscreened);
-        // view->connect_signal(IPC_WF_EVENT_VIEW_APP_ID_CHANGED,
-        // &view_app_id_changed);
-        // view->connect_signal("decoration-changed", &on_decoration_changed);
     }
 
     void unbind_view_events(wayfire_view view)
@@ -888,10 +663,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         view->disconnect_signal(&view_title_changed);
         view->disconnect_signal(&view_geometry_changed);
-
-        // view->disconnect_signal(&view_fullscreened);
-        // view->disconnect_signal(&view_app_id_changed);
-        // view->disconnect_signal(&on_decoration_changed);
     }
 
     void bind_core_events()
@@ -909,34 +680,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             &view_hints_changed);
         wf::get_core().connect_signal("input-device-added", &input_device_added);
         wf::get_core().connect_signal("input-device-removed", &input_device_removed);
-
-        // wf::get_core().connect_signal(IPC_WF_EVENT_VIEW_MOVED_TO_OUTPUT,
-        // &view_moved_to_output);
-        // wf::get_core().connect_signal(IPC_WF_EVENT_POINTER_BUTTON,
-        // &pointer_button);
-        // wf::get_core().connect_signal(IPC_WF_EVENT_TABLET_BUTTON, &tablet_button);
-
-/*
- *
- *       wf::get_core().connect_signal("pointer_motion", &on_motion_event);
- *       wf::get_core().connect_signal("tablet_axis", &on_motion_event);
- *       wf::get_core().connect_signal("touch_motion", &on_touch_motion_event);
- *
- *       wf::get_core().connect_signal("reload-config", &_reload_config);
- *       wf::get_core().connect_signal("keyboard_key", &on_key_event);
- *
- *       wf::get_core().connect_signal("input-device-added", &input_device_added);
- *       wf::get_core().connect_signal("input-device-removed",
- * &input_device_removed);
- *
- *       wf::get_core().connect_signal("pointer_swipe_begin", &on_swipe_begin);
- *       wf::get_core().connect_signal("pointer_swipe_update", &on_swipe_update);
- *       wf::get_core().connect_signal("pointer_swipe_end", &on_swipe_end);
- *
- *       wf::get_core().connect_signal("output-stack-order-changed",
- * &on_views_updated);
- *       wf::get_core().connect_signal("view-geometry-changed", &on_views_updated);
- */
     }
 
     void unbind_core_events()
@@ -948,30 +691,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         wf::get_core().disconnect_signal(&view_hints_changed);
         wf::get_core().disconnect_signal(&input_device_added);
         wf::get_core().disconnect_signal(&input_device_removed);
-
-        // wf::get_core().disconnect_signal(&view_moved_to_output);
-        // wf::get_core().disconnect_signal(&pointer_button);
-        // wf::get_core().disconnect_signal(&tablet_button);
-
-/*
- *
- *       wf::get_core().disconnect_signal(&on_motion_event);
- *       wf::get_core().disconnect_signal(&on_motion_event);
- *       wf::get_core().disconnect_signal(&on_touch_motion_event);
- *
- *       wf::get_core().disconnect_signal(&_reload_config);
- *       wf::get_core().disconnect_signal(&on_key_event);
- *
- *       wf::get_core().disconnect_signal(&input_device_added);
- *       wf::get_core().disconnect_signal(&input_device_removed);
- *
- *       wf::get_core().disconnect_signal(&on_swipe_begin);
- *       wf::get_core().disconnect_signal( &on_swipe_update);
- *       wf::get_core().disconnect_signal(&on_swipe_end);
- *
- *       wf::get_core().disconnect_signal(&on_views_updated);
- *       wf::get_core().disconnect_signal(&on_views_updated);
- */
     }
 };
 
