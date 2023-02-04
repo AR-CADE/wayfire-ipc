@@ -314,7 +314,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
     {
         // if (data == nullptr)
         // {
-        //     return Json::nullValue;
+        // return Json::nullValue;
         // }
 
         if (ipc_server_t::client_count() == 0)
@@ -348,7 +348,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         // if (data == nullptr)
         // {
-        //     return;
+        // return;
         // }
 
         if (!ipc_server_t::has_event_listeners(signal))
@@ -375,7 +375,8 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             /*"close"*/ "unspecified");
     };
 
-    wf::signal_connection_t output_layout_config_changed = [=] (wf::signal_data_t *data)
+    wf::signal_connection_t output_layout_config_changed =
+        [=] (wf::signal_data_t *data)
     {
         (void)data;
         signal_output_event(IPC_I3_EVENT_TYPE_OUTPUT, nullptr,
