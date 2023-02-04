@@ -312,6 +312,7 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     Json::Value output_json_data(wf::signal_data_t *data, const std::string & change)
     {
+        (void)data;
         // if (data == nullptr)
         // {
         // return Json::nullValue;
