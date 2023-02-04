@@ -200,12 +200,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "close");
     };
 
-    wf::signal_connection_t view_tiled = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_TILED, data,
-            IPC_WF_EVENT_VIEW_TILED);
-    };
-
     wf::signal_connection_t view_minimized = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
@@ -231,18 +225,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         }
     };
 
-    wf::signal_connection_t view_layer_attached = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_LAYER_ATTACHED, data,
-            IPC_WF_EVENT_VIEW_LAYER_ATTACHED);
-    };
-
-    wf::signal_connection_t view_layer_detached = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_LAYER_DETACHED, data,
-            IPC_WF_EVENT_VIEW_LAYER_DETACHED);
-    };
-
     wf::signal_connection_t view_focused = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "focus");
@@ -253,41 +235,11 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "move");
     };
 
-    wf::signal_connection_t view_pre_moved_to_output = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_PRE_MOVED_TO_OUTPUT, data,
-            IPC_WF_EVENT_VIEW_PRE_MOVED_TO_OUTPUT);
-    };
-
-    wf::signal_connection_t view_attached = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_ATTACHED, data,
-            IPC_WF_EVENT_VIEW_ATTACHED);
-    };
-
-    wf::signal_connection_t view_detached = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_DETACHED, data,
-            IPC_WF_EVENT_VIEW_DETACHED);
-    };
-
-    wf::signal_connection_t view_set_sticky = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_SET_STICKY, data,
-            IPC_WF_EVENT_VIEW_SET_STICKY);
-    };
 
     wf::signal_connection_t wm_actions_above_changed = [=] (wf::signal_data_t *data)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, data, "floating");
     };
-
-    wf::signal_connection_t view_app_id_changed = [=] (wf::signal_data_t *data)
-    {
-        signal_window_event(IPC_WF_EVENT_TYPE_VIEW_APP_ID_CHANGED, data,
-            IPC_WF_EVENT_VIEW_APP_ID_CHANGED);
-    };
-
 
     wf::signal_connection_t view_title_changed = [=] (wf::signal_data_t *data)
     {
@@ -608,19 +560,18 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         output->connect_signal(IPC_WF_EVENT_VIEW_MAPPED, &view_mapped);
         output->connect_signal(IPC_WF_EVENT_VIEW_UNMAPPED, &view_unmapped);
-        output->connect_signal(IPC_WF_EVENT_VIEW_TILED, &view_tiled);
         output->connect_signal(IPC_WF_EVENT_VIEW_FOCUSED, &view_focused);
         output->connect_signal(IPC_WF_EVENT_VIEW_GEOMETRY_CHANGED,
             &view_geometry_changed);
 
         output->connect_signal(IPC_WF_EVENT_VIEW_MINIMIZED, &view_minimized);
         output->connect_signal(IPC_WF_EVENT_VIEW_FULLSCREENED, &view_fullscreened);
-        output->connect_signal(IPC_WF_EVENT_VIEW_SET_STICKY, &view_set_sticky);
-        output->connect_signal("wm-actions-above-changed",
+        output->connect_signal(IPC_WF_EVENT_VIEW_ABOVE_CHANGED,
             &wm_actions_above_changed);
         output->connect_signal(IPC_WF_EVENT_VIEW_CHANGE_WORKSPACE,
             &view_change_workspace);
-        output->connect_signal("workspace-grid-changed", &workspace_grid_changed);
+        output->connect_signal(IPC_WF_EVENT_WORKSPACE_GRID_CHANGED,
+            &workspace_grid_changed);
         output->connect_signal(IPC_WF_EVENT_WORKSPACE_CHANGED, &workspace_changed);
     }
 
@@ -633,12 +584,10 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
         output->disconnect_signal(&view_mapped);
         output->disconnect_signal(&view_unmapped);
-        output->disconnect_signal(&view_tiled);
         output->disconnect_signal(&view_focused);
         output->disconnect_signal(&view_geometry_changed);
         output->disconnect_signal(&view_minimized);
         output->disconnect_signal(&view_fullscreened);
-        output->disconnect_signal(&view_set_sticky);
         output->disconnect_signal(&wm_actions_above_changed);
         output->disconnect_signal(&view_change_workspace);
         output->disconnect_signal(&workspace_grid_changed);
@@ -670,8 +619,6 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
 
     void bind_core_events()
     {
-        wf::get_core().connect_signal(IPC_WF_EVENT_VIEW_PRE_MOVED_TO_OUTPUT,
-            &view_pre_moved_to_output);
         wf::get_core().output_layout->connect_signal(IPC_WF_EVENT_OUTPUT_ADDED,
             &output_added);
         wf::get_core().output_layout->connect_signal(IPC_WF_EVENT_OUTPUT_REMOVED,
@@ -681,13 +628,14 @@ class ipc_t : public wf::singleton_plugin_t<ipc_server_t>
             &output_layout_config_changed);
         wf::get_core().connect_signal(IPC_WF_EVENT_VIEW_HINTS_CHANGED,
             &view_hints_changed);
-        wf::get_core().connect_signal("input-device-added", &input_device_added);
-        wf::get_core().connect_signal("input-device-removed", &input_device_removed);
+        wf::get_core().connect_signal(IPC_WF_EVENT_INPUT_DEVICE_ADDED,
+            &input_device_added);
+        wf::get_core().connect_signal(IPC_WF_EVENT_INPUT_DEVICE_REMOVED,
+            &input_device_removed);
     }
 
     void unbind_core_events()
     {
-        wf::get_core().disconnect_signal(&view_pre_moved_to_output);
         wf::get_core().output_layout->disconnect_signal(&output_added);
         wf::get_core().output_layout->disconnect_signal(&output_removed);
         wf::get_core().output_layout->disconnect_signal(&output_config_changed);
