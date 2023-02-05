@@ -6,6 +6,7 @@
 #include <libinput.h>
 #include <string>
 #include <wayfire/core.hpp>
+#include <wayfire/geometry.hpp>
 #include <wayfire/input-device.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/plugin.hpp>
@@ -818,9 +819,32 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["sticky"]  = false;
     object["focused"] = wf::get_core().get_active_output() == output;
     object["floating_nodes"] = get_shell_view_nodes(output);
-    object["focus"] = Json::arrayValue;
     object["rect"]  = describe_wlr_box(output->get_layout_geometry());
     object["nodes"] = Json::arrayValue;
+    object["marks"] = Json::arrayValue;
+    object["deco_rect"]   = create_empty_rect();
+    object["windows"]     = Json::nullValue;
+    object["window_rect"] = create_empty_rect();
+
+    Json::Value focusNodes = Json::arrayValue;
+    auto workspaces = get_workspaces_nodes(output);
+    if (!workspaces.isNull() && workspaces.isArray())
+    {
+        for (Json::ArrayIndex i = 0; i < workspaces.size(); i++)
+        {
+            Json::Value workspace = workspaces.get(i, Json::nullValue);
+            if (!workspace.isNull())
+            {
+                Json::Value id = workspace.get("id", Json::nullValue);
+                if (!id.isNull() && id.isInt())
+                {
+                    focusNodes.append(id.asInt());
+                }
+            }
+        }
+    }
+
+    object["focus"] = focusNodes;
 
     //
     // Output specific attr
@@ -1032,9 +1056,28 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["urgent"] = false;
     object["sticky"] = view->sticky;
     object["floating_nodes"] = get_view_nodes(view, true);
-    object["focus"] = Json::arrayValue;
     object["name"]  = view->get_title();
     object["nodes"] = Json::arrayValue;
+
+    auto views = get_view_nodes(view);
+    Json::Value focusNodes = Json::arrayValue;
+    if (!views.isNull() && views.isArray())
+    {
+        for (Json::ArrayIndex i = 0; i < views.size(); i++)
+        {
+            Json::Value v = views.get(i, Json::nullValue);
+            if (!v.isNull())
+            {
+                Json::Value id = v.get("id", Json::nullValue);
+                if (!id.isNull() && id.isInt())
+                {
+                    focusNodes.append(id.asInt());
+                }
+            }
+        }
+    }
+
+    object["focus"] = focusNodes;
 
     wf::output_t *output = view->get_output();
     if (output != nullptr)
@@ -1080,12 +1123,15 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         object["rect"] = describe_geometry(rect);
     }
 
-    object["app_id"]  = view->get_app_id();
-    object["visible"] = view->get_transformed_node()->is_enabled();
+    object["app_id"]    = view->get_app_id();
+    object["visible"]   = view->get_transformed_node()->is_enabled();
+    object["marks"]     = Json::arrayValue;
+    object["deco_rect"] = create_empty_rect(); // FIX ME
+    object["window"]    = Json::nullValue;
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
     object["geometry"]    = describe_geometry(view->get_wm_geometry());
 
-    object["fullscreen_mode"] = view->fullscreen;
+    object["fullscreen_mode"] = (view->fullscreen) ? 1 : 0;
 
     object["shell"] = "xdg_shell";
     object["inhibit_idle"] = false;
@@ -1169,7 +1215,8 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 Json::Value ipc_json::get_root_node()
 {
     Json::Value object;
-    auto active_output = wf::get_core().get_active_output();
+    Json::Value focusNodes = Json::arrayValue;
+    auto active_output     = wf::get_core().get_active_output();
 
     if (active_output == nullptr)
     {
@@ -1179,29 +1226,77 @@ Json::Value ipc_json::get_root_node()
     //
     // Node attr
     //
-    object["id"]     = 1;
-    object["layout"] = "root";
+    object["id"]     = 0;
+    object["layout"] = "stacked";
     object["name"]   = "root";
     object["type"]   = "root";
     object["border"] = "none";
     object["current_border_width"] = 0;
-    object["orientation"] = orientation_description(active_output);
+    object["orientation"] = "horizontal"; // TODO: FIXME
     object["percent"]     = Json::nullValue;
-    object["urgent"]  = false;
-    object["sticky"]  = false;
-    object["focused"] = true;
+    object["urgent"] = false;
+    object["sticky"] = false;
     object["floating_nodes"] = Json::arrayValue;
-    object["focus"] = Json::arrayValue;
+    object["marks"]     = Json::arrayValue;
+    object["deco_rect"] = create_empty_rect();
+    object["geometry"]  = create_empty_rect();
+    object["window"]    = Json::nullValue;
+    object["window_rect"] = create_empty_rect();
 
-    auto wsize = active_output->workspace->get_workspace_grid_size();
-    if ((wsize.width > 0) && (wsize.height > 0))
+    auto outputs = wf::get_core().output_layout->get_outputs();
+    wf::geometry_t rect;
+    rect.x = -1;
+    rect.y = -1;
+    object["focused"] = outputs.size() == 0;
+
+    for (wf::output_t *output : outputs)
     {
-        auto workspace = describe_workspace(wf::point_t{0, 0}, active_output);
-        if (!workspace.isNull())
+        focusNodes.append(output->get_id());
+        if (rect.x == -1)
         {
-            object["rect"] = workspace["rect"];
+            rect.x = output->get_layout_geometry().x;
+        }
+
+        if (rect.y == -1)
+        {
+            rect.y = output->get_layout_geometry().y;
+        }
+
+        Json::Value orientation = object.get("orientation", Json::nullValue);
+        if (!orientation.isNull() && orientation.isString())
+        {
+            if (orientation.asString() == "vertical")
+            {
+                rect.height += output->get_layout_geometry().height;
+
+                if (output->get_layout_geometry().width > rect.width)
+                {
+                    rect.width = output->get_layout_geometry().width;
+                }
+            } else if (orientation.asString() == "horizontal")
+            {
+                rect.width += output->get_layout_geometry().width;
+
+                if (output->get_layout_geometry().height > rect.height)
+                {
+                    rect.height = output->get_layout_geometry().height;
+                }
+            }
         }
     }
+
+    if (rect.x == -1)
+    {
+        rect.x = 0;
+    }
+
+    if (rect.y == -1)
+    {
+        rect.y = 0;
+    }
+
+    object["rect"]  = describe_geometry(rect);
+    object["focus"] = focusNodes;
 
     return object;
 }
@@ -1225,7 +1320,9 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
         auto container = describe_view(view);
         if (!container.isNull())
         {
-            container["nodes"] = get_view_nodes(view);
+            auto views = get_view_nodes(view);
+            container["nodes"]   = views;
+            container["focused"] = views.size() == 0;
         }
 
         nodes.append(container);
@@ -1249,7 +1346,9 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
         auto container = describe_view(view);
         if (!container.isNull())
         {
-            container["nodes"] = get_view_nodes(view);
+            auto views = get_view_nodes(view);
+            container["nodes"]   = views;
+            container["focused"] = views.size() == 0;
         }
 
         nodes.append(container);
@@ -1307,7 +1406,9 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
         auto container = describe_view(view);
         if (!container.isNull())
         {
-            container["nodes"] = get_view_nodes(view);
+            auto views = get_view_nodes(view);
+            container["nodes"]   = get_view_nodes(view);
+            container["focused"] = views.size() == 0;
         }
 
         nodes.append(container);
@@ -1330,7 +1431,9 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
             auto workspace = describe_workspace(wf::point_t{x, y}, output);
             if (describe_container_nodes)
             {
-                workspace["nodes"] = get_container_nodes(wf::point_t{x, y}, output);
+                auto container = get_container_nodes(wf::point_t{x, y}, output);
+                workspace["nodes"]   = container;
+                workspace["focused"] = container.size() == 0;
             }
 
             vector.push_back(workspace);
@@ -1381,7 +1484,9 @@ Json::Value ipc_json::get_tree()
     for (wf::output_t *output : outputs)
     {
         auto out = describe_output(output);
-        out["nodes"] = get_workspaces_nodes(output);
+        auto workspaces = get_workspaces_nodes(output);
+        out["nodes"]   = workspaces;
+        out["focused"] = workspaces.size() == 0;
         rootNodes.append(out);
     }
 
@@ -1420,8 +1525,32 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     object["focused"] = focused;
     object["representation"] = "";
     object["floating_nodes"] = get_top_view_nodes(point, output);
-    object["focus"] = Json::arrayValue;
-    object["nodes"] = Json::arrayValue;
+    object["nodes"]     = Json::arrayValue;
+    object["marks"]     = Json::arrayValue;
+    object["deco_rect"] = create_empty_rect();
+    object["window"]    = Json::nullValue;
+    object["window_rect"] = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
+
+    auto containers = get_container_nodes(wf::point_t{point.x, point.y}, output);
+    Json::Value focusNodes = Json::arrayValue;
+    if (!containers.isNull() && containers.isArray())
+    {
+        for (Json::ArrayIndex i = 0; i < containers.size(); i++)
+        {
+            Json::Value container = containers.get(i, Json::nullValue);
+            if (!containers.isNull())
+            {
+                Json::Value container_id = container.get("id", Json::nullValue);
+                if (!container_id.isNull() && container_id.isInt())
+                {
+                    focusNodes.append(container_id.asInt());
+                }
+            }
+        }
+    }
+
+    object["focus"] = focusNodes;
 
     //
     // Workspace specific attr
