@@ -62,9 +62,16 @@ class ipc_json : public json
     static Json::Value describe_output_mode(const struct wlr_output_mode *mode);
     static const char *describe_output_mode_aspect_ratio(
         enum wlr_output_mode_aspect_ratio aspect_ratio);
+    static Json::Value get_i3_scratchpad_container_nodes_by_output(
+        wf::output_t *output);
+    static Json::Value get_i3_scratchpad_container_nodes_by_workspace(wf::point_t ws,
+        wf::output_t *output);
 
   private:
     static Json::Value get_root_node();
+    static Json::Value get_i3_scratchpad_container_nodes();
+    static Json::Value get_i3_scratchpad_workspace_nodes(Json::Value rootNodes);
+    static Json::Value get_i3_scratchpad_output_nodes(Json::Value rootNodes);
 };
 
 #endif

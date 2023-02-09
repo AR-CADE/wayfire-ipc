@@ -1,5 +1,7 @@
 #include "ipc.h"
+#include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
 #include <json/value.h>
@@ -23,6 +25,11 @@ wf::option_wrapper_t<bool> dynamic_delay{"workarounds/dynamic_repaint_delay"};
 wf::option_wrapper_t<int> keyboard_repeat_delay{"input/kb_repeat_delay"};
 wf::option_wrapper_t<int> keyboard_repeat_rate{"input/kb_repeat_rate"};
 wf::option_wrapper_t<double> mouse_scroll_speed{"input/mouse_scroll_speed"};
+
+static const unsigned long i3_scratchpad_workspace_id = rand() %
+    (unsigned long)(2000 + (RAND_MAX / 2));
+static const unsigned long i3_scratchpad_output_id = rand() %
+    (unsigned long)(2000 + (RAND_MAX / 2));
 
 Json::Value ipc_json::get_abi_version()
 {
@@ -1407,7 +1414,7 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
         if (!container.isNull())
         {
             auto views = get_view_nodes(view);
-            container["nodes"]   = get_view_nodes(view);
+            container["nodes"]   = views;
             container["focused"] = views.size() == 0;
         }
 
@@ -1470,6 +1477,186 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
     return nodes;
 }
 
+Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t ws,
+    wf::output_t *output)
+{
+    Json::Value nodes = Json::arrayValue;
+
+    for (auto& view :
+         output->workspace->get_views_on_workspace(ws,
+             wf::LAYER_WORKSPACE | wf::LAYER_TOP |
+             wf::LAYER_DESKTOP_WIDGET, true))
+    {
+        if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
+        {
+            continue;
+        }
+
+        if (!view->minimized)
+        {
+            continue;
+        }
+
+        auto container = describe_view(view);
+        if (!container.isNull())
+        {
+            auto views = get_view_nodes(view);
+            container["nodes"]   = views;
+            container["focused"] = views.size() == 0;
+        }
+
+        nodes.append(container);
+    }
+
+    return nodes;
+}
+
+Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_output(
+    wf::output_t *output)
+{
+    Json::Value nodes = Json::arrayValue;
+
+    auto wsize = output->workspace->get_workspace_grid_size();
+    for (int x = 0; x < wsize.width; x++)
+    {
+        for (int y = 0; y < wsize.height; y++)
+        {
+            auto containers = get_i3_scratchpad_container_nodes_by_workspace(
+                wf::point_t{x, y}, output);
+
+            for (Json::ArrayIndex i = 0; i < containers.size(); i++)
+            {
+                Json::Value container = containers.get(i, Json::nullValue);
+                if (!containers.isNull())
+                {
+                    nodes.append(container);
+                }
+            }
+        }
+    }
+
+    return nodes;
+}
+
+Json::Value ipc_json::get_i3_scratchpad_container_nodes()
+{
+    Json::Value nodes = Json::arrayValue;
+
+    auto outputs = wf::get_core().output_layout->get_outputs();
+    for (wf::output_t *output : outputs)
+    {
+        auto containers = get_i3_scratchpad_container_nodes_by_output(output);
+
+        for (Json::ArrayIndex i = 0; i < containers.size(); i++)
+        {
+            Json::Value container = containers.get(i, Json::nullValue);
+            if (!containers.isNull())
+            {
+                nodes.append(container);
+            }
+        }
+    }
+
+    return nodes;
+}
+
+Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
+{
+    Json::Value object = Json::objectValue;
+
+    //
+    // Node attr
+    //
+    object["id"]     = i3_scratchpad_workspace_id;
+    object["type"]   = "workspace";
+    object["layout"] = "stacked";
+    object["border"] = "none";
+    object["current_border_width"] = 0;
+    object["orientation"] = rootNodes.get("orientation", "horizontal");
+    object["percent"]     = Json::nullValue;
+    object["urgent"]  = false;
+    object["sticky"]  = false;
+    object["focused"] = false;
+    object["floating_nodes"] = Json::arrayValue;
+    object["nodes"]     = Json::arrayValue;
+    object["marks"]     = Json::arrayValue;
+    object["deco_rect"] = create_empty_rect();
+    object["window"]    = Json::nullValue;
+    object["window_rect"] = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
+
+    auto containers = get_i3_scratchpad_container_nodes();
+    Json::Value focusNodes = Json::arrayValue;
+    if (!containers.isNull() && containers.isArray())
+    {
+        for (Json::ArrayIndex i = 0; i < containers.size(); i++)
+        {
+            Json::Value container = containers.get(i, Json::nullValue);
+            if (!containers.isNull())
+            {
+                Json::Value container_id = container.get("id", Json::nullValue);
+                if (!container_id.isNull() && container_id.isInt())
+                {
+                    focusNodes.append(container_id.asInt());
+                }
+            }
+        }
+    }
+
+    object["focus"] = focusNodes;
+    object["nodes"] = containers;
+    object["fullscreen_mode"] = 1;
+    object["name"] = "__i3_scratch";
+    object["rect"] = rootNodes.get("rect", create_empty_rect());
+
+    return object;
+}
+
+Json::Value ipc_json::get_i3_scratchpad_output_nodes(Json::Value rootNodes)
+{
+    Json::Value object;
+
+    //
+    // Node attr
+    //
+    object["id"]     = i3_scratchpad_output_id;
+    object["type"]   = "output";
+    object["border"] = "none";
+    object["current_border_width"] = 0;
+    object["orientation"] = rootNodes.get("orientation", "horizontal");
+    object["percent"]     = Json::nullValue;
+    object["urgent"]  = false;
+    object["sticky"]  = false;
+    object["focused"] = false;
+    object["floating_nodes"] = Json::arrayValue;
+    object["rect"]  = rootNodes.get("rect", create_empty_rect());
+    object["nodes"] = Json::arrayValue;
+    object["marks"] = Json::arrayValue;
+    object["deco_rect"]   = create_empty_rect();
+    object["windows"]     = Json::nullValue;
+    object["window_rect"] = create_empty_rect();
+
+    Json::Value focusNodes = Json::arrayValue;
+    Json::Value workspaces = Json::arrayValue;
+    auto workspace = get_i3_scratchpad_workspace_nodes(rootNodes);
+    if (!workspace.isNull())
+    {
+        workspaces.append(workspace);
+        Json::Value id = workspace.get("id", Json::nullValue);
+        if (!id.isNull() && id.isInt())
+        {
+            focusNodes.append(id.asInt());
+        }
+    }
+
+    object["focus"]  = focusNodes;
+    object["nodes"]  = workspaces;
+    object["layout"] = "output";
+    object["name"]   = "__i3";
+
+    return object;
+}
+
 Json::Value ipc_json::get_tree()
 {
     Json::Value rootNodes = Json::arrayValue;
@@ -1479,6 +1666,9 @@ Json::Value ipc_json::get_tree()
     {
         return Json::nullValue;
     }
+
+    auto i3Scratchpad = get_i3_scratchpad_output_nodes(root);
+    rootNodes.append(i3Scratchpad);
 
     auto outputs = wf::get_core().output_layout->get_outputs();
     for (wf::output_t *output : outputs)
