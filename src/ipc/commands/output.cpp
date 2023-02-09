@@ -100,10 +100,6 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
 
         if (cmd_handler == nullptr)
         {
-            auto output = wf::get_core().get_active_output();
-            command_signal data;
-            data.argv = argv;
-            output->emit_signal(std::string(*argv) + "-command", &data);
             break;
         }
 

@@ -1,5 +1,6 @@
 #include <ipc/server.hpp>
 #include <json/value.h>
+#include <string>
 #include <vector>
 #include "commands/command_impl.hpp"
 

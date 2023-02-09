@@ -14,7 +14,7 @@ server = shared_module(
     'commands/opacity.cpp', 
     'commands/fullscreen.cpp', 
     'commands/workspace.cpp', 
-    'commands/scratchpad.cpp', 
+    'commands/scratchpad.cpp',
     'commands/output/power.cpp', 
     'commands/output/scale.cpp', 
     'commands/output/transform.cpp', 
