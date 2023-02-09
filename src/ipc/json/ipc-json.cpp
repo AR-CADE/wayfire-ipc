@@ -1459,7 +1459,7 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
     for (auto& view :
          output->workspace->get_views_on_workspace(ws,
              wf::LAYER_WORKSPACE | wf::LAYER_TOP |
-             wf::LAYER_DESKTOP_WIDGET, true))
+             wf::LAYER_DESKTOP_WIDGET | wf::LAYER_MINIMIZED))
     {
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {

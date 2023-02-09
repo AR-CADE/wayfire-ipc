@@ -5,7 +5,6 @@
 #include <vector>
 #include <wayfire/core.hpp>
 #include <wayfire/util/log.hpp>
-#include <wayfire/plugins/common/util.hpp>
 #include <wayfire/view.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/workspace-manager.hpp>
