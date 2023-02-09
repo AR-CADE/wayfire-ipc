@@ -132,8 +132,19 @@ bool ipc_command::container_has_ancestor(wayfire_view descendant,
 
 wayfire_view ipc_command::container_get_view(Json::Value container)
 {
-    int id = container.get("id", Json::nullValue).asInt();
-    return find_container(id);
+    if (container.isNull())
+    {
+        return nullptr;
+    }
+
+    auto id = container.get("id", Json::nullValue);
+
+    if (id.isNull() || !id.isNumeric())
+    {
+        return nullptr;
+    }
+
+    return find_container(id.asInt());
 }
 
 void ipc_command::close_view_container(Json::Value container)
