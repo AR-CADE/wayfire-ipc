@@ -734,7 +734,7 @@ int main(int argc, char **argv)
     {
         if (!quiet)
         {
-            LOGE("failed to parse payload as json: \n", resp);
+            LOGE("failed to parse payload as json: \n");
         }
 
         ret = 1;
@@ -782,7 +782,7 @@ int main(int argc, char **argv)
             {
                 if (!quiet)
                 {
-                    LOGE("failed to parse payload as json: \n", resp);
+                    LOGE("failed to parse payload as json: \n");
                 }
 
                 ret = 1;
