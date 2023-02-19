@@ -24,6 +24,11 @@
 
 static bool success_object(Json::Value result)
 {
+    if (result.isNull())
+    {
+        return false;
+    }
+
     Json::Value ret = result.get("success", Json::nullValue);
     if (ret.isNull() || !ret.isBool())
     {
@@ -36,6 +41,11 @@ static bool success_object(Json::Value result)
 // Iterate results array and return false if any of them failed
 static bool success(Json::Value r, bool fallback)
 {
+    if (r.isNull())
+    {
+        return fallback;
+    }
+
     if (!r.isArray())
     {
         if (r.isObject())
@@ -62,6 +72,11 @@ static bool success(Json::Value r, bool fallback)
 
 static void pretty_print_cmd(Json::Value r)
 {
+    if (r.isNull())
+    {
+        return;
+    }
+
     if (!success_object(r))
     {
         Json::Value error = r.get("error", Json::nullValue);
@@ -79,6 +94,11 @@ static void pretty_print_cmd(Json::Value r)
 
 static void pretty_print_workspace(Json::Value w)
 {
+    if (w.isNull())
+    {
+        return;
+    }
+
     Json::Value name = w.get("name", Json::nullValue);
     // Json::Value rect = w.get("rect", Json::nullValue);
     Json::Value visible = w.get("visible", Json::nullValue);
@@ -104,6 +124,11 @@ static void pretty_print_workspace(Json::Value w)
 
 static const char *pretty_type_name(const char *name)
 {
+    if (name == nullptr)
+    {
+        return nullptr;
+    }
+
     // TODO these constants probably belong in the common lib
     struct
     {
@@ -132,45 +157,48 @@ static const char *pretty_type_name(const char *name)
 
 static void pretty_print_input(Json::Value i)
 {
-    Json::Value id   = i.get("identifier", Json::nullValue);
-    Json::Value name = i.get("name", Json::nullValue);
-    Json::Value type = i.get("type", Json::nullValue);
-    Json::Value product = i.get("product", Json::nullValue);
-    Json::Value vendor  = i.get("vendor", Json::nullValue);
-
-    const char *fmt =
-        "Input device: %s\n"
-        "  Type: %s\n"
-        "  Identifier: %s\n"
-        "  Product ID: %d\n"
-        "  Vendor ID: %d\n";
-
-    printf(fmt, name.asString().c_str(),
-        pretty_type_name(type.asString().c_str()),
-        id.asString().c_str(),
-        product.asInt(),
-        vendor.asInt());
-
-    Json::Value kbdlayout = i.get("xkb_active_layout_name", Json::nullValue);
-    if (kbdlayout.isNull())
+    if (i.isNull() == false)
     {
-        printf("  Active Keyboard Layout: (unnamed)\n");
-    } else
-    {
-        std::string str    = ipc_json::json_to_string(kbdlayout);
-        const char *layout = str.c_str();
-        printf("  Active Keyboard Layout: %s\n",
-            layout);
-    }
+        Json::Value id   = i.get("identifier", Json::nullValue);
+        Json::Value name = i.get("name", Json::nullValue);
+        Json::Value type = i.get("type", Json::nullValue);
+        Json::Value product = i.get("product", Json::nullValue);
+        Json::Value vendor  = i.get("vendor", Json::nullValue);
 
-    Json::Value libinput = i.get("libinput", Json::nullValue);
-    if (!libinput.isNull())
-    {
-        Json::Value events = libinput.get("send_events", Json::nullValue);
-        if (!events.isNull())
+        const char *fmt =
+            "Input device: %s\n"
+            "  Type: %s\n"
+            "  Identifier: %s\n"
+            "  Product ID: %d\n"
+            "  Vendor ID: %d\n";
+
+        printf(fmt, name.asString().c_str(),
+            pretty_type_name(type.asString().c_str()),
+            id.asString().c_str(),
+            product.asInt(),
+            vendor.asInt());
+
+        Json::Value kbdlayout = i.get("xkb_active_layout_name", Json::nullValue);
+        if (kbdlayout.isNull())
         {
-            printf("  Libinput Send Events: %s\n",
-                events.asString().c_str());
+            printf("  Active Keyboard Layout: (unnamed)\n");
+        } else
+        {
+            std::string str    = ipc_json::json_to_string(kbdlayout);
+            const char *layout = str.c_str();
+            printf("  Active Keyboard Layout: %s\n",
+                layout);
+        }
+
+        Json::Value libinput = i.get("libinput", Json::nullValue);
+        if (!libinput.isNull())
+        {
+            Json::Value events = libinput.get("send_events", Json::nullValue);
+            if (!events.isNull())
+            {
+                printf("  Libinput Send Events: %s\n",
+                    events.asString().c_str());
+            }
         }
     }
 
@@ -179,24 +207,27 @@ static void pretty_print_input(Json::Value i)
 
 static void pretty_print_seat(Json::Value i)
 {
-    Json::Value name = i.get("name", Json::nullValue);
-    Json::Value capabilities = i.get("capabilities", Json::nullValue);
-    Json::Value devices = i.get("devices", Json::nullValue);
-
-    const char *fmt =
-        "Seat: %s\n"
-        "  Capabilities: %d\n";
-
-    printf(fmt, name.asString().c_str(),
-        capabilities.asInt());
-
-    if (devices.isArray() && (devices.empty() == false))
+    if (i.isNull() == false)
     {
-        printf("  Devices:\n");
-        for (auto& device : devices)
+        Json::Value name = i.get("name", Json::nullValue);
+        Json::Value capabilities = i.get("capabilities", Json::nullValue);
+        Json::Value devices = i.get("devices", Json::nullValue);
+
+        const char *fmt =
+            "Seat: %s\n"
+            "  Capabilities: %d\n";
+
+        printf(fmt, name.asString().c_str(),
+            capabilities.asInt());
+
+        if (devices.isArray() && (devices.empty() == false))
         {
-            Json::Value device_name = device.get("name", Json::nullValue);
-            printf("    %s\n", device_name.asString().c_str());
+            printf("  Devices:\n");
+            for (auto& device : devices)
+            {
+                Json::Value device_name = device.get("name", Json::nullValue);
+                printf("    %s\n", device_name.asString().c_str());
+            }
         }
     }
 
@@ -205,108 +236,113 @@ static void pretty_print_seat(Json::Value i)
 
 static void pretty_print_output(Json::Value o)
 {
-    Json::Value name    = o.get("name", Json::nullValue);
-    Json::Value rect    = o.get("rect", Json::nullValue);
-    Json::Value focused = o.get("focused", Json::nullValue);
-    Json::Value active  = o.get("active", Json::nullValue);
-    Json::Value power   = o.get("power", Json::nullValue);
-    Json::Value ws = o.get("current_workspace", Json::nullValue);
-    Json::Value non_desktop = o.get("non_desktop", Json::nullValue);
-
-    Json::Value make   = o.get("make", Json::nullValue);
-    Json::Value model  = o.get("model", Json::nullValue);
-    Json::Value serial = o.get("serial", Json::nullValue);
-    Json::Value scale  = o.get("scale", Json::nullValue);
-    Json::Value scale_filter = o.get("scale_filter", Json::nullValue);
-    Json::Value subpixel     = o.get("subpixel_hinting", Json::nullValue);
-    Json::Value transform    = o.get("transform", Json::nullValue);
-    Json::Value max_render_time = o.get("max_render_time", Json::nullValue);
-    Json::Value adaptive_sync_status =
-        o.get("adaptive_sync_status", Json::nullValue);
-
-    Json::Value x = rect.get("x", Json::nullValue);
-    Json::Value y = rect.get("y", Json::nullValue);
-
-    Json::Value modes = o.get("modes", Json::nullValue);
-    Json::Value current_mode = o.get("current_mode", Json::nullValue);
-    Json::Value width   = current_mode.get("width", Json::nullValue);
-    Json::Value height  = current_mode.get("height", Json::nullValue);
-    Json::Value refresh = current_mode.get("refresh", Json::nullValue);
-
-    if (non_desktop.asBool() == true)
+    if (o.isNull() == false)
     {
-        printf(
-            "Output %s '%s %s %s' (non-desktop)\n",
-            name.asString().c_str(),
-            make.asString().c_str(),
-            model.asString().c_str(),
-            serial.asString().c_str());
-    } else if (active.asBool() == true)
-    {
-        printf(
-            "Output %s '%s %s %s'%s\n"
-            "  Current mode: %dx%d @ %.3f Hz\n"
-            "  Power: %s\n"
-            "  Position: %d,%d\n"
-            "  Scale factor: %f\n"
-            "  Scale filter: %s\n"
-            "  Subpixel hinting: %s\n"
-            "  Transform: %s\n"
-            "  Workspace: %s\n",
-            name.asString().c_str(),
-            make.asString().c_str(),
-            model.asString().c_str(),
-            serial.asString().c_str(),
-            focused.asBool() ? " (focused)" : "",
-            width.asInt(),
-            height.asInt(),
-            (double)refresh.asInt() / 1000,
-            power.asBool() ? "on" : "off",
-            x.asInt(), y.asInt(),
-            scale.asDouble(),
-            scale_filter.asString().c_str(),
-            subpixel.asString().c_str(),
-            transform.asString().c_str(),
-            ws.asString().c_str());
+        Json::Value name    = o.get("name", Json::nullValue);
+        Json::Value rect    = o.get("rect", Json::nullValue);
+        Json::Value focused = o.get("focused", Json::nullValue);
+        Json::Value active  = o.get("active", Json::nullValue);
+        Json::Value power   = o.get("power", Json::nullValue);
+        Json::Value ws = o.get("current_workspace", Json::nullValue);
+        Json::Value non_desktop = o.get("non_desktop", Json::nullValue);
 
-        int max_render_time_int = max_render_time.asInt();
-        printf("  Max render time: ");
-        printf(max_render_time_int == 0 ? "off\n" : "%d ms\n", max_render_time_int);
+        Json::Value make   = o.get("make", Json::nullValue);
+        Json::Value model  = o.get("model", Json::nullValue);
+        Json::Value serial = o.get("serial", Json::nullValue);
+        Json::Value scale  = o.get("scale", Json::nullValue);
+        Json::Value scale_filter = o.get("scale_filter", Json::nullValue);
+        Json::Value subpixel     = o.get("subpixel_hinting", Json::nullValue);
+        Json::Value transform    = o.get("transform", Json::nullValue);
+        Json::Value max_render_time = o.get("max_render_time", Json::nullValue);
+        Json::Value adaptive_sync_status =
+            o.get("adaptive_sync_status", Json::nullValue);
 
-        printf("  Adaptive sync: %s\n",
-            adaptive_sync_status.asString().c_str());
-    } else
-    {
-        printf(
-            "Output %s '%s %s %s' (disabled)\n",
-            name.asString().c_str(),
-            make.asString().c_str(),
-            model.asString().c_str(),
-            serial.asString().c_str());
-    }
+        Json::Value x = rect.get("x", Json::nullValue);
+        Json::Value y = rect.get("y", Json::nullValue);
 
-    if (modes.isArray() && (modes.empty() == false))
-    {
-        printf("  Available modes:\n");
-        for (auto& mode : modes)
+        Json::Value modes = o.get("modes", Json::nullValue);
+        Json::Value current_mode = o.get("current_mode", Json::nullValue);
+        Json::Value width   = current_mode.get("width", Json::nullValue);
+        Json::Value height  = current_mode.get("height", Json::nullValue);
+        Json::Value refresh = current_mode.get("refresh", Json::nullValue);
+
+        if (non_desktop.asBool() == true)
         {
-            Json::Value mode_width   = mode.get("width", Json::nullValue);
-            Json::Value mode_height  = mode.get("height", Json::nullValue);
-            Json::Value mode_refresh = mode.get("refresh", Json::nullValue);
-            Json::Value mode_picture_aspect_ratio = mode.get("picture_aspect_ratio",
-                Json::nullValue);
+            printf(
+                "Output %s '%s %s %s' (non-desktop)\n",
+                name.asString().c_str(),
+                make.asString().c_str(),
+                model.asString().c_str(),
+                serial.asString().c_str());
+        } else if (active.asBool() == true)
+        {
+            printf(
+                "Output %s '%s %s %s'%s\n"
+                "  Current mode: %dx%d @ %.3f Hz\n"
+                "  Power: %s\n"
+                "  Position: %d,%d\n"
+                "  Scale factor: %f\n"
+                "  Scale filter: %s\n"
+                "  Subpixel hinting: %s\n"
+                "  Transform: %s\n"
+                "  Workspace: %s\n",
+                name.asString().c_str(),
+                make.asString().c_str(),
+                model.asString().c_str(),
+                serial.asString().c_str(),
+                focused.asBool() ? " (focused)" : "",
+                width.asInt(),
+                height.asInt(),
+                (double)refresh.asInt() / 1000,
+                power.asBool() ? "on" : "off",
+                x.asInt(), y.asInt(),
+                scale.asDouble(),
+                scale_filter.asString().c_str(),
+                subpixel.asString().c_str(),
+                transform.asString().c_str(),
+                ws.asString().c_str());
 
-            printf("    %dx%d @ %.3f Hz", mode_width.asInt(),
-                mode_height.asInt(),
-                (double)mode_refresh.asInt() / 1000);
+            int max_render_time_int = max_render_time.asInt();
+            printf("  Max render time: ");
+            printf(max_render_time_int == 0 ? "off\n" : "%d ms\n",
+                max_render_time_int);
 
-            if ((mode_picture_aspect_ratio.isNull() == false) &&
-                (mode_picture_aspect_ratio.asString() != "none"))
+            printf("  Adaptive sync: %s\n",
+                adaptive_sync_status.asString().c_str());
+        } else
+        {
+            printf(
+                "Output %s '%s %s %s' (disabled)\n",
+                name.asString().c_str(),
+                make.asString().c_str(),
+                model.asString().c_str(),
+                serial.asString().c_str());
+        }
+
+        if (modes.isArray() && (modes.empty() == false))
+        {
+            printf("  Available modes:\n");
+            for (auto& mode : modes)
             {
-                printf(" (%s)", mode_picture_aspect_ratio.asString().c_str());
-            }
+                Json::Value mode_width   = mode.get("width", Json::nullValue);
+                Json::Value mode_height  = mode.get("height", Json::nullValue);
+                Json::Value mode_refresh = mode.get("refresh", Json::nullValue);
+                Json::Value mode_picture_aspect_ratio = mode.get(
+                    "picture_aspect_ratio",
+                    Json::nullValue);
 
-            printf("\n");
+                printf("    %dx%d @ %.3f Hz", mode_width.asInt(),
+                    mode_height.asInt(),
+                    (double)mode_refresh.asInt() / 1000);
+
+                if ((mode_picture_aspect_ratio.isNull() == false) &&
+                    (mode_picture_aspect_ratio.asString() != "none"))
+                {
+                    printf(" (%s)", mode_picture_aspect_ratio.asString().c_str());
+                }
+
+                printf("\n");
+            }
         }
     }
 
