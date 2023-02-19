@@ -660,6 +660,15 @@ void criteria::node_for_each_matched_container(Json::Value obj,
             node_for_each_matched_container(node, containers);
         }
     }
+
+    Json::Value floating_nodes_obj = obj.get("floating_nodes", Json::nullValue);
+    if ((floating_nodes_obj.isNull() == false) && floating_nodes_obj.isArray())
+    {
+        for (const auto& node : floating_nodes_obj)
+        {
+            node_for_each_matched_container(node, containers);
+        }
+    }
 }
 
 Json::Value criteria::get_containers()

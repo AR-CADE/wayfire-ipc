@@ -1578,7 +1578,7 @@ Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
     }
 
     object["focus"] = focusNodes;
-    object["nodes"] = containers;
+    object["floating_nodes"]  = containers;
     object["fullscreen_mode"] = 1;
     object["name"] = "__i3_scratch";
     object["rect"] = rootNodes.get("rect", create_empty_rect());
