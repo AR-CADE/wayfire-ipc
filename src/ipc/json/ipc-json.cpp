@@ -1056,10 +1056,10 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 
     object["focus"] = focusNodes;
 
-    wf::output_t *output = view->get_output();
+    wf::output_t *output = wf::get_core().get_active_output();
     if (output != nullptr)
     {
-        object["focused"] = (view->get_output()->get_top_view() == view) &&
+        object["focused"] = (output->get_active_view() == view) &&
             view->is_visible();
     }
 
@@ -1302,8 +1302,11 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
         if (!container.isNull())
         {
             auto views = get_view_nodes(view);
-            container["nodes"]   = views;
-            container["focused"] = views.size() == 0;
+            container["nodes"] = views;
+            if (container["focused"] == true)
+            {
+                container["focused"] = views.size() == 0;
+            }
         }
 
         nodes.append(container);
@@ -1328,8 +1331,11 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
         if (!container.isNull())
         {
             auto views = get_view_nodes(view);
-            container["nodes"]   = views;
-            container["focused"] = views.size() == 0;
+            container["nodes"] = views;
+            if (container["focused"] == true)
+            {
+                container["focused"] = views.size() == 0;
+            }
         }
 
         nodes.append(container);
@@ -1388,8 +1394,11 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
         if (!container.isNull())
         {
             auto views = get_view_nodes(view);
-            container["nodes"]   = views;
-            container["focused"] = views.size() == 0;
+            container["nodes"] = views;
+            if (container["focused"] == true)
+            {
+                container["focused"] = views.size() == 0;
+            }
         }
 
         nodes.append(container);
@@ -1413,8 +1422,11 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
             if (describe_container_nodes)
             {
                 auto container = get_container_nodes(wf::point_t{x, y}, output);
-                workspace["nodes"]   = container;
-                workspace["focused"] = container.size() == 0;
+                workspace["nodes"] = container;
+                if (workspace["focused"] == true)
+                {
+                    workspace["focused"] = container.size() == 0;
+                }
             }
 
             vector.push_back(workspace);
@@ -1475,8 +1487,11 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
         if (!container.isNull())
         {
             auto views = get_view_nodes(view);
-            container["nodes"]   = views;
-            container["focused"] = views.size() == 0;
+            container["nodes"] = views;
+            if (container["focused"])
+            {
+                container["focused"] = views.size() == 0;
+            }
         }
 
         nodes.append(container);
@@ -1649,8 +1664,12 @@ Json::Value ipc_json::get_tree()
     {
         auto out = describe_output(output);
         auto workspaces = get_workspaces_nodes(output);
-        out["nodes"]   = workspaces;
-        out["focused"] = workspaces.size() == 0;
+        out["nodes"] = workspaces;
+        if (out["focused"] == true)
+        {
+            out["focused"] = workspaces.size() == 0;
+        }
+
         rootNodes.append(out);
     }
 
