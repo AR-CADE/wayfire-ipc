@@ -14,7 +14,7 @@
 #include <wayfire/plugin.hpp>
 #include <wayfire/plugins/common/workspace-wall.hpp>
 #include <wayfire/view.hpp>
-#include <wayfire/workspace-manager.hpp>
+#include <wayfire/view-helpers.hpp>
 // #include <wlr/backend/libinput.h>
 
 
@@ -873,7 +873,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["adaptive_sync_status"] =
         output_adaptive_sync_status_description(wlr_output->adaptive_sync_status);
 
-    wf::point_t workspace = output->workspace->get_current_workspace();
+    wf::point_t workspace = output->wset()->get_current_workspace();
     object["current_workspace"] = ipc_tools::get_workspace_index(workspace, output);
 
     Json::Value modes_array = Json::arrayValue;
@@ -1051,9 +1051,11 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     //
     object["id"] = view->get_id();
     // NOTE for now we support only support the wm-actions plugin
+    auto layer = wf::get_view_layer(view);
     object["type"] = view->has_data("wm-actions-above") ||
-        (view->get_output()->workspace->get_view_layer(view) &
-            (wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET)) ? "floating_con" : "con";
+        (layer == wf::scene::layer::TOP ||
+            layer == wf::scene::layer::DWIDGET) ? "floating_con" : "con";
+
     // TODO support tiling
     object["layout"] = "stacked";
     // TODO: figure out what if the border type for the container
@@ -1089,7 +1091,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     wf::output_t *output = wf::get_core().get_active_output();
     if (output != nullptr)
     {
-        object["focused"] = (output->get_top_view() == view) &&
+        object["focused"] = (output->get_active_view() == view) &&
             view->get_transformed_node()->is_enabled();
     }
 
@@ -1345,9 +1347,19 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
 {
     Json::Value nodes = Json::arrayValue;
     for (auto& view :
-         output->workspace->get_views_on_workspace(point,
-             wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
+         wf::collect_views_from_output(output,
+             {wf::scene::layer::TOP, wf::scene::layer::DWIDGET}))
     {
+        if (output->wset()->get_view_main_workspace(view) != point)
+        {
+            continue;
+        }
+
+        if (view->minimized)
+        {
+            continue;
+        }
+
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
@@ -1407,10 +1419,19 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
 Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
-    for (auto& view :
-         output->workspace->get_views_on_workspace(point,
-             wf::LAYER_WORKSPACE | wf::LAYER_TOP | wf::LAYER_DESKTOP_WIDGET))
+    for (auto& view : wf::collect_views_from_output(output,
+    {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
     {
+        if (output->wset()->get_view_main_workspace(view) != point)
+        {
+            continue;
+        }
+
+        if (view->minimized)
+        {
+            continue;
+        }
+
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
@@ -1439,7 +1460,7 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
     Json::Value nodes = Json::arrayValue;
     std::vector<Json::Value> vector;
 
-    auto wsize = output->workspace->get_workspace_grid_size();
+    auto wsize = output->wset()->get_workspace_grid_size();
     for (int x = 0; x < wsize.width; x++)
     {
         for (int y = 0; y < wsize.height; y++)
@@ -1494,11 +1515,14 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
 {
     Json::Value nodes = Json::arrayValue;
 
-    for (auto& view :
-         output->workspace->get_views_on_workspace(ws,
-             wf::LAYER_WORKSPACE | wf::LAYER_TOP |
-             wf::LAYER_DESKTOP_WIDGET, true))
+    for (auto& view : wf::collect_views_from_output(output,
+    {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
     {
+        if (output->wset()->get_view_main_workspace(view) != ws)
+        {
+            continue;
+        }
+
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
@@ -1531,7 +1555,7 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_output(
 {
     Json::Value nodes = Json::arrayValue;
 
-    auto wsize = output->workspace->get_workspace_grid_size();
+    auto wsize = output->wset()->get_workspace_grid_size();
     for (int x = 0; x < wsize.width; x++)
     {
         for (int y = 0; y < wsize.height; y++)
@@ -1706,13 +1730,13 @@ Json::Value ipc_json::get_tree()
 Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output)
 {
     assert(output != nullptr);
-    ASSERT_VALID_WORKSPACE(output->workspace, point);
+    ASSERT_VALID_WORKSPACE(output->wset(), point);
 
     auto wall = std::make_unique<wf::workspace_wall_t>(output);
     assert(wall != nullptr);
 
     auto rect    = wall->get_workspace_rectangle(point);
-    bool visible = output->workspace->get_current_workspace() == point;
+    bool visible = output->wset()->get_current_workspace() == point;
     bool focused = visible && (wf::get_core().get_active_output() == output);
     int index    = ipc_tools::get_workspace_index(point, output);
     int id = ipc_tools::get_workspace_id(output->get_id(), index);

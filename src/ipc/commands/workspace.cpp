@@ -8,7 +8,7 @@
 
 void workspace_switch(wf::point_t ws, wf::output_t *output)
 {
-    output->workspace->request_workspace(ws);
+    output->wset()->request_workspace(ws);
 }
 
 wf::point_t workspace_by_number(int index, wf::output_t *output)
@@ -42,7 +42,7 @@ wf::point_t workspace_next(int index, wf::point_t current, wf::output_t *output)
 
 wf::point_t workspace_by_name(const char *name, wf::output_t *output)
 {
-    wf::point_t current = output->workspace->get_current_workspace();
+    wf::point_t current = output->wset()->get_current_workspace();
 
     if (strcmp(name, "prev") == 0)
     {
@@ -121,7 +121,7 @@ Json::Value workspace_handler(int argc, char **argv, command_handler_context *ct
         ws = workspace_by_name(name.c_str(), output);
     }
 
-    if (!output->workspace->is_workspace_valid(ws))
+    if (!output->wset()->is_workspace_valid(ws))
     {
         return ipc_json::command_result(RETURN_ABORTED, "No workspace to switch to");
     }

@@ -200,7 +200,7 @@ static void set_config_node(const Json::Value& node, bool node_overridden,
             if ((uint32_t)id != view->get_id())
             {
                 wf::point_t ws =
-                    wf::get_core().get_active_output()->workspace->
+                    wf::get_core().get_active_output()->wset()->
                     get_view_main_workspace(
                         view);
                 handler_context->workspace = ipc_json::describe_workspace(ws,
@@ -315,10 +315,10 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         {
             auto out = wf::get_core().get_active_output();
             assert(out != nullptr);
-            auto top_view = out->get_top_view();
-            if (top_view != nullptr)
+            auto active_view = out->get_active_view();
+            if (active_view != nullptr)
             {
-                auto v = ipc_json::describe_view(top_view);
+                auto v = ipc_json::describe_view(active_view);
                 set_config_node(v, false, &handler_context);
             }
 

@@ -8,7 +8,7 @@
 #include <wayfire/plugins/common/util.hpp>
 #include <wayfire/view.hpp>
 #include <wayfire/output.hpp>
-#include <wayfire/workspace-manager.hpp>
+#include <wayfire/workspace-set.hpp>
 #include "criteria.hpp"
 #include <ipc/json.hpp>
 
@@ -557,7 +557,7 @@ bool criteria::matches_view(const Json::Value& view)
             if ((uint32_t)id != v->get_id())
             {
                 wf::point_t point =
-                    wf::get_core().get_active_output()->workspace->
+                    wf::get_core().get_active_output()->wset()->
                     get_view_main_workspace(
                         v);
                 Json::Value ws = ipc_json::describe_workspace(point,
@@ -580,7 +580,7 @@ bool criteria::matches_view(const Json::Value& view)
             if (focused)
             {
                 wf::point_t focused_ws =
-                    focused->get_output()->workspace->get_view_main_workspace(focused);
+                    focused->get_output()->wset()->get_view_main_workspace(focused);
                 Json::Value focused_workspace = ipc_json::describe_workspace(
                     focused_ws, focused->get_output());
                 Json::Value focused_workspace_name = focused_workspace.get("name",

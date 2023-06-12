@@ -11,7 +11,7 @@
 #include <wayfire/output-layout.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/util/log.hpp>
-#include <wayfire/workspace-manager.hpp>
+#include <wayfire/workspace-set.hpp>
 
 #define INVALID_WORKSPACE wf::point_t{-1, -1}
 
@@ -28,7 +28,7 @@ class ipc_tools
         auto outputs = wf::get_core().output_layout->get_outputs();
         for (wf::output_t *output : outputs)
         {
-            auto wsize = output->workspace->get_workspace_grid_size();
+            auto wsize = output->wset()->get_workspace_grid_size();
             for (int x = 0; x < wsize.width; x++)
             {
                 for (int y = 0; y < wsize.height; y++)
@@ -50,7 +50,7 @@ class ipc_tools
     static wf::point_t get_workspace_at_index(int index, wf::output_t *output)
     {
         assert(output != nullptr);
-        auto wsize = output->workspace->get_workspace_grid_size();
+        auto wsize = output->wset()->get_workspace_grid_size();
 
         for (int x = 0; x < wsize.width; x++)
         {
@@ -77,9 +77,9 @@ class ipc_tools
     static int get_workspace_index(wf::point_t point, wf::output_t *output)
     {
         assert(output != nullptr);
-        ASSERT_VALID_WORKSPACE(output->workspace, point);
+        ASSERT_VALID_WORKSPACE(output->wset(), point);
 
-        auto wsize = output->workspace->get_workspace_grid_size();
+        auto wsize = output->wset()->get_workspace_grid_size();
         return point.x + point.y * wsize.width + 1;
     }
 

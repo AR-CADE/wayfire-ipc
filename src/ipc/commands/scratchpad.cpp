@@ -21,7 +21,7 @@ static void scratchpad_toggle_auto(wf::output_t *output)
         return;
     }
 
-    wf::point_t ws = output->workspace->get_current_workspace();
+    wf::point_t ws = output->wset()->get_current_workspace();
 
     if (ws == INVALID_WORKSPACE)
     {
@@ -66,7 +66,7 @@ static void scratchpad_toggle_auto(wf::output_t *output)
             {
                 LOGD("Focusing other scratchpad window (",
                     view->get_title(), ") to this workspace");
-                output->workspace->move_to_workspace(view, ws);
+                output->wset()->move_to_workspace(view, ws);
                 view->minimize_request(true);
                 return;
             }

@@ -419,7 +419,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         {
             if (data->output == output)
             {
-                auto wsize = output->workspace->get_workspace_grid_size();
+                auto wsize = output->wset()->get_workspace_grid_size();
                 for (int x = 0; x < wsize.width; x++)
                 {
                     for (int y = 0; y < wsize.height; y++)
@@ -483,7 +483,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         (void)ev;
         wf::workspace_changed_signal signal;
         signal.output = wf::get_core().get_active_output();
-        signal.new_viewport = signal.output->workspace->get_current_workspace();
+        signal.new_viewport = signal.output->wset()->get_current_workspace();
         signal_workspace_event(IPC_I3_EVENT_TYPE_WORKSPACE, &signal, "reload");
     };
 

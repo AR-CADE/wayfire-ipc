@@ -29,7 +29,7 @@
 #include <wayfire/output-layout.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/plugin.hpp>
-#include <wayfire/workspace-manager.hpp>
+#include <wayfire/workspace-set.hpp>
 #include <wayland-server-core.h>
 #include <wayland-client.h>
 #include <ipc/json.hpp>
