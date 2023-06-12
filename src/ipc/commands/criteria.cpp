@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <json/value.h>
 #include <string>
@@ -992,6 +993,29 @@ void criteria::unescape(char *value)
  */
 bool criteria::parse(char *raw, char **error_arg)
 {
+    bool free_error_arg = false;
+    bool free_error     = false;
+
+    if (*error_arg)
+    {
+        free_error_arg = true;
+    }
+
+    if (error && (*error_arg != error))
+    {
+        free_error = true;
+    }
+
+    if (free_error_arg)
+    {
+        free(*error_arg);
+    }
+
+    if (free_error)
+    {
+        free(error);
+    }
+
     *error_arg = nullptr;
     error = nullptr;
 
