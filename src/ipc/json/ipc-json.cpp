@@ -1515,14 +1515,8 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
 {
     Json::Value nodes = Json::arrayValue;
 
-    for (auto& view : wf::collect_views_from_output(output,
-    {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
+    for (auto& view : output->wset()->get_views(0, ws))
     {
-        if (output->wset()->get_view_main_workspace(view) != ws)
-        {
-            continue;
-        }
-
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
             continue;
