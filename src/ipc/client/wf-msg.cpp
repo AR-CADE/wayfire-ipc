@@ -727,85 +727,96 @@ int main(int argc, char **argv)
     uint32_t len = (uint32_t)command.size();
     char *resp   = ipc_single_command(socketfd, type, command.c_str(), &len);
 #endif
-    // pretty print the json
-    Json::Value result = ipc_json::string_to_json(resp);
 
-    if (result.isNull() || result.empty())
+    if (resp == nullptr)
     {
         if (!quiet)
         {
-            LOGE("failed to parse payload as json: \n");
+            LOGE("failed to get ipc response: \n");
         }
-
-        ret = 1;
     } else
     {
-        if (!success(result, true))
+        // pretty print the json
+        Json::Value result = ipc_json::string_to_json(std::string(resp));
+
+        if (result.isNull() || result.empty())
         {
-            ret = 2;
-        }
-
-        if (!quiet && ((type != IPC_SUBSCRIBE) || (ret != 0)))
-        {
-            if (raw)
+            if (!quiet)
             {
-                std::cout << ipc_json::json_to_string(result) << std::endl;
-            } else
-            {
-                pretty_print(type, result);
-            }
-        }
-    }
-
-#if STRICT_C
-    free(command);
-#endif
-    free(resp);
-
-    if ((type == IPC_SUBSCRIBE) && (ret == 0))
-    {
-        std::cout << "Monitoring. " << std::endl;
-        // Remove the timeout for subscribed events
-        timeout.tv_sec  = 0;
-        timeout.tv_usec = 0;
-        ipc_set_recv_timeout(socketfd, timeout);
-
-        do {
-            struct ipc_response *reply = ipc_recv_response(socketfd);
-            if (!reply)
-            {
-                break;
+                LOGE("failed to parse payload as json: \n");
             }
 
-            Json::Value obj = ipc_json::string_to_json(reply->payload);
-            if (obj.isNull() || obj.empty())
+            ret = 1;
+        } else
+        {
+            if (!success(result, true))
             {
-                if (!quiet)
-                {
-                    LOGE("failed to parse payload as json: \n");
-                }
+                ret = 2;
+            }
 
-                ret = 1;
-
-                break;
-            } else if (quiet)
-            {
-                //
-            } else
+            if (!quiet && ((type != IPC_SUBSCRIBE) || (ret != 0)))
             {
                 if (raw)
                 {
-                    std::cout << obj << std::endl;
+                    std::cout << ipc_json::json_to_string(result) << std::endl;
                 } else
                 {
-                    std::cout << ipc_json::json_to_string(obj) << std::endl;
+                    pretty_print(type, result);
+                }
+            }
+        }
+
+#if STRICT_C
+        free(command);
+#endif
+        free(resp);
+
+        if ((type == IPC_SUBSCRIBE) && (ret == 0))
+        {
+            std::cout << "Monitoring. " << std::endl;
+            // Remove the timeout for subscribed events
+            timeout.tv_sec  = 0;
+            timeout.tv_usec = 0;
+            ipc_set_recv_timeout(socketfd, timeout);
+
+            do {
+                struct ipc_response *reply = ipc_recv_response(socketfd);
+                if (!reply || !reply->payload)
+                {
+                    break;
                 }
 
-                fflush(stdout);
-            }
+                Json::Value obj = ipc_json::string_to_json(std::string(
+                    reply->payload));
+                if (obj.isNull() || obj.empty())
+                {
+                    if (!quiet)
+                    {
+                        LOGE("failed to parse payload as json: \n");
+                    }
 
-            free_ipc_response(reply);
-        } while (monitor);
+                    ret = 1;
+
+                    break;
+                } else if (quiet)
+                {
+                    //
+                } else
+                {
+                    if (raw)
+                    {
+                        std::cout << obj << std::endl;
+                    } else
+                    {
+                        std::cout << ipc_json::json_to_string(obj) << std::endl;
+                    }
+
+                    fflush(stdout);
+                }
+
+                free_ipc_response(reply);
+            } while (monitor);
+        }
     }
 
     close(socketfd);

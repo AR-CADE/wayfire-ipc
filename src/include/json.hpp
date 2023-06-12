@@ -58,11 +58,6 @@ class json
 
     static Json::Value string_to_json(const std::string & str)
     {
-        if (str.c_str() == nullptr)
-        {
-            return Json::nullValue;
-        }
-
         auto parse_result = parse(str);
 
         if (parse_result.error)
