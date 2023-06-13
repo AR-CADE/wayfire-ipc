@@ -5,7 +5,6 @@
 #include "wayfire/plugins/common/shared-core-data.hpp"
 #include <wayfire/output-layout.hpp>
 #include <wayfire/signal-definitions.hpp>
-#include <wayfire/workspace-manager.hpp>
 #include <ipc/command.h>
 #include <ipc/json.hpp>
 
