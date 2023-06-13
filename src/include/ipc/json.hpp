@@ -25,7 +25,9 @@ class ipc_json : public json
     static const char *input_device_get_type_description(
         nonstd::observer_ptr<wf::input_device_t> device);
     static bool device_is_touchpad(nonstd::observer_ptr<wf::input_device_t> device);
+#if 0
     static Json::Value describe_libinput_device(struct libinput_device *device);
+#endif
     static Json::Value get_version();
     static Json::Value describe_seat(wlr_seat *seat);
     static Json::Value args_to_json(char **argv, int argc);

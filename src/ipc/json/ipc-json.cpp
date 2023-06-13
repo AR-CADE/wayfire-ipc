@@ -5,7 +5,9 @@
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
 #include <json/value.h>
-#include <libinput.h>
+#if 0
+    #include <libinput.h>
+#endif
 #include <string>
 #include <wayfire/core.hpp>
 #include <wayfire/geometry.hpp>
@@ -344,6 +346,7 @@ Json::Value ipc_json::command_result(RETURN_STATUS status, const char *error)
     return object;
 }
 
+#if 0
 Json::Value ipc_json::describe_libinput_device(struct libinput_device *device)
 {
     Json::Value object;
@@ -448,6 +451,10 @@ Json::Value ipc_json::describe_libinput_device(struct libinput_device *device)
 
           case LIBINPUT_CONFIG_ACCEL_PROFILE_ADAPTIVE:
             accel_profile = "adaptive";
+            break;
+
+          case LIBINPUT_CONFIG_ACCEL_PROFILE_CUSTOM:
+            accel_profile = "custom";
             break;
         }
 
@@ -579,6 +586,8 @@ Json::Value ipc_json::describe_libinput_device(struct libinput_device *device)
 
     return object;
 }
+
+#endif
 
 Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> device)
 {
