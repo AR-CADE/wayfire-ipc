@@ -1429,7 +1429,7 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
 {
     Json::Value nodes = Json::arrayValue;
     for (auto& view : wf::collect_views_from_output(output,
-    {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
+        {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
     {
         if (output->wset()->get_view_main_workspace(view) != point)
         {
