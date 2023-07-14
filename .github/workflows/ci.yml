@@ -60,6 +60,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: wayfire-ipc
-    - run: cd wayfire-ipc && wget https://raw.githubusercontent.com/WayfireWM/wayfire/master/uncrustify.ini
+    - run: cd wayfire-ipc && wget https://raw.githubusercontent.com/AR-CADE/wayfire-ipc/main/uncrustify.ini
     - run: cd wayfire-ipc && git ls-files | grep "hpp$\|cpp$" | xargs ../uncrustify/build/uncrustify -c uncrustify.ini --no-backup --replace
     - run: cd wayfire-ipc && git diff --exit-code
