@@ -117,7 +117,13 @@ wayfire_view ipc_command::find_xwayland_container(int id)
 bool ipc_command::container_has_ancestor(wayfire_view descendant,
     wayfire_view ancestor)
 {
-    auto chidlren = descendant->children;
+    auto toplevel_view = wf::toplevel_cast(descendant);
+    if (toplevel_view == nullptr)
+    {
+        return false;
+    }
+
+    auto chidlren = toplevel_view->children;
 
     if (std::any_of(chidlren.begin(), chidlren.end(), [&] (const auto & child)
     {
@@ -202,7 +208,7 @@ static void set_config_node(const Json::Value& node, bool node_overridden,
                 wf::point_t ws =
                     wf::get_core().get_active_output()->wset()->
                     get_view_main_workspace(
-                        view);
+                        wf::toplevel_cast(view));
                 handler_context->workspace = ipc_json::describe_workspace(ws,
                     view->get_output());
             }

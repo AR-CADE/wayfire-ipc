@@ -7,6 +7,7 @@
 #include <wayfire/signal-definitions.hpp>
 #include <ipc/command.h>
 #include <ipc/json.hpp>
+#include <wayfire/toplevel-view.hpp>
 
 class wayfire_power
 {
@@ -292,14 +293,20 @@ class wayfire_power_plugin : public wf::per_output_plugin_instance_t
             &toggle);
         output->connect(&fullscreen_state_changed);
         disable_on_fullscreen.set_callback(disable_on_fullscreen_changed);
+        auto view = output->get_active_view();
 
-        if (output->get_active_view() && output->get_active_view()->fullscreen)
+        if (view != nullptr)
         {
-            /* Currently, the fullscreen count would always be 0 or 1,
-             * since fullscreen-layer-focused is only emitted on changes between 0
-             * and 1
-             **/
-            has_fullscreen = true;
+            auto toplevel_view = wf::toplevel_cast(view);
+
+            if ((toplevel_view != nullptr) && toplevel_view->toplevel()->current().fullscreen)
+            {
+                /* Currently, the fullscreen count would always be 0 or 1,
+                 * since fullscreen-layer-focused is only emitted on changes between 0
+                 * and 1
+                 **/
+                has_fullscreen = true;
+            }
         }
 
         update_fullscreen();

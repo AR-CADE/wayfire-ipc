@@ -3,6 +3,7 @@
 #include <json/value.h>
 #include <strings.h>
 #include <wayfire/core.hpp>
+#include <wayfire/window-manager.hpp>
 
 // fullscreen [enable|disable|toggle] [global]
 Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *ctx)
@@ -35,7 +36,13 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
         return ipc_json::command_result(RETURN_NOT_FOUND);
     }
 
-    bool is_fullscreen = view->fullscreen;
+    auto toplevel_view = wf::toplevel_cast(view);
+    if (toplevel_view == nullptr)
+    {
+        return ipc_json::command_result(RETURN_NOT_FOUND);
+    }
+
+    bool is_fullscreen = toplevel_view->toplevel()->current().fullscreen;
     bool enable = !is_fullscreen;
 
     if (argc >= 1)
@@ -46,7 +53,7 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
         }
     }
 
-    view->fullscreen_request(view->get_output(), enable);
+    wf::get_core().default_wm->fullscreen_request(toplevel_view, view->get_output(), enable);
 
     return ipc_json::command_result(RETURN_SUCCESS);
 }

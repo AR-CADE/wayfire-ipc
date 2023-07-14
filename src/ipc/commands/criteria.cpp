@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <wayfire/core.hpp>
+#include <wayfire/toplevel-view.hpp>
 #include <wayfire/util/log.hpp>
 #include <wayfire/plugins/common/util.hpp>
 #include <wayfire/view.hpp>
@@ -560,7 +561,7 @@ bool criteria::matches_view(const Json::Value& view)
                 wf::point_t point =
                     wf::get_core().get_active_output()->wset()->
                     get_view_main_workspace(
-                        v);
+                        wf::toplevel_cast(v));
                 Json::Value ws = ipc_json::describe_workspace(point,
                     v->get_output());
                 workspace_name = ws.get("name", Json::nullValue);
@@ -581,7 +582,7 @@ bool criteria::matches_view(const Json::Value& view)
             if (focused)
             {
                 wf::point_t focused_ws =
-                    focused->get_output()->wset()->get_view_main_workspace(focused);
+                    focused->get_output()->wset()->get_view_main_workspace(wf::toplevel_cast(focused));
                 Json::Value focused_workspace = ipc_json::describe_workspace(
                     focused_ws, focused->get_output());
                 Json::Value focused_workspace_name = focused_workspace.get("name",

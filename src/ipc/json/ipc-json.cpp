@@ -1065,6 +1065,12 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         (layer == wf::scene::layer::TOP ||
             layer == wf::scene::layer::DWIDGET) ? "floating_con" : "con";
 
+    auto toplevel_view = wf::toplevel_cast(view);
+    if (toplevel_view == nullptr)
+    {
+        return Json::nullValue;
+    }
+
     // TODO support tiling
     object["layout"] = "stacked";
     // TODO: figure out what if the border type for the container
@@ -1072,7 +1078,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["current_border_width"] = 0;
     object["orientation"] = orientation_description(view->get_output());
     object["urgent"] = false;
-    object["sticky"] = view->sticky;
+    object["sticky"] = toplevel_view->sticky;
     object["floating_nodes"] = get_view_nodes(view, true);
     object["name"]  = view->get_title();
     object["nodes"] = Json::arrayValue;
@@ -1104,7 +1110,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
             view->get_transformed_node()->is_enabled();
     }
 
-    wayfire_view parent = view->parent;
+    wayfire_view parent = toplevel_view->parent;
     if (parent != nullptr)
     {
         wlr_box parent_box = parent->get_bounding_box();
@@ -1147,9 +1153,9 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["deco_rect"] = create_empty_rect(); // FIX ME
     object["window"]    = Json::nullValue;
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
-    object["geometry"]    = describe_geometry(view->get_wm_geometry());
+    object["geometry"]    = describe_geometry(toplevel_view->toplevel()->current().geometry);
 
-    object["fullscreen_mode"] = (view->fullscreen) ? 1 : 0;
+    object["fullscreen_mode"] = (toplevel_view->toplevel()->current().fullscreen) ? 1 : 0;
 
     object["shell"] = "xdg_shell";
     object["inhibit_idle"] = false;
@@ -1359,12 +1365,18 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
          wf::collect_views_from_output(output,
              {wf::scene::layer::TOP, wf::scene::layer::DWIDGET}))
     {
-        if (output->wset()->get_view_main_workspace(view) != point)
+        auto toplevel_view = wf::toplevel_cast(view);
+        if (toplevel_view == nullptr)
         {
             continue;
         }
 
-        if (view->minimized)
+        if (output->wset()->get_view_main_workspace(toplevel_view) != point)
+        {
+            continue;
+        }
+
+        if (toplevel_view->minimized)
         {
             continue;
         }
@@ -1393,10 +1405,15 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
 
 Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
 {
-    Json::Value nodes = Json::arrayValue;
+    Json::Value nodes  = Json::arrayValue;
+    auto toplevel_view = wf::toplevel_cast(view);
+    if (toplevel_view == nullptr)
+    {
+        return nodes;
+    }
 
     for (auto& v :
-         view->enumerate_views())
+         toplevel_view->enumerate_views())
     {
         if (v == view)
         {
@@ -1431,12 +1448,18 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
     for (auto& view : wf::collect_views_from_output(output,
         {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
     {
-        if (output->wset()->get_view_main_workspace(view) != point)
+        auto toplevel_view = wf::toplevel_cast(view);
+        if (toplevel_view == nullptr)
         {
             continue;
         }
 
-        if (view->minimized)
+        if (output->wset()->get_view_main_workspace(toplevel_view) != point)
+        {
+            continue;
+        }
+
+        if (toplevel_view->minimized)
         {
             continue;
         }

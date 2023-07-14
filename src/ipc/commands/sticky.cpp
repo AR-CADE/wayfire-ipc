@@ -29,9 +29,16 @@ Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx)
 
     wayfire_view view = ipc_command::container_get_view(con);
 
-    bool sticky = ipc_command::parse_boolean(argv[0], view->sticky);
+    auto toplevel_view = wf::toplevel_cast(view);
+    if (toplevel_view == nullptr)
+    {
+        return ipc_json::command_result(RETURN_ABORTED,
+            "No toplevel for this container");
+    }
 
-    view->set_sticky(sticky);
+    bool sticky = ipc_command::parse_boolean(argv[0], toplevel_view->sticky);
+
+    toplevel_view->set_sticky(sticky);
 
     return ipc_json::command_result(RETURN_SUCCESS);
 }

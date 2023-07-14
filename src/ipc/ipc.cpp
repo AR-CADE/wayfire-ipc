@@ -202,7 +202,13 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (view->fullscreen != ev->state)
+        auto toplevel_view = wf::toplevel_cast(view);
+        if (toplevel_view == nullptr)
+        {
+            return;
+        }
+
+        if (toplevel_view->toplevel()->current().fullscreen != ev->state)
         {
             signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view,
                 "fullscreen_mode");

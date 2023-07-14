@@ -7,6 +7,7 @@
 #include <wayfire/core.hpp>
 #include <wayfire/geometry.hpp>
 #include <wayfire/output.hpp>
+#include <wayfire/window-manager.hpp>
 
 static void scratchpad_toggle_auto(wf::output_t *output)
 {
@@ -15,10 +16,14 @@ static void scratchpad_toggle_auto(wf::output_t *output)
     auto focus = output->get_active_view();
     if (focus)
     {
-        LOGD("Focus is a scratchpad window - hiding ",
-            focus->get_title());
-        focus->minimize_request(false);
-        return;
+        auto toplevel_view = wf::toplevel_cast(focus);
+        if (toplevel_view)
+        {
+            LOGD("Focus is a scratchpad window - hiding ",
+                focus->get_title());
+            wf::get_core().default_wm->minimize_request(toplevel_view, false);
+            return;
+        }
     }
 
     wf::point_t ws = output->wset()->get_current_workspace();
@@ -43,10 +48,14 @@ static void scratchpad_toggle_auto(wf::output_t *output)
 
             if (focus != view)
             {
-                LOGD("Focusing other scratchpad window (",
-                    view->get_title(), ") in this workspace");
-                view->minimize_request(true);
-                return;
+                auto toplevel_view = wf::toplevel_cast(view);
+                if (toplevel_view)
+                {
+                    LOGD("Focusing other scratchpad window (",
+                        view->get_title(), ") in this workspace");
+                    wf::get_core().default_wm->minimize_request(toplevel_view, true);
+                    return;
+                }
             }
         }
     }
@@ -64,11 +73,15 @@ static void scratchpad_toggle_auto(wf::output_t *output)
 
             if (focus != view)
             {
-                LOGD("Focusing other scratchpad window (",
-                    view->get_title(), ") to this workspace");
-                output->wset()->move_to_workspace(view, ws);
-                view->minimize_request(true);
-                return;
+                auto toplevel_view = wf::toplevel_cast(view);
+                if (toplevel_view)
+                {
+                    LOGD("Focusing other scratchpad window (",
+                        view->get_title(), ") to this workspace");
+                    output->wset()->move_to_workspace(toplevel_view, ws);
+                    wf::get_core().default_wm->minimize_request(toplevel_view, true);
+                    return;
+                }
             }
         }
     }
@@ -83,9 +96,9 @@ static void scratchpad_toggle_auto(wf::output_t *output)
     // ipc_event_window(con, "move");
 }
 
-static void scratchpad_toggle_container(const wayfire_view & view)
+static void scratchpad_toggle_container(const wayfire_toplevel_view & toplevel_view)
 {
-    view->minimize_request(!view->minimized);
+    wf::get_core().default_wm->minimize_request(toplevel_view, !toplevel_view->minimized);
 }
 
 Json::Value scratchpad_handler(int argc, char **argv, command_handler_context *ctx)
@@ -117,7 +130,13 @@ Json::Value scratchpad_handler(int argc, char **argv, command_handler_context *c
             return ipc_json::command_result(RETURN_SUCCESS);
         }
 
-        scratchpad_toggle_container(view);
+        auto toplevel_view = wf::toplevel_cast(view);
+        if (!toplevel_view)
+        {
+            return ipc_json::command_result(RETURN_SUCCESS);
+        }
+
+        scratchpad_toggle_container(toplevel_view);
     } else
     {
         auto output = wf::get_core().get_active_output();
