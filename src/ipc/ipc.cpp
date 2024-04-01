@@ -6,6 +6,7 @@
 #include <wayfire/core.hpp>
 #include <wayfire/output.hpp>
 #include <wayfire/signal-definitions.hpp>
+#include <wayfire/view.hpp>
 
 wf::option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
 wf::option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
@@ -215,10 +216,10 @@ class ipc_t : public wf::per_output_plugin_instance_t
         }
     };
 
-    wf::signal::connection_t<wf::focus_view_signal> on_view_focused =
-        [=] (wf::focus_view_signal *ev)
+    wf::signal::connection_t<wf::keyboard_focus_changed_signal> on_keyboard_focus_changed =
+        [=] (wf::keyboard_focus_changed_signal *ev)
     {
-        signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "focus");
+        signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, wf::node_to_view(ev->new_focus), "focus");
     };
 
     wf::signal::connection_t<wf::view_change_workspace_signal>
@@ -488,7 +489,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
     {
         (void)ev;
         wf::workspace_changed_signal signal;
-        signal.output = wf::get_core().get_active_output();
+        signal.output = wf::get_core().seat->get_active_output();
         signal.new_viewport = signal.output->wset()->get_current_workspace();
         signal_workspace_event(IPC_I3_EVENT_TYPE_WORKSPACE, &signal, "reload");
     };
@@ -564,7 +565,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         output->connect(&on_view_mapped);
         output->connect(&on_view_unmapped);
-        output->connect(&on_view_focused);
+        output->connect(&on_keyboard_focus_changed);
         output->connect(&on_view_geometry_changed);
         output->connect(&on_view_minimized);
         output->connect(&on_view_fullscreened);
@@ -583,7 +584,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         output->disconnect(&on_view_mapped);
         output->disconnect(&on_view_unmapped);
-        output->disconnect(&on_view_focused);
+        output->disconnect(&on_keyboard_focus_changed);
         output->disconnect(&on_view_geometry_changed);
         output->disconnect(&on_view_minimized);
         output->disconnect(&on_view_fullscreened);
