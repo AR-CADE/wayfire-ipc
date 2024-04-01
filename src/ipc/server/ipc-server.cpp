@@ -566,7 +566,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
             {
                 Json::Value output_json = ipc_json::describe_output(output);
 
-                output_json["focused"] = wf::get_core().get_active_output() ==
+                output_json["focused"] = wf::get_core().seat->get_active_output() ==
                     output;
 
                 const char *subpixel =

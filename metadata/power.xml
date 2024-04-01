@@ -22,5 +22,11 @@
 			<_long>Disables idle on fullscreen.</_long>
 			<default>true</default>
 		</option>
+		<!-- Disable initially -->
+		<option name="disable_initially" type="bool">
+			<_short>Disable power timeout initially</_short>
+			<_long>Disables power timeout innitially as if the toggle was called once after loading the plugin.</_long>
+			<default>false</default>
+		</option>
 	</plugin>
 </wayfire>

@@ -3,17 +3,12 @@
 #include "ipc/tools.hpp"
 #include <json/forwards.h>
 #include <json/value.h>
-#include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/geometry.hpp>
-#include <wayfire/output.hpp>
-#include <wayfire/window-manager.hpp>
 
 static void scratchpad_toggle_auto(wf::output_t *output)
 {
     // Check if the currently focused window is a scratchpad window and should
     // be hidden again.
-    auto focus = output->get_active_view();
+    auto focus = wf::get_active_view_for_output(output);
     if (focus)
     {
         auto toplevel_view = wf::toplevel_cast(focus);
@@ -139,7 +134,7 @@ Json::Value scratchpad_handler(int argc, char **argv, command_handler_context *c
         scratchpad_toggle_container(toplevel_view);
     } else
     {
-        auto output = wf::get_core().get_active_output();
+        auto output = wf::get_core().seat->get_active_output();
 
         if (!output)
         {

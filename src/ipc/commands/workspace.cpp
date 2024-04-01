@@ -86,7 +86,7 @@ Json::Value workspace_handler(int argc, char **argv, command_handler_context *ct
         return error;
     }
 
-    auto output = wf::get_core().get_active_output();
+    auto output = wf::get_core().seat->get_active_output();
 
     wf::point_t ws;
     if (strcasecmp(argv[0], "number") == 0)

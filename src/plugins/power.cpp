@@ -12,65 +12,56 @@
 class wayfire_power
 {
     wf::option_wrapper_t<int> power_timeout{"power/power_timeout"};
-    wf::wl_listener_wrapper on_idle_power, on_resume_power;
-    wlr_idle_timeout *timeout_power = nullptr;
+    bool is_idle = false;
 
   public:
+    wf::signal::connection_t<wf::seat_activity_signal> on_seat_activity;
     std::optional<wf::idle_inhibitor_t> hotkey_inhibitor;
+    wf::wl_timer<false> timeout_power;
 
     wayfire_power()
     {
         power_timeout.set_callback([=] ()
         {
-            create_power_timeout(1000 * power_timeout);
+            create_power_timeout();
         });
-        create_power_timeout(1000 * power_timeout);
+
+        on_seat_activity = [=] (void*)
+        {
+            create_power_timeout();
+        };
+        create_power_timeout();
+        wf::get_core().connect(&on_seat_activity);
     }
 
-    wayfire_power(const wayfire_power&) = delete;
-    wayfire_power& operator =(const wayfire_power&) = delete;
-    wayfire_power(wayfire_power&&) = delete;
-    wayfire_power& operator =(wayfire_power&&) = delete;
-
-    void destroy_power_timeout()
+    void create_power_timeout()
     {
-        if (timeout_power)
+        if (power_timeout <= 0)
         {
-            on_idle_power.disconnect();
-            on_resume_power.disconnect();
-            wlr_idle_timeout_destroy(timeout_power);
-        }
-
-        timeout_power = nullptr;
-    }
-
-    void create_power_timeout(int timeout_sec)
-    {
-        destroy_power_timeout();
-        if (timeout_sec <= 0)
-        {
+            timeout_power.disconnect();
             return;
         }
 
-        timeout_power = wlr_idle_timeout_create(wf::get_core().protocols.idle,
-            wf::get_core().get_current_seat(), timeout_sec);
-
-        on_idle_power.set_callback([&] (void*)
+        if (!timeout_power.is_connected() && is_idle)
         {
+            is_idle = false;
+            set_state(wf::OUTPUT_IMAGE_SOURCE_DPMS, wf::OUTPUT_IMAGE_SOURCE_SELF);
+
+            return;
+        }
+
+        timeout_power.disconnect();
+        timeout_power.set_timeout(1000 * power_timeout, [=] ()
+        {
+            is_idle = true;
             set_state(wf::OUTPUT_IMAGE_SOURCE_SELF, wf::OUTPUT_IMAGE_SOURCE_DPMS);
         });
-        on_idle_power.connect(&timeout_power->events.idle);
-
-        on_resume_power.set_callback([&] (void*)
-        {
-            set_state(wf::OUTPUT_IMAGE_SOURCE_DPMS, wf::OUTPUT_IMAGE_SOURCE_SELF);
-        });
-        on_resume_power.connect(&timeout_power->events.resume);
     }
 
     ~wayfire_power()
     {
-        destroy_power_timeout();
+        timeout_power.disconnect();
+        wf::get_core().disconnect(&on_seat_activity);
     }
 
     /* Change all outputs with state from to state to */
@@ -201,10 +192,11 @@ class wayfire_power
 class wayfire_power_plugin : public wf::per_output_plugin_instance_t
 {
     wf::option_wrapper_t<bool> disable_on_fullscreen{"power/disable_on_fullscreen"};
+    wf::option_wrapper_t<bool> disable_initially{"power/disable_initially"};
 
     std::optional<wf::idle_inhibitor_t> fullscreen_inhibitor;
     bool has_fullscreen = false;
-    wf::shared_data::ref_ptr_t<wayfire_power> get_instance;
+    wf::shared_data::ref_ptr_t<wayfire_power> global_power;
 
     wf::plugin_activation_data_t grab_interface = {
         .name = "power",
@@ -213,13 +205,13 @@ class wayfire_power_plugin : public wf::per_output_plugin_instance_t
 
     wf::activator_callback toggle = [=] (auto)
     {
-        if (!output->can_activate_plugin(&grab_interface))
+        if (global_power->hotkey_inhibitor.has_value())
         {
-            return false;
+            global_power->hotkey_inhibitor.reset();
+        } else
+        {
+            global_power->hotkey_inhibitor.emplace();
         }
-
-        /* Toggle power for all outputs **/
-        get_instance->toggle_state();
 
         return true;
     };
@@ -230,6 +222,25 @@ class wayfire_power_plugin : public wf::per_output_plugin_instance_t
     {
         this->has_fullscreen = ev->has_promoted;
         update_fullscreen();
+    };
+
+    wf::signal::connection_t<wf::idle_inhibit_changed_signal> inhibit_changed =
+        [=] (wf::idle_inhibit_changed_signal *ev)
+    {
+        if (!ev)
+        {
+            return;
+        }
+
+        if (ev->inhibit)
+        {
+            wf::get_core().disconnect(&global_power->on_seat_activity);
+            global_power->timeout_power.disconnect();
+        } else
+        {
+            wf::get_core().connect(&global_power->on_seat_activity);
+            global_power->create_power_timeout();
+        }
     };
 
     wf::config::option_base_t::updated_callback_t disable_on_fullscreen_changed =
@@ -264,10 +275,10 @@ class wayfire_power_plugin : public wf::per_output_plugin_instance_t
 
         if (option.asString() == IPC_OFF_TOCKEN)
         {
-            get_instance->set_state_off(name_or_id);
+            global_power->set_state_off(name_or_id);
         } else
         {
-            get_instance->set_state_on(name_or_id);
+            global_power->set_state_on(name_or_id);
         }
     };
 
@@ -288,37 +299,39 @@ class wayfire_power_plugin : public wf::per_output_plugin_instance_t
   public:
     void init() override
     {
+        if (disable_initially)
+        {
+            global_power->hotkey_inhibitor.emplace();
+        }
+
         output->add_activator(
             wf::option_wrapper_t<wf::activatorbinding_t>{"power/toggle"},
             &toggle);
+
         output->connect(&fullscreen_state_changed);
         disable_on_fullscreen.set_callback(disable_on_fullscreen_changed);
-        auto view = output->get_active_view();
 
-        if (view != nullptr)
+        if (auto toplevel = toplevel_cast(wf::get_active_view_for_output(output)))
         {
-            auto toplevel_view = wf::toplevel_cast(view);
-
-            if ((toplevel_view != nullptr) && toplevel_view->toplevel()->current().fullscreen)
-            {
-                /* Currently, the fullscreen count would always be 0 or 1,
-                 * since fullscreen-layer-focused is only emitted on changes between 0
-                 * and 1
-                 **/
-                has_fullscreen = true;
-            }
+            /* Currently, the fullscreen count would always be 0 or 1,
+             * since fullscreen-layer-focused is only emitted on changes between 0
+             * and 1
+             **/
+            has_fullscreen = toplevel->pending_fullscreen();
         }
 
         update_fullscreen();
 
         output->connect(&on_power_command);
+        wf::get_core().connect(&inhibit_changed);
     }
 
     void fini() override
     {
-        output->rem_binding(&toggle);
+        wf::get_core().disconnect(&inhibit_changed);
         output->disconnect(&fullscreen_state_changed);
         output->disconnect(&on_power_command);
+        output->rem_binding(&toggle);
     }
 };
 

@@ -226,8 +226,8 @@ bool criteria::matches_container(const Json::Value& container)
 
 bool criteria::matches_view(const Json::Value& view)
 {
-    wf::output_t *focus  = wf::get_core().get_active_output();
-    wayfire_view focused = focus ? focus->get_active_view() : nullptr;
+    wf::output_t *focus  = wf::get_core().seat->get_active_output();
+    wayfire_view focused = focus ? wf::get_active_view_for_output(focus) : nullptr;
 
     if (this->title)
     {
@@ -559,7 +559,7 @@ bool criteria::matches_view(const Json::Value& view)
             if ((uint32_t)id != v->get_id())
             {
                 wf::point_t point =
-                    wf::get_core().get_active_output()->wset()->
+                    wf::get_core().seat->get_active_output()->wset()->
                     get_view_main_workspace(
                         wf::toplevel_cast(v));
                 Json::Value ws = ipc_json::describe_workspace(point,
@@ -850,8 +850,8 @@ bool criteria::parse_token(char *name, char *value)
       case T_CON_ID:
         if (strcmp(value, "__focused__") == 0)
         {
-            wf::output_t *focus = wf::get_core().get_active_output();
-            wayfire_view view   = focus ? focus->get_active_view() : nullptr;
+            wf::output_t *focus = wf::get_core().seat->get_active_output();
+            wayfire_view view   = focus ? wf::get_active_view_for_output(focus) : nullptr;
             this->con_id = view ? view->get_id() : 0;
         } else
         {

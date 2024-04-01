@@ -8,10 +8,14 @@
 #include <string>
 #include <vector>
 #include <wayfire/core.hpp>
+#include <wayfire/geometry.hpp>
 #include <wayfire/output-layout.hpp>
 #include <wayfire/output.hpp>
+#include <wayfire/seat.hpp>
 #include <wayfire/util/log.hpp>
 #include <wayfire/workspace-set.hpp>
+#include <wayfire/window-manager.hpp>
+
 
 #define INVALID_WORKSPACE wf::point_t{-1, -1}
 

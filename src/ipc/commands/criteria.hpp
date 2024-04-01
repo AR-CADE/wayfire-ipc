@@ -6,6 +6,7 @@
 #include <json/json.h>
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
+#include <ipc/tools.hpp>
 #include <wayfire/view.hpp>
 #include <xwayland_support.h>
 

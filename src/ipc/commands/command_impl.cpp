@@ -3,9 +3,6 @@
 #include <cstdint>
 #include <json/value.h>
 #include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/geometry.hpp>
-#include <wayfire/util/log.hpp>
 
 bool ipc_command::parse_boolean(const char *boolean, bool current)
 {
@@ -206,7 +203,7 @@ static void set_config_node(const Json::Value& node, bool node_overridden,
             if ((uint32_t)id != view->get_id())
             {
                 wf::point_t ws =
-                    wf::get_core().get_active_output()->wset()->
+                    wf::get_core().seat->get_active_output()->wset()->
                     get_view_main_workspace(
                         wf::toplevel_cast(view));
                 handler_context->workspace = ipc_json::describe_workspace(ws,
@@ -319,9 +316,9 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
 
         if (!using_criteria)
         {
-            auto out = wf::get_core().get_active_output();
+            auto out = wf::get_core().seat->get_active_output();
             assert(out != nullptr);
-            auto active_view = out->get_active_view();
+            auto active_view = wf::get_active_view_for_output(out);
             if (active_view != nullptr)
             {
                 auto v = ipc_json::describe_view(active_view);

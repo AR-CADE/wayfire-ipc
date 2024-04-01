@@ -13,7 +13,7 @@
 
 static RETURN_STATUS signal_power_cmd(Json::Value argv)
 {
-    auto output = wf::get_core().get_active_output();
+    auto output = wf::get_core().seat->get_active_output();
     power_command_signal data;
     data.argv = argv;
     output->emit(&data);

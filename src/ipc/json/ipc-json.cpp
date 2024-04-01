@@ -833,7 +833,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["percent"]     = Json::nullValue;
     object["urgent"]  = false;
     object["sticky"]  = false;
-    object["focused"] = wf::get_core().get_active_output() == output;
+    object["focused"] = wf::get_core().seat->get_active_output() == output;
     object["floating_nodes"] = get_shell_view_nodes(output);
     object["rect"]  = describe_wlr_box(output->get_layout_geometry());
     object["nodes"] = Json::arrayValue;
@@ -949,34 +949,34 @@ Json::Value ipc_json::describe_dimension(wf::dimensions_t dimension)
     return object;
 }
 
-Json::Value ipc_json::describe_wlr_surface_state(wlr_surface_state surface_state)
-{
-    Json::Value object;
-    object["committed"]     = surface_state.committed;
-    object["buffer_height"] = surface_state.buffer_height;
-    object["buffer_width"]  = surface_state.buffer_width;
-    object["cached_state_locks"] = surface_state.cached_state_locks;
-    object["width"]  = surface_state.width;
-    object["height"] = surface_state.height;
-    object["dx"]     = surface_state.dx;
-    object["dy"]     = surface_state.dy;
-    object["scale"]  = surface_state.scale;
-    object["seq"]    = surface_state.seq;
-    return object;
-}
+// Json::Value ipc_json::describe_wlr_surface_state(wlr_surface_state surface_state)
+// {
+// Json::Value object;
+// object["committed"]     = surface_state.committed;
+// object["buffer_height"] = surface_state.buffer_height;
+// object["buffer_width"]  = surface_state.buffer_width;
+// object["cached_state_locks"] = surface_state.cached_state_locks;
+// object["width"]  = surface_state.width;
+// object["height"] = surface_state.height;
+// object["dx"]     = surface_state.dx;
+// object["dy"]     = surface_state.dy;
+// object["scale"]  = surface_state.scale;
+// object["seq"]    = surface_state.seq;
+// return object;
+// }
 
-Json::Value ipc_json::describe_wlr_surface(wlr_surface *surface)
-{
-    Json::Value object;
-    if (surface != nullptr)
-    {
-        object["sx"] = surface->sx;
-        object["sy"] = surface->sy;
-        object["current"] = describe_wlr_surface_state(surface->current);
-    }
+// Json::Value ipc_json::describe_wlr_surface(wlr_surface *surface)
+// {
+// Json::Value object;
+// if (surface != nullptr)
+// {
+// object["sx"] = surface->sx;
+// object["sy"] = surface->sy;
+// object["current"] = describe_wlr_surface_state(surface->current);
+// }
 
-    return object;
-}
+// return object;
+// }
 
 #if HAVE_XWAYLAND
 Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surface)
@@ -986,7 +986,7 @@ Json::Value ipc_json::describe_wlr_xwayland_surface(wlr_xwayland_surface *surfac
     {
         object["window_id"] = surface->window_id;
         // object["instance"] = surface->instance;
-        object["mapped"] = surface->mapped;
+        // object["mapped"] = surface->mapped;
         object["maximized_horz"] = surface->maximized_horz;
         object["maximized_vert"] = surface->maximized_vert;
         object["minimized"] = surface->minimized;
@@ -1103,10 +1103,10 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 
     object["focus"] = focusNodes;
 
-    wf::output_t *output = wf::get_core().get_active_output();
+    wf::output_t *output = wf::get_core().seat->get_active_output();
     if (output != nullptr)
     {
-        object["focused"] = (output->get_active_view() == view) &&
+        object["focused"] = (wf::get_active_view_for_output(output) == view) &&
             view->get_transformed_node()->is_enabled();
     }
 
@@ -1171,62 +1171,59 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         auto main_wlr_surface = view->get_wlr_surface();
         if (main_wlr_surface != nullptr)
         {
-            if (wlr_surface_is_xwayland_surface(main_wlr_surface))
+            struct wlr_xwayland_surface *main_xsurf =
+                wlr_xwayland_surface_try_from_wlr_surface(main_wlr_surface);
+            if (main_xsurf != nullptr)
             {
                 object["is_xwayland"] = true;
                 object["shell"] = "xwayland";
 
-                struct wlr_xwayland_surface *main_xsurf =
-                    wlr_xwayland_surface_from_wlr_surface(main_wlr_surface);
-                if (main_xsurf != nullptr)
+                Json::Value window_props;
+
+                object["window"] = main_xsurf->window_id;
+
+                auto hints = main_xsurf->hints;
+                if (hints != nullptr)
                 {
-                    Json::Value window_props;
-
-                    object["window"] = main_xsurf->window_id;
-
-                    auto hints = main_xsurf->hints;
-                    if (hints != nullptr)
-                    {
-                        object["urgent"] = hints->flags &
-                            XCB_ICCCM_WM_HINT_X_URGENCY;
-                    } else
-                    {
-                        object["urgent"] = false;
-                    }
-
-                    auto clazz = main_xsurf->class_t;
-                    if (clazz != nullptr)
-                    {
-                        object["class"] = std::string(clazz);
-                    }
-
-                    auto instance = main_xsurf->instance;
-                    if (instance != nullptr)
-                    {
-                        window_props["instance"] = std::string(instance);
-                    }
-
-                    auto title = main_xsurf->title;
-                    if (title != nullptr)
-                    {
-                        window_props["title"] = std::string(title);
-                    }
-
-                    auto role = main_xsurf->role;
-                    if (role != nullptr)
-                    {
-                        window_props["window_role"] = std::string(role);
-                    }
-
-                    if (parent != nullptr)
-                    {
-                        window_props["transient_for"] = parent->get_id();
-                    }
-
-                    window_props["type"] = "unknown";
-
-                    object["window_properties"] = window_props;
+                    object["urgent"] = hints->flags &
+                        XCB_ICCCM_WM_HINT_X_URGENCY;
+                } else
+                {
+                    object["urgent"] = false;
                 }
+
+                auto clazz = main_xsurf->class_t;
+                if (clazz != nullptr)
+                {
+                    object["class"] = std::string(clazz);
+                }
+
+                auto instance = main_xsurf->instance;
+                if (instance != nullptr)
+                {
+                    window_props["instance"] = std::string(instance);
+                }
+
+                auto title = main_xsurf->title;
+                if (title != nullptr)
+                {
+                    window_props["title"] = std::string(title);
+                }
+
+                auto role = main_xsurf->role;
+                if (role != nullptr)
+                {
+                    window_props["window_role"] = std::string(role);
+                }
+
+                if (parent != nullptr)
+                {
+                    window_props["transient_for"] = parent->get_id();
+                }
+
+                window_props["type"] = "unknown";
+
+                object["window_properties"] = window_props;
             }
         }
     }
@@ -1240,7 +1237,7 @@ Json::Value ipc_json::get_root_node()
 {
     Json::Value object;
     Json::Value focusNodes = Json::arrayValue;
-    auto active_output     = wf::get_core().get_active_output();
+    auto active_output     = wf::get_core().seat->get_active_output();
 
     if (active_output == nullptr)
     {
@@ -1763,7 +1760,7 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
 
     auto rect    = wall->get_workspace_rectangle(point);
     bool visible = output->wset()->get_current_workspace() == point;
-    bool focused = visible && (wf::get_core().get_active_output() == output);
+    bool focused = visible && (wf::get_core().seat->get_active_output() == output);
     int index    = ipc_tools::get_workspace_index(point, output);
     int id = ipc_tools::get_workspace_id(output->get_id(), index);
 
