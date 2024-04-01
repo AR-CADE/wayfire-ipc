@@ -5,6 +5,7 @@ An experimental ipc plugin for wayfire, aims to be kind of I3/sway compatible.
 
 - [Wayfire](https://github.com/WayfireWM/wayfire)
 - [JsonCpp](https://github.com/open-source-parsers/jsoncpp)
+- [nlohmann_json](https://github.com/nlohmann/json)
 - [pcre2](https://github.com/PCRE2Project/pcre2)
 
 Build dependencies
