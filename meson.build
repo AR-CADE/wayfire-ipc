@@ -21,7 +21,7 @@ c_comp = meson.get_compiler('c')
 wayfire        	= dependency('wayfire')
 jsoncpp        	= dependency('jsoncpp')
 pcre2           = dependency('libpcre2-8')
-nlohmann_json = dependency('nlohmann_json')
+#nlohmann_json = dependency('nlohmann_json')
 
 
 version = '"@0@"'.format(wayfire.version())
