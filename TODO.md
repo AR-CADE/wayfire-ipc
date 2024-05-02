@@ -1,1 +1,9 @@
-- Dispite the heavy change of the current wayfire main branch (that we can call wayfire 8 beta), this plugin still compile and work correctly ... and it's pretty cool. But i plan to update this plugin once wayfire 8 will be released as stable, make it more as an extention of the comming native ipc plugin and use some of the cool new features around the ipc, until that i will just try to make this plugin compatible with the waifire main branch.
+
+- rename the socket's env variable from `WAYFIRESOCK` to `WAYFIREI3SOCK`
+- headers cleanup
+- check where it's possible to call a distributed fuction with ipc instead of writing/maintaining my own duplicated code
+- sync commands, criteria, etc with [sway](https://github.com/swaywm/sway)
+- move to nlohmann_json (if possible)
+- move to the workspace sets api (and call the ipc plugin for all actions)
+- use the wf::scene api to generate the json tree (if possible)
+- deprecate, then remove `wf-msg` (just get swaymsg directly from sway, or [dart_swaymsg](https://github.com/AR-CADE/dart_swaymsg))
