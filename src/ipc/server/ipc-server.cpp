@@ -1,7 +1,4 @@
 #include <ipc/server.hpp>
-#include <json/value.h>
-#include <string>
-#include <vector>
 #include "commands/command_impl.hpp"
 
 static struct wl_event_source *ipc_event_source;
