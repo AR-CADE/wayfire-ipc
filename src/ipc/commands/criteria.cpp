@@ -558,10 +558,15 @@ bool criteria::matches_view(const Json::Value& view)
         {
             if ((uint32_t)id != v->get_id())
             {
+                auto top = wf::toplevel_cast(v);
+
+                if (top == nullptr) {
+                    continue;
+                }
+                
                 wf::point_t point =
-                    wf::get_core().seat->get_active_output()->wset()->
-                    get_view_main_workspace(
-                        wf::toplevel_cast(v));
+                    v->get_output()->wset()->
+                    get_view_main_workspace(top);
                 Json::Value ws = ipc_json::describe_workspace(point,
                     v->get_output());
                 workspace_name = ws.get("name", Json::nullValue);
@@ -581,8 +586,14 @@ bool criteria::matches_view(const Json::Value& view)
         {
             if (focused)
             {
+                auto top = wf::toplevel_cast(focused);
+
+                if (top == nullptr) {
+                    return false;
+                }
+
                 wf::point_t focused_ws =
-                    focused->get_output()->wset()->get_view_main_workspace(wf::toplevel_cast(focused));
+                    focused->get_output()->wset()->get_view_main_workspace(top);
                 Json::Value focused_workspace = ipc_json::describe_workspace(
                     focused_ws, focused->get_output());
                 Json::Value focused_workspace_name = focused_workspace.get("name",
