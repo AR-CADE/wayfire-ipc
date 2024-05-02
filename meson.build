@@ -19,6 +19,7 @@ icon_dir = join_paths(share_dir, 'wayfire', 'icons')
 c_comp = meson.get_compiler('c')
 
 wayfire        	= dependency('wayfire')
+wlroots        	= dependency('wlroots')
 jsoncpp        	= dependency('jsoncpp')
 pcre2           = dependency('libpcre2-8')
 nlohmann_json = dependency('nlohmann_json')
