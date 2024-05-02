@@ -560,10 +560,11 @@ bool criteria::matches_view(const Json::Value& view)
             {
                 auto top = wf::toplevel_cast(v);
 
-                if (top == nullptr) {
+                if (top == nullptr)
+                {
                     continue;
                 }
-                
+
                 wf::point_t point =
                     v->get_output()->wset()->
                     get_view_main_workspace(top);
@@ -588,7 +589,8 @@ bool criteria::matches_view(const Json::Value& view)
             {
                 auto top = wf::toplevel_cast(focused);
 
-                if (top == nullptr) {
+                if (top == nullptr)
+                {
                     return false;
                 }
 

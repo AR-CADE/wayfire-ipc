@@ -201,13 +201,14 @@ static void set_config_node(const Json::Value& node, bool node_overridden,
         for (const wayfire_view& view : wf::get_core().get_all_views())
         {
             if ((uint32_t)id != view->get_id())
-            {   
+            {
                 auto top = wf::toplevel_cast(view);
 
-                if (top == nullptr) {
+                if (top == nullptr)
+                {
                     continue;
                 }
-                
+
                 wf::point_t ws =
                     view->get_output()->wset()->
                     get_view_main_workspace(top);
