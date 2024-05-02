@@ -883,7 +883,8 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
         output_adaptive_sync_status_description(wlr_output->adaptive_sync_status);
 
     wf::point_t workspace = output->wset()->get_current_workspace();
-    object["current_workspace"] = ipc_tools::get_workspace_index(workspace, output);
+    int index = ipc_tools::get_workspace_index(workspace, output);
+    object["current_workspace"] = std::to_string(index);
 
     Json::Value modes_array = Json::arrayValue;
 
