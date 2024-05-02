@@ -4,6 +4,9 @@
 #include <strings.h>
 #include <wayfire/core.hpp>
 #include <wayfire/opengl.hpp>
+// #include <wayfire/plugins/common/shared-core-data.hpp>
+// #include <wayfire/plugins/ipc/ipc-helpers.hpp>
+// #include <wayfire/plugins/ipc/ipc-method-repository.hpp>
 #include <wayfire/view-transform.hpp>
 
 Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
@@ -37,17 +40,27 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
     }
 
     char *err;
-    float val   = strtof(argc == 1 ? argv[0] : argv[1], &err);
-    float alpha = 0;
+    float val = strtof(argc == 1 ? argv[0] : argv[1], &err);
+
     if (*err)
     {
         return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "opacity float invalid");
     }
 
+    //
     auto transform_2d =
         view->get_transformed_node()->get_transformer<wf::scene::view_2d_transformer_t>(
             "opacity");
+
+    float alpha = transform_2d ? transform_2d->alpha : 1;
+    //
+    // wf::shared_data::ref_ptr_t<wf::ipc::method_repository_t> ipc_repo;
+    // nlohmann::json get_request;
+    // get_request["view-id"] = view->get_id();
+    // auto get_response = ipc_repo->call_method("wf/alpha/get-view-alpha", get_request);
+
+    // float alpha = get_response["alpha"];
 
     if (!strcasecmp(argv[0], "plus"))
     {
@@ -59,9 +72,6 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
     {
         return ipc_json::command_result(RETURN_INVALID_PARAMETER,
             "Expected: set|plus|minus <0..1>");
-    } else
-    {
-        alpha = val;
     }
 
     if ((val < 0) || (val > 1))
@@ -70,6 +80,11 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
             "opacity value out of bounds");
     }
 
+    // nlohmann::json set_request;
+    // set_request["view-id"] = view->get_id();
+    // set_request["alpha"] = val;
+    // (void)ipc_repo->call_method("wf/alpha/set-view-alpha", set_request);
+    //
     if (val == 1)
     {
         if (transform_2d)
@@ -80,18 +95,19 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
     {
         if (transform_2d)
         {
-            transform_2d->alpha = alpha;
+            transform_2d->alpha = val;
         } else
         {
             auto new_transform_2d =
                 std::make_shared<wf::scene::view_2d_transformer_t>(view);
-            new_transform_2d->alpha = alpha;
+            new_transform_2d->alpha = val;
             view->get_transformed_node()->add_transformer(
                 new_transform_2d, wf::TRANSFORMER_HIGHLEVEL, "opacity");
         }
     }
 
     view->damage();
+    //
 
     return ipc_json::command_result(RETURN_SUCCESS);
 }
