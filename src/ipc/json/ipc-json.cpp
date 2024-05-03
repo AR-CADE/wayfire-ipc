@@ -1814,7 +1814,7 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     //
     object["num"] = index;
     object["fullscreen_mode"] = 1;
-    object["name"]    = index;
+    object["name"]    = std::to_string(index);
     object["visible"] = visible;
     object["rect"]    = ipc_json::describe_geometry(rect);
     object["output"]  = output->handle &&
