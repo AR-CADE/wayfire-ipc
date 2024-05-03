@@ -794,7 +794,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
                 sections.append(section);
             }
 
-            object["config"] = sections;
+            object["config"] = sections.toStyledString();
         }
 
         std::string json_string = ipc_json::json_to_string(object);

@@ -70,14 +70,7 @@ Json::Value ipc_json::get_version()
     version["minor"] = minor;
     version["patch"] = patch;
     version["abi"]   = get_abi_version();
-
-    /*
-     *  Json::Value xml_dirs = Json::arrayValue;
-     *  for (std::string dir : wf::get_core().config_backend->get_xml_dirs())
-     * xml_dirs.append(dir);
-     *
-     *  version["loaded_config_file_names"] = xml_dirs;
-     */
+    version["loaded_config_file_name"] = "";
 
     return version;
 }
@@ -745,6 +738,8 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
 
     object["modes"] = Json::arrayValue;
     object["rect"]  = create_empty_rect();
+    object["window_rect"] = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
 
     return object;
 }
@@ -841,6 +836,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["deco_rect"]   = create_empty_rect();
     object["windows"]     = Json::nullValue;
     object["window_rect"] = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
 
     Json::Value focusNodes = Json::arrayValue;
     auto workspaces = get_workspaces_nodes(output);
@@ -1154,9 +1150,15 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["deco_rect"] = create_empty_rect(); // FIX ME
     object["window"]    = Json::nullValue;
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
-    object["geometry"]    = describe_geometry(toplevel_view->toplevel()->current().geometry);
+    object["geometry"]    = create_empty_rect();
+    object["fullscreen_mode"] = 0;
 
-    object["fullscreen_mode"] = (toplevel_view->toplevel()->current().fullscreen) ? 1 : 0;
+    auto top = toplevel_view->toplevel();
+    if (top != nullptr)
+    {
+        object["geometry"] = describe_geometry(top->current().geometry);
+        object["fullscreen_mode"] = (top->current().fullscreen) ? 1 : 0;
+    }
 
     object["shell"] = "xdg_shell";
     object["inhibit_idle"] = false;
@@ -1348,9 +1350,9 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
             {
                 container["focused"] = views.size() == 0;
             }
-        }
 
-        nodes.append(container);
+            nodes.append(container);
+        }
     }
 
     return nodes;
@@ -1393,9 +1395,9 @@ Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output
             {
                 container["focused"] = views.size() == 0;
             }
-        }
 
-        nodes.append(container);
+            nodes.append(container);
+        }
     }
 
     return nodes;
@@ -1434,6 +1436,11 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
         }
 
         auto obj = describe_view(v);
+        if (obj.isNull())
+        {
+            continue;
+        }
+
         nodes.append(obj);
     }
 
@@ -1476,9 +1483,9 @@ Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *outpu
             {
                 container["focused"] = views.size() == 0;
             }
-        }
 
-        nodes.append(container);
+            nodes.append(container);
+        }
     }
 
     return nodes;
@@ -1496,17 +1503,20 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
         for (int y = 0; y < wsize.height; y++)
         {
             auto workspace = describe_workspace(wf::point_t{x, y}, output);
-            if (describe_container_nodes)
+            if (!workspace.isNull())
             {
-                auto container = get_container_nodes(wf::point_t{x, y}, output);
-                workspace["nodes"] = container;
-                if (workspace["focused"] == true)
+                if (describe_container_nodes)
                 {
-                    workspace["focused"] = container.size() == 0;
+                    auto container = get_container_nodes(wf::point_t{x, y}, output);
+                    workspace["nodes"] = container;
+                    if (workspace["focused"] == true)
+                    {
+                        workspace["focused"] = container.size() == 0;
+                    }
                 }
-            }
 
-            vector.push_back(workspace);
+                vector.push_back(workspace);
+            }
         }
     }
 
@@ -1566,9 +1576,9 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
             {
                 container["focused"] = views.size() == 0;
             }
-        }
 
-        nodes.append(container);
+            nodes.append(container);
+        }
     }
 
     return nodes;
@@ -1698,6 +1708,7 @@ Json::Value ipc_json::get_i3_scratchpad_output_nodes(Json::Value rootNodes)
     object["deco_rect"]   = create_empty_rect();
     object["windows"]     = Json::nullValue;
     object["window_rect"] = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
 
     Json::Value focusNodes = Json::arrayValue;
     Json::Value workspaces = Json::arrayValue;
@@ -1731,12 +1742,20 @@ Json::Value ipc_json::get_tree()
     }
 
     auto i3Scratchpad = get_i3_scratchpad_output_nodes(root);
-    rootNodes.append(i3Scratchpad);
+    if (i3Scratchpad.isNull() == false)
+    {
+        rootNodes.append(i3Scratchpad);
+    }
 
     auto outputs = wf::get_core().output_layout->get_outputs();
     for (wf::output_t *output : outputs)
     {
         auto out = describe_output(output);
+        if (i3Scratchpad.isNull())
+        {
+            continue;
+        }
+
         auto workspaces = get_workspaces_nodes(output);
         out["nodes"] = workspaces;
         if (out["focused"] == true)
