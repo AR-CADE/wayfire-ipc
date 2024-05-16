@@ -255,7 +255,7 @@ bool criteria::matches_view(const Json::Value& view)
 
           case PATTERN_PCRE2:
         {
-            if (regex_cmp(title_str, this->title->regex) != 0)
+            if (regex_cmp(title_str, this->title->regex) < 0)
             {
                 return false;
             }
@@ -300,7 +300,7 @@ bool criteria::matches_view(const Json::Value& view)
 
           case PATTERN_PCRE2:
         {
-            if (regex_cmp(view_shell, this->shell->regex) != 0)
+            if (regex_cmp(view_shell, this->shell->regex) < 0)
             {
                 return false;
             }
@@ -323,26 +323,26 @@ bool criteria::matches_view(const Json::Value& view)
 
         switch (this->app_id->match_type)
         {
-          case PATTERN_FOCUSED:
-        {
+            case PATTERN_FOCUSED:
+            {
             std::string focused_app_id_str = focused->get_app_id();
             if (focused && lenient_strcmp(app_id_str, focused_app_id_str.c_str()))
-            {
-                return false;
+                {
+                    return false;
+                }
+
+                break;
             }
 
-            break;
-        }
-
-          case PATTERN_PCRE2:
-        {
-            if (regex_cmp(app_id_str, this->app_id->regex) != 0)
+            case PATTERN_PCRE2:
             {
-                return false;
-            }
+            if (regex_cmp(app_id_str, this->app_id->regex) < 0)
+            {
+                    return false;
+                }
 
-            break;
-        }
+                break;
+            }
         }
     }
 
@@ -380,7 +380,7 @@ bool criteria::matches_view(const Json::Value& view)
             break;
 
           case PATTERN_PCRE:
-            if (regex_cmp(class, this->class->regex) != 0)
+            if (regex_cmp(class, this->class->regex) < 0)
             {
                 return false;
             }
@@ -408,7 +408,7 @@ bool criteria::matches_view(const Json::Value& view)
             break;
 
           case PATTERN_PCRE:
-            if (regex_cmp(instance, this->instance->regex) != 0)
+            if (regex_cmp(instance, this->instance->regex) < 0)
             {
                 return false;
             }
@@ -436,7 +436,7 @@ bool criteria::matches_view(const Json::Value& view)
             break;
 
           case PATTERN_PCRE:
-            if (regex_cmp(window_role, this->window_role->regex) != 0)
+            if (regex_cmp(window_role, this->window_role->regex) < 0)
             {
                 return false;
             }
@@ -618,7 +618,7 @@ bool criteria::matches_view(const Json::Value& view)
         }
 
           case PATTERN_PCRE2:
-            if (regex_cmp(name.c_str(), this->workspace->regex) != 0)
+            if (regex_cmp(name.c_str(), this->workspace->regex) < 0)
             {
                 return false;
             }
