@@ -322,25 +322,25 @@ bool criteria::matches_view(const Json::Value& view)
 
         switch (this->app_id->match_type)
         {
-            case PATTERN_FOCUSED:
+          case PATTERN_FOCUSED:
+        {
+            if (focused && lenient_strcmp(app_id_str, focused->get_app_id().c_str()))
             {
-                if (focused && lenient_strcmp(app_id_str, focused->get_app_id().c_str()))
-                {
-                    return false;
-                }
-
-                break;
+                return false;
             }
 
-            case PATTERN_PCRE2:
-            {
-                if (regex_cmp(app_id_str, this->app_id->regex) < 0)
-                {
-                    return false;
-                }
+            break;
+        }
 
-                break;
+          case PATTERN_PCRE2:
+        {
+            if (regex_cmp(app_id_str, this->app_id->regex) < 0)
+            {
+                return false;
             }
+
+            break;
+        }
         }
     }
 
