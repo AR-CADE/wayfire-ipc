@@ -244,8 +244,7 @@ bool criteria::matches_view(const Json::Value& view)
         {
           case PATTERN_FOCUSED:
         {
-            std::string focused_title_str = focused->get_title();
-            if (focused && lenient_strcmp(title_str, focused_title_str.c_str()))
+            if (focused && lenient_strcmp(title_str, focused->get_title().c_str()))
             {
                 return false;
             }
@@ -325,8 +324,7 @@ bool criteria::matches_view(const Json::Value& view)
         {
             case PATTERN_FOCUSED:
             {
-            std::string focused_app_id_str = focused->get_app_id();
-            if (focused && lenient_strcmp(app_id_str, focused_app_id_str.c_str()))
+                if (focused && lenient_strcmp(app_id_str, focused->get_app_id().c_str()))
                 {
                     return false;
                 }
@@ -336,8 +334,8 @@ bool criteria::matches_view(const Json::Value& view)
 
             case PATTERN_PCRE2:
             {
-            if (regex_cmp(app_id_str, this->app_id->regex) < 0)
-            {
+                if (regex_cmp(app_id_str, this->app_id->regex) < 0)
+                {
                     return false;
                 }
 
