@@ -33,6 +33,7 @@ struct pattern
 
 enum criteria_token
 {
+    T_ALL,
     T_APP_ID,
     T_CON_ID,
     T_CON_MARK,
@@ -73,6 +74,7 @@ class criteria
     struct pattern *window_role = nullptr;
     enum atom_name window_type;
 #endif
+    bool all = false;
     bool floating = false;
     bool tiling   = false;
     char urgent   = 0; // 'l' for latest or 'o' for oldest
@@ -125,7 +127,7 @@ class criteria
     // The error pointer is used for parsing functions, and saves having to pass it
     // as an argument in several places.
     char *error = nullptr;
-    bool parse_token(char *name, char *value);
+    bool parse_token(const char *name, char *value);
     bool matches_view(const Json::Value& view);
     bool has_container();
     bool matches_container(const Json::Value& container);
@@ -139,7 +141,7 @@ class criteria
 #endif
     static void unescape(char *value);
     static void skip_spaces(char **head);
-    static enum criteria_token token_from_name(char *name);
+    static enum criteria_token token_from_name(const char *name);
 #if HAVE_XWAYLAND && WIP
     static enum atom_name parse_window_type(const char *type);
 #endif

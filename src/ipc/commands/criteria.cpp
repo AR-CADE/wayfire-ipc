@@ -36,6 +36,7 @@ bool criteria::is_empty()
 {
     return !this->title &&
            !this->shell &&
+           !this->all &&
            !this->app_id &&
            !this->con_mark &&
            !this->con_id
@@ -767,9 +768,12 @@ enum atom_name criteria::parse_window_type(const char *type)
 
 #endif
 
-enum criteria_token criteria::token_from_name(char *name)
+enum criteria_token criteria::token_from_name(const char *name)
 {
-    if (strcmp(name, "app_id") == 0)
+    if (strcmp(name, "all") == 0)
+    {
+        return T_ALL;
+    } else if (strcmp(name, "app_id") == 0)
     {
         return T_APP_ID;
     } else if (strcmp(name, "con_id") == 0)
@@ -821,7 +825,7 @@ enum criteria_token criteria::token_from_name(char *name)
     return T_INVALID;
 }
 
-bool criteria::parse_token(char *name, char *value)
+bool criteria::parse_token(const char *name, char *value)
 {
     enum criteria_token token = token_from_name(name);
     if (token == T_INVALID)
@@ -833,8 +837,8 @@ bool criteria::parse_token(char *name, char *value)
         return false;
     }
 
-    // Require value, unless token is floating or tiled
-    if (!value && (token != T_FLOATING) && (token != T_TILING))
+    // Require value, unless token is all, floating or tiled
+    if (!value && (token != T_ALL) && (token != T_FLOATING) && (token != T_TILING))
     {
         const char *fmt = "Token '%s' requires a value";
         int len = strlen(fmt) + strlen(name) - 1;
@@ -846,6 +850,10 @@ bool criteria::parse_token(char *name, char *value)
     char *endptr = nullptr;
     switch (token)
     {
+      case T_ALL:
+        this->all = true;
+        break;
+
       case T_TITLE:
         pattern_create(&this->title, value);
         break;
