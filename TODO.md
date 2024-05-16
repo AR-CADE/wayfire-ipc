@@ -1,5 +1,7 @@
-
+- rename the repository from `WAYFIRE-IPC` to `WAYFIRE-I3-IPC`
+- rename the plugin name from `ipc-server` to `i3-ipc`
 - rename the socket's env variable from `WAYFIRESOCK` to `WAYFIREI3SOCK`
+- rename the socket file from `wf-ipc.xxxx.sock` to `wf-i3-ipc.xxxx.sock`
 - headers cleanup
 - check where it's possible to call a distributed fuction with ipc instead of writing/maintaining my own duplicated code
 - sync commands, criteria, etc with [sway](https://github.com/swaywm/sway)
