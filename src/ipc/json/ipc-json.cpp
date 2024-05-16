@@ -1,10 +1,10 @@
 #include <ipc.h>
 #include <algorithm>
-#include <cstddef>
 #include <cstdlib>
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
 #include <json/value.h>
+#include <wlr/util/box.h>
 #if 0
     #include <libinput.h>
 #endif
@@ -28,10 +28,14 @@ wf::option_wrapper_t<int> keyboard_repeat_delay{"input/kb_repeat_delay"};
 wf::option_wrapper_t<int> keyboard_repeat_rate{"input/kb_repeat_rate"};
 wf::option_wrapper_t<double> mouse_scroll_speed{"input/mouse_scroll_speed"};
 
-static const unsigned long i3_scratchpad_workspace_id = rand() %
-    (unsigned long)(2000 + (RAND_MAX / 2));
-static const unsigned long i3_scratchpad_output_id = rand() %
-    (unsigned long)(2000 + (RAND_MAX / 2));
+// static const unsigned long i3_scratch_id = rand() %
+// (unsigned long)(2000 + (RAND_MAX / 2));
+// static const unsigned long i3_output_id = rand() %
+// (unsigned long)(2000 + (RAND_MAX / 2));
+
+
+static const int i3_output_id  = INT32_MAX;
+static const int i3_scratch_id = INT32_MAX - 1;
 
 Json::Value ipc_json::get_abi_version()
 {
@@ -801,42 +805,63 @@ Json::Value ipc_json::describe_output_mode(const struct wlr_output_mode *mode)
     return mode_object;
 }
 
-Json::Value ipc_json::describe_output(wf::output_t *output)
+Json::Value ipc_json::create_node(int id, const std::string& type, char *name, bool focused,
+    Json::Value focus, wlr_box rect)
 {
     Json::Value object;
 
+    object["id"] = id;
+
+    object["name"] = Json::nullValue;
+    if (name != nullptr)
+    {
+        object["name"] = name;
+    }
+
+    object["type"]    = type;
+    object["percent"] = Json::nullValue;
+    object["border"]  = "none";
+    object["current_border_width"] = 0;
+    object["layout"] = "none";
+    object["orientation"] = "none";
+    object["rect"] = describe_wlr_box(rect);
+    object["window_rect"] = create_empty_rect();
+    object["deco_rect"]   = create_empty_rect();
+    object["geometry"]    = create_empty_rect();
+    object["urgent"]  = false;
+    object["sticky"]  = false;
+    object["marks"]   = Json::arrayValue;
+    object["windows"] = Json::nullValue;
+    object["focused"] = focused;
+    object["focus"]   = focus;
+    object["nodes"]   = Json::arrayValue;
+    object["floating_nodes"] = Json::arrayValue;
+    object["floating"] = Json::nullValue;
+    object["scratchpad_state"] = Json::nullValue;
+
+    return object;
+}
+
+Json::Value ipc_json::describe_output(wf::output_t *output)
+{
     if (!output)
     {
-        return object;
+        return Json::nullValue;
     }
 
     wlr_output *wlr_output = output->handle;
 
     if (!wlr_output)
     {
-        return object;
+        return Json::nullValue;
     }
 
-    //
-    // Node attr
-    //
-    object["id"]     = output->get_id();
-    object["type"]   = "output";
-    object["border"] = "none";
-    object["current_border_width"] = 0;
-    object["orientation"] = orientation_description(output);
-    object["percent"]     = Json::nullValue;
-    object["urgent"]  = false;
-    object["sticky"]  = false;
-    object["focused"] = wf::get_core().seat->get_active_output() == output;
+    Json::Value object =
+        create_node(output->get_id(), "output", wlr_output->name,
+            wf::get_core().seat->get_active_output() == output, Json::nullValue,
+            output->get_layout_geometry());
+    object["orientation"]    = orientation_description(wlr_output->transform);
     object["floating_nodes"] = get_shell_view_nodes(output);
-    object["rect"]  = describe_wlr_box(output->get_layout_geometry());
-    object["nodes"] = Json::arrayValue;
-    object["marks"] = Json::arrayValue;
-    object["deco_rect"]   = create_empty_rect();
-    object["windows"]     = Json::nullValue;
-    object["window_rect"] = create_empty_rect();
-    object["geometry"]    = create_empty_rect();
 
     Json::Value focusNodes = Json::arrayValue;
     auto workspaces = get_workspaces_nodes(output);
@@ -858,21 +883,16 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
 
     object["focus"] = focusNodes;
 
-    //
-    // Output specific attr
-    //
     object["non_desktop"] = false;
     object["active"]  = true;
     object["dpms"]    = wlr_output->enabled;
     object["power"]   = wlr_output->enabled;
     object["primary"] = false;
     object["layout"]  = "output";
-    object["orientation"] = orientation_description(wlr_output->transform);
-    object["make"]   = wlr_output->make ? wlr_output->make : "";
-    object["name"]   = wlr_output->name ? wlr_output->name : "";
-    object["model"]  = wlr_output->model ? wlr_output->model : "";
-    object["serial"] = wlr_output->serial ? wlr_output->serial : "";
-    object["scale"]  = wlr_output->scale;
+    object["make"]    = wlr_output->make ? wlr_output->make : "";
+    object["model"]   = wlr_output->model ? wlr_output->model : "";
+    object["serial"]  = wlr_output->serial ? wlr_output->serial : "";
+    object["scale"]   = wlr_output->scale;
     object["scale_filter"] = "unknown";
     object["transform"]    = output_transform_description(wlr_output->transform);
     object["adaptive_sync_status"] =
@@ -1050,17 +1070,16 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         return Json::nullValue;
     }
 
-    Json::Value object;
-
-    //
-    // Node attr
-    //
-    object["id"] = view->get_id();
-    // NOTE for now we support only support the wm-actions plugin
     auto layer = wf::get_view_layer(view);
-    object["type"] = view->has_data("wm-actions-above") ||
+
+    bool floating = view->has_data("wm-actions-above") ||
         (layer == wf::scene::layer::TOP ||
-            layer == wf::scene::layer::DWIDGET) ? "floating_con" : "con";
+            layer == wf::scene::layer::DWIDGET);
+
+    Json::Value object =
+        create_node(view->get_id(), floating ? "floating_con" : "con", view->get_title().data(),
+            false, Json::nullValue,
+            wlr_box{0, 0, 0, 0});
 
     auto toplevel_view = wf::toplevel_cast(view);
     if (toplevel_view == nullptr)
@@ -1068,17 +1087,13 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         return Json::nullValue;
     }
 
-    // TODO support tiling
     object["layout"] = "stacked";
-    // TODO: figure out what if the border type for the container
-    object["border"] = "none";
-    object["current_border_width"] = 0;
     object["orientation"] = orientation_description(view->get_output());
-    object["urgent"] = false;
     object["sticky"] = toplevel_view->sticky;
     object["floating_nodes"] = get_view_nodes(view, true);
-    object["name"]  = view->get_title();
-    object["nodes"] = Json::arrayValue;
+
+    // sway doesn't track the floating reason, so we can't use "auto_on" or "user_off"
+    object["floating"] = floating ? "user_on" : "auto_off";
 
     auto views = get_view_nodes(view);
     Json::Value focusNodes = Json::arrayValue;
@@ -1121,9 +1136,6 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         }
     }
 
-    //
-    // Container specific attr
-    //
     wl_client *client = view->get_client();
     if (client != nullptr)
     {
@@ -1144,14 +1156,9 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         object["rect"] = describe_geometry(rect);
     }
 
-    object["app_id"]    = view->get_app_id();
-    object["visible"]   = view->get_transformed_node()->is_enabled();
-    object["marks"]     = Json::arrayValue;
-    object["deco_rect"] = create_empty_rect(); // FIX ME
-    object["window"]    = Json::nullValue;
+    object["app_id"]  = view->get_app_id();
+    object["visible"] = view->get_transformed_node()->is_enabled();
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
-    object["geometry"]    = create_empty_rect();
-    object["fullscreen_mode"] = 0;
 
     auto top = toplevel_view->toplevel();
     if (top != nullptr)
@@ -1159,6 +1166,9 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         object["geometry"] = describe_geometry(top->current().geometry);
         object["fullscreen_mode"] = (top->current().fullscreen) ? 1 : 0;
     }
+
+    // sway doesn't track if window was resized in scratchpad, so we can't use "changed"
+    object["scratchpad_state"] = !toplevel_view->minimized ? "none" : "fresh";
 
     object["shell"] = "xdg_shell";
     object["inhibit_idle"] = false;
@@ -1238,7 +1248,6 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 
 Json::Value ipc_json::get_root_node()
 {
-    Json::Value object;
     Json::Value focusNodes = Json::arrayValue;
     auto active_output     = wf::get_core().seat->get_active_output();
 
@@ -1247,25 +1256,13 @@ Json::Value ipc_json::get_root_node()
         return Json::nullValue;
     }
 
-    //
-    // Node attr
-    //
-    object["id"]     = 0;
+    Json::Value object =
+        create_node(0, "root", std::string("root").data(),
+            false, Json::nullValue,
+            wlr_box{0, 0, 0, 0});
+
     object["layout"] = "stacked";
-    object["name"]   = "root";
-    object["type"]   = "root";
-    object["border"] = "none";
-    object["current_border_width"] = 0;
     object["orientation"] = "horizontal"; // TODO: FIXME
-    object["percent"]     = Json::nullValue;
-    object["urgent"] = false;
-    object["sticky"] = false;
-    object["floating_nodes"] = Json::arrayValue;
-    object["marks"]     = Json::arrayValue;
-    object["deco_rect"] = create_empty_rect();
-    object["geometry"]  = create_empty_rect();
-    object["window"]    = Json::nullValue;
-    object["window_rect"] = create_empty_rect();
 
     auto outputs = wf::get_core().output_layout->get_outputs();
     wf::geometry_t rect;
@@ -1635,28 +1632,13 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes()
 
 Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
 {
-    Json::Value object = Json::objectValue;
+    Json::Value object =
+        create_node(i3_scratch_id, "workspace", std::string("__i3_scratch").data(),
+            false, Json::nullValue,
+            wlr_box{0, 0, 0, 0});
 
-    //
-    // Node attr
-    //
-    object["id"]     = i3_scratchpad_workspace_id;
-    object["type"]   = "workspace";
     object["layout"] = "stacked";
-    object["border"] = "none";
-    object["current_border_width"] = 0;
     object["orientation"] = rootNodes.get("orientation", "horizontal");
-    object["percent"]     = Json::nullValue;
-    object["urgent"]  = false;
-    object["sticky"]  = false;
-    object["focused"] = false;
-    object["floating_nodes"] = Json::arrayValue;
-    object["nodes"]     = Json::arrayValue;
-    object["marks"]     = Json::arrayValue;
-    object["deco_rect"] = create_empty_rect();
-    object["window"]    = Json::nullValue;
-    object["window_rect"] = create_empty_rect();
-    object["geometry"]    = create_empty_rect();
 
     auto containers = get_i3_scratchpad_container_nodes();
     Json::Value focusNodes = Json::arrayValue;
@@ -1679,7 +1661,6 @@ Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
     object["focus"] = focusNodes;
     object["floating_nodes"]  = containers;
     object["fullscreen_mode"] = 1;
-    object["name"] = "__i3_scratch";
     object["rect"] = rootNodes.get("rect", create_empty_rect());
 
     return object;
@@ -1687,28 +1668,13 @@ Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
 
 Json::Value ipc_json::get_i3_scratchpad_output_nodes(Json::Value rootNodes)
 {
-    Json::Value object;
+    Json::Value object =
+        create_node(i3_output_id, "output", (char*)"__i3",
+            false, Json::nullValue,
+            wlr_box{0, 0, 0, 0});
 
-    //
-    // Node attr
-    //
-    object["id"]     = i3_scratchpad_output_id;
-    object["type"]   = "output";
-    object["border"] = "none";
-    object["current_border_width"] = 0;
     object["orientation"] = rootNodes.get("orientation", "horizontal");
-    object["percent"]     = Json::nullValue;
-    object["urgent"]  = false;
-    object["sticky"]  = false;
-    object["focused"] = false;
-    object["floating_nodes"] = Json::arrayValue;
-    object["rect"]  = rootNodes.get("rect", create_empty_rect());
-    object["nodes"] = Json::arrayValue;
-    object["marks"] = Json::arrayValue;
-    object["deco_rect"]   = create_empty_rect();
-    object["windows"]     = Json::nullValue;
-    object["window_rect"] = create_empty_rect();
-    object["geometry"]    = create_empty_rect();
+    object["rect"] = rootNodes.get("rect", create_empty_rect());
 
     Json::Value focusNodes = Json::arrayValue;
     Json::Value workspaces = Json::arrayValue;
@@ -1726,7 +1692,6 @@ Json::Value ipc_json::get_i3_scratchpad_output_nodes(Json::Value rootNodes)
     object["focus"]  = focusNodes;
     object["nodes"]  = workspaces;
     object["layout"] = "output";
-    object["name"]   = "__i3";
 
     return object;
 }
@@ -1784,29 +1749,18 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     int index    = ipc_tools::get_workspace_index(point, output);
     int id = ipc_tools::get_workspace_id(output->get_id(), index);
 
-    Json::Value object = Json::objectValue;
-
     //
     // Node attr
     //
-    object["id"]     = id;
-    object["type"]   = "workspace";
+    Json::Value object =
+        create_node(id, "workspace", std::to_string(index).data(),
+            focused, Json::nullValue,
+            rect);
+
     object["layout"] = "stacked";
-    object["border"] = "none";
-    object["current_border_width"] = 0;
-    object["orientation"] = orientation_description(output);
-    object["percent"]     = Json::nullValue;
-    object["urgent"]  = false;
-    object["sticky"]  = false;
-    object["focused"] = focused;
+    object["orientation"]    = orientation_description(output);
     object["representation"] = "";
     object["floating_nodes"] = get_top_view_nodes(point, output);
-    object["nodes"]     = Json::arrayValue;
-    object["marks"]     = Json::arrayValue;
-    object["deco_rect"] = create_empty_rect();
-    object["window"]    = Json::nullValue;
-    object["window_rect"] = create_empty_rect();
-    object["geometry"]    = create_empty_rect();
 
     auto containers = get_container_nodes(wf::point_t{point.x, point.y}, output);
     Json::Value focusNodes = Json::arrayValue;
@@ -1828,14 +1782,9 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
 
     object["focus"] = focusNodes;
 
-    //
-    // Workspace specific attr
-    //
     object["num"] = index;
     object["fullscreen_mode"] = 1;
-    object["name"]    = std::to_string(index);
     object["visible"] = visible;
-    object["rect"]    = ipc_json::describe_geometry(rect);
     object["output"]  = output->handle &&
         output->handle->name ? output->handle->name : "";
     object["grid_position"] = ipc_json::wayfire_point_to_json(point);

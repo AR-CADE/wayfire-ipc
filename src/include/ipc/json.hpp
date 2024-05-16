@@ -35,7 +35,7 @@ class ipc_json : public json
         const char *error = nullptr);
     static Json::Value describe_view(wayfire_view view);
     static Json::Value describe_dimension(wf::dimensions_t dimension);
-    static Json::Value describe_wlr_box(wf::geometry_t geometry);
+    static Json::Value describe_wlr_box(wlr_box box);
     static Json::Value describe_geometry(wf::geometry_t geometry);
     static Json::Value describe_point(wf::point_t point);
     static Json::Value describe_pointf(wf::pointf_t point);
@@ -68,6 +68,8 @@ class ipc_json : public json
         wf::output_t *output);
     static Json::Value get_i3_scratchpad_container_nodes_by_workspace(wf::point_t ws,
         wf::output_t *output);
+    static Json::Value create_node(int id, const std::string& type, char *name, bool focused,
+        Json::Value focus, wlr_box rect);
 
   private:
     static Json::Value get_root_node();
