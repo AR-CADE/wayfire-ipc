@@ -54,7 +54,7 @@ jobs:
     - run: zypper --non-interactive install git clang pkgconf meson ninja wayland-devel xwayland-devel wayland-protocols-devel Mesa-libGLESv3-devel libinput-devel libxkbcommon-devel libpixman-1-0-devel glm-devel libdrm-devel libglvnd-devel cairo-devel pango-devel systemd-devel scdoc seatd-devel jsoncpp-devel pcre2-devel hwdata libdisplay-info-devel nlohmann_json-devel
     - run: zypper --non-interactive addrepo https://download.opensuse.org/repositories/home:Dead_Mozay:wayfire/openSUSE_Tumbleweed/home:Dead_Mozay:wayfire.repo
     - run: zypper --non-interactive --gpg-auto-import-keys refresh
-    - run: zypper --non-interactive install wayfire wlroots-devel wayfire-devel          
+    - run: zypper --non-interactive install wayfire wlroots-0_17-devel wayfire-devel          
 
     - name: Wayfire IPC
       uses: actions/checkout@v2
