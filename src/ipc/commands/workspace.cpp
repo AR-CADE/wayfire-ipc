@@ -18,9 +18,7 @@ wf::point_t workspace_by_number(int index, wf::output_t *output)
 
 wf::point_t workspace_prev(int index, wf::point_t current, wf::output_t *output)
 {
-    auto prev = ipc_tools::get_workspace_at_index(index - 1, output);
-
-    if (prev != INVALID_WORKSPACE)
+    if (auto prev = ipc_tools::get_workspace_at_index(index - 1, output);prev != INVALID_WORKSPACE)
     {
         return prev;
     }
@@ -30,9 +28,7 @@ wf::point_t workspace_prev(int index, wf::point_t current, wf::output_t *output)
 
 wf::point_t workspace_next(int index, wf::point_t current, wf::output_t *output)
 {
-    auto next = ipc_tools::get_workspace_at_index(index + 1, output);
-
-    if (next != INVALID_WORKSPACE)
+    if (auto next = ipc_tools::get_workspace_at_index(index + 1, output);next != INVALID_WORKSPACE)
     {
         return next;
     }
@@ -78,10 +74,9 @@ Json::Value workspace_handler(int argc, char **argv, command_handler_context *ct
 {
     (void)ctx;
 
-    Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "workspace", EXPECTED_AT_LEAST,
-                 1)) != Json::nullValue)
+    if (Json::Value error;(error =
+                               ipc_command::checkarg(argc, "workspace", EXPECTED_AT_LEAST,
+                                   1)) != Json::nullValue)
     {
         return error;
     }

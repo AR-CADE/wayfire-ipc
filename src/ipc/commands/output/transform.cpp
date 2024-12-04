@@ -138,7 +138,7 @@ Json::Value output_transform_handler(int argc, char **argv,
             transform = invert_rotation_direction(transform);
         }
 
-        struct wlr_output *w_output = output->handle;
+        struct wlr_output const *w_output = output->handle;
         if (w_output == nullptr)
         {
             return ipc_json::command_result(RETURN_ABORTED,

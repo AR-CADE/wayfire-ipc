@@ -120,9 +120,8 @@ bool ipc_command::container_has_ancestor(wayfire_view descendant,
         return false;
     }
 
-    auto chidlren = toplevel_view->children;
-
-    if (std::any_of(chidlren.begin(), chidlren.end(), [&] (const auto & child)
+    if (auto chidlren = toplevel_view->children;
+        std::any_of(chidlren.begin(), chidlren.end(), [&] (const auto & child)
     {
         return child == ancestor;
     }))
@@ -133,7 +132,7 @@ bool ipc_command::container_has_ancestor(wayfire_view descendant,
     return false;
 }
 
-wayfire_view ipc_command::container_get_view(Json::Value container)
+wayfire_view ipc_command::container_get_view(const Json::Value & container)
 {
     if (container.isNull())
     {
@@ -150,7 +149,7 @@ wayfire_view ipc_command::container_get_view(Json::Value container)
     return find_container(id.asInt());
 }
 
-void ipc_command::close_view_container(Json::Value container)
+void ipc_command::close_view_container(const Json::Value & container)
 {
     auto view = container_get_view(container);
 
@@ -160,7 +159,7 @@ void ipc_command::close_view_container(Json::Value container)
     }
 }
 
-void ipc_command::close_view_container_child(Json::Value container)
+void ipc_command::close_view_container_child(const Json::Value & container)
 {
     close_view_container(container);
 
@@ -315,7 +314,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         if (!handler)
         {
             std::string error = "Unknown command " + std::string(argv[0]);
-            res_list.append(ipc_json::command_result(RETURN_SUCCESS, error.c_str()));
+            res_list.append(ipc_json::command_result(RETURN_NOT_FOUND, error.c_str()));
             ipc_tools::free_argv(argc, argv);
             goto cleanup;
         }
@@ -324,8 +323,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
         {
             auto out = wf::get_core().seat->get_active_output();
             assert(out != nullptr);
-            auto active_view = wf::get_active_view_for_output(out);
-            if (active_view != nullptr)
+            if (auto active_view = wf::get_active_view_for_output(out);active_view != nullptr)
             {
                 auto v = ipc_json::describe_view(active_view);
                 set_config_node(v, false, &handler_context);
@@ -340,7 +338,7 @@ Json::Value ipc_command::execute_command(const std::string& _exec)
                 ipc_tools::free_argv(argc, argv);
                 goto cleanup;
             }
-        } else if ((containers.size() == 0) || !containers.isArray())
+        } else if (containers.empty() || !containers.isArray())
         {
             res_list.append(ipc_json::command_result(RETURN_ABORTED,
                 "No matching node."));

@@ -68,10 +68,8 @@ class ipc_server_t
     static void send_tick(const std::string& payload);
     static void send_event(const char *json_string, enum ipc_event_type event);
     static uint32_t client_count();
-
-    // protected:
-
-  public:
+    static void handle_display_destroy(wl_listener *listener, void *data);
+    static bool has_event_listeners(enum ipc_event_type event);
     void serve();
 
   protected:
@@ -81,13 +79,9 @@ class ipc_server_t
         enum ipc_payload_type payload_type,
         RETURN_STATUS status);
 
-  public:
-    static void handle_display_destroy(wl_listener *listener, void *data);
-    static bool has_event_listeners(enum ipc_event_type event);
-
   private:
     static int handle_connection(int fd, uint32_t mask, void *data);
-    void setup_user_sockaddr();
+    void setup_user_sockaddr() const;
     static int client_handle_writable(int client_fd, uint32_t mask, void *data);
     static int client_handle_readable(int client_fd, uint32_t mask, void *data);
     static void client_disconnect(ipc_server_cli *client);

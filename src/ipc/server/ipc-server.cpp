@@ -62,7 +62,7 @@ void ipc_server_t::serve()
     ipc_socket = -1;
     ipc_event_source = nullptr;
 
-    if (ipc_client_list.size() > 0)
+    if (!ipc_client_list.empty())
     {
         ipc_client_list.clear();
     }
@@ -99,7 +99,7 @@ void ipc_server_t::serve()
 
     struct reset_sockaddr_functor
     {
-        void operator ()(char *socket_var)
+        void operator ()(char const *socket_var) const
         {
             strncpy(ipc_sockaddr.sun_path, socket_var,
                 sizeof(ipc_sockaddr.sun_path) - 1);
@@ -171,7 +171,7 @@ bool ipc_server_t::send_reply(ipc_server_cli *client, int payload_type,
         client->write_buffer_size *= 2;
     }
 
-    if (client->write_buffer_size > 4e6) // 4 MB
+    if (client->write_buffer_size > (size_t)4e6) // 4 MB
     {
         LOGE("Client write buffer too big (", client->write_buffer_size,
             "), disconnecting client");
@@ -179,7 +179,7 @@ bool ipc_server_t::send_reply(ipc_server_cli *client, int payload_type,
         return false;
     }
 
-    char *new_buffer =
+    auto new_buffer =
         static_cast<char*>(realloc(client->write_buffer, client->write_buffer_size));
     if (!new_buffer)
     {
@@ -271,7 +271,7 @@ int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
         return 0;
     }
 
-    ipc_server_cli *client = new ipc_server_cli();
+    auto client = new ipc_server_cli();
 
     client->pending_length = 0;
     client->fd = client_fd;
@@ -290,10 +290,9 @@ int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
     return 0;
 }
 
-void ipc_server_t::setup_user_sockaddr()
+void ipc_server_t::setup_user_sockaddr() const
 {
-    struct sockaddr_un *ipc_sock =
-        (sockaddr_un*)&ipc_sockaddr;
+    auto ipc_sock = &ipc_sockaddr;
 
     ipc_sock->sun_family = AF_UNIX;
     int path_size = sizeof(ipc_sock->sun_path);
@@ -317,7 +316,7 @@ void ipc_server_t::setup_user_sockaddr()
 int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *data)
 {
     (void)client_fd;
-    ipc_server_cli *client = static_cast<ipc_server_cli*>(data);
+    auto client = static_cast<ipc_server_cli*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {
@@ -368,7 +367,7 @@ int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *dat
 
 int ipc_server_t::client_handle_readable(int client_fd, uint32_t mask, void *data)
 {
-    ipc_server_cli *client = static_cast<ipc_server_cli*>(data);
+    auto client = static_cast<ipc_server_cli*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {
@@ -410,7 +409,7 @@ int ipc_server_t::client_handle_readable(int client_fd, uint32_t mask, void *dat
         return 0;
     }
 
-    if (read_available < (int)IPC_HEADER_SIZE)
+    if (read_available < IPC_HEADER_SIZE)
     {
         return 0;
     }
@@ -618,7 +617,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
         Json::Value object;
 
         auto devices = wf::get_core().get_input_devices();
-        for (auto & dev : devices)
+        for (auto const & dev : devices)
         {
             object.append(ipc_json::describe_input(dev));
         }
@@ -655,7 +654,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
         {
             if (request[i].isString())
             {
-                std::string event = std::string(request[i].asString());
+                auto event = std::string(request[i].asString());
 
                 if (event == IPC_I3_EVENT_WORKSPACE)
                 {
@@ -710,7 +709,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
     {
         // TODO: Check if they're permitted to use these events
         Json::Value request = ipc_json::string_to_json(buf);
-        if ((request.size() == 0) || !request.isArray())
+        if (request.empty() || !request.isArray())
         {
             send_status(client, payload_type, RETURN_INVALID_PARAMETER);
             LOGI("Failed to parse unsubscribe request");
@@ -722,7 +721,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
         {
             if (request[i].isString())
             {
-                std::string event = std::string(request[i].asString());
+                auto event = std::string(request[i].asString());
 
                 auto event_type = ipc_tools::event_to_type(event);
 
@@ -762,8 +761,7 @@ void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
     {
         Json::Value object;
 
-        auto config = &wf::get_core().config;
-        if (config)
+        if (auto config = &wf::get_core().config)
         {
             Json::Value sections = Json::arrayValue;
             std::vector<std::shared_ptr<wf::config::section_t>> all_sections =

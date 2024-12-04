@@ -93,7 +93,7 @@ class criteria
         this->destroy();
     }
 
-    bool is_empty();
+    bool is_empty() const;
     // static bool is_equal(struct criteria *left, struct criteria *right);
 
     // static bool already_exists(struct criteria *criteria);
@@ -129,7 +129,7 @@ class criteria
     char *error = nullptr;
     bool parse_token(const char *name, char *value);
     bool matches_view(const Json::Value& view);
-    bool has_container();
+    bool has_container() const;
     bool matches_container(const Json::Value& container);
 
     bool generate_regex(pcre2_code **regex, char *value);

@@ -9,7 +9,7 @@
 #include <json/value.h>
 #include <wayfire/core.hpp>
 
-static RETURN_STATUS set_mode(wlr_output_mode mode,
+static RETURN_STATUS set_mode(const wlr_output_mode& mode,
     wf::output_t *output)
 {
     bool found = true;
@@ -56,7 +56,8 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
     }
 
     int32_t use_custom_mode = -1;
-    int32_t width = -1, height = -1;
+    int32_t width  = -1;
+    int32_t height = -1;
     float refresh_rate = -1;
 
     if (strcmp(argv[0], "--custom") == 0)
@@ -70,7 +71,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
     }
 
     char *end;
-    width = strtol(*argv, &end, 10);
+    width = (int32_t)strtol(*argv, &end, 10);
     if (*end)
     {
         // Format is 1234x4321
@@ -81,7 +82,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         }
 
         ++end;
-        height = strtol(end, &end, 10);
+        height = (int32_t)strtol(end, &end, 10);
         if (*end)
         {
             if (*end != '@')
@@ -109,7 +110,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
                 "Missing mode argument (height).");
         }
 
-        height = strtol(*argv, &end, 10);
+        height = (int32_t)strtol(*argv, &end, 10);
         if (*end)
         {
             return ipc_json::command_result(RETURN_INVALID_PARAMETER,
@@ -124,7 +125,7 @@ Json::Value output_mode_handler(int argc, char **argv, command_handler_context *
         return ipc_json::command_result(RETURN_ABORTED, "Missing output");
     }
 
-    struct wlr_output_mode *selected_mode = nullptr;
+    struct wlr_output_mode const *selected_mode = nullptr;
     struct wlr_output_mode custom_mode;
 
     if (use_custom_mode == 1)

@@ -10,10 +10,9 @@ Json::Value exit_handler(int argc, char **argv, command_handler_context *ctx)
     (void)argv;
     (void)ctx;
 
-    Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "exit", EXPECTED_EQUAL_TO,
-                 0)) != Json::nullValue)
+    if (Json::Value error;(error =
+                               ipc_command::checkarg(argc, "exit", EXPECTED_EQUAL_TO,
+                                   0)) != Json::nullValue)
     {
         return error;
     }

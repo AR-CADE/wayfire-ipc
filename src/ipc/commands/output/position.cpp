@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <json/forwards.h>
 #include <json/value.h>
 #include <wayfire/core.hpp>
@@ -55,10 +56,11 @@ Json::Value output_position_handler(int argc, char **argv,
             "Missing position argument.");
     }
 
-    int32_t x = 0, y = 0;
+    int32_t x = 0;
+    int32_t y = 0;
 
     char *end;
-    x = strtol(*argv, &end, 10);
+    x = (int32_t)strtol(*argv, &end, 10);
     if (*end)
     {
         // Format is 1234,4321
@@ -69,7 +71,7 @@ Json::Value output_position_handler(int argc, char **argv,
         }
 
         ++end;
-        y = strtol(end, &end, 10);
+        y = (int32_t)strtol(end, &end, 10);
         if (*end)
         {
             return ipc_json::command_result(RETURN_INVALID_PARAMETER,
@@ -86,7 +88,7 @@ Json::Value output_position_handler(int argc, char **argv,
                 "Missing position argument (y).");
         }
 
-        y = strtol(*argv, &end, 10);
+        y = (int32_t)strtol(*argv, &end, 10);
         if (*end)
         {
             return ipc_json::command_result(RETURN_INVALID_PARAMETER,

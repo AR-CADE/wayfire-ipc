@@ -68,14 +68,14 @@ class ipc_json : public json
         wf::output_t *output);
     static Json::Value get_i3_scratchpad_container_nodes_by_workspace(wf::point_t ws,
         wf::output_t *output);
-    static Json::Value create_node(int id, const std::string& type, char *name, bool focused,
-        Json::Value focus, wlr_box rect);
+    static Json::Value create_node(int id, const std::string& type, const std::string& name, bool focused,
+        const Json::Value & focus, wlr_box rect);
 
   private:
     static Json::Value get_root_node();
     static Json::Value get_i3_scratchpad_container_nodes();
-    static Json::Value get_i3_scratchpad_workspace_nodes(Json::Value rootNodes);
-    static Json::Value get_i3_scratchpad_output_nodes(Json::Value rootNodes);
+    static Json::Value get_i3_scratchpad_workspace_nodes(const Json::Value & rootNodes);
+    static Json::Value get_i3_scratchpad_output_nodes(const Json::Value & rootNodes);
 };
 
 #endif

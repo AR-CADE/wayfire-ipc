@@ -11,10 +11,9 @@
 
 Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
 {
-    Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "opacity", EXPECTED_AT_LEAST,
-                 1)) != Json::nullValue)
+    if (Json::Value error;(error =
+                               ipc_command::checkarg(argc, "opacity", EXPECTED_AT_LEAST,
+                                   1)) != Json::nullValue)
     {
         return error;
     }
@@ -36,7 +35,7 @@ Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
 
     if (view == nullptr)
     {
-        return ipc_json::command_result(RETURN_NOT_FOUND);
+        return ipc_json::command_result(RETURN_ABORTED);
     }
 
     char *err;

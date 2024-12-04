@@ -6,6 +6,7 @@
 #include <cstring>
 #include <ipc.h>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <wayfire/core.hpp>
 #include <wayfire/geometry.hpp>
@@ -87,10 +88,12 @@ class ipc_tools
         return point.x + point.y * wsize.width + 1;
     }
 
-    static std::vector<std::string> split_string(std::string s,
-        const std::string & delimiter)
+    static std::vector<std::string> split_string(const std::string & s,
+        const std::string_view & delimiter)
     {
-        size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+        size_t pos_start = 0;
+        size_t pos_end;
+        size_t delim_len = delimiter.length();
         std::vector<std::string> res;
 
         while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos)
@@ -107,7 +110,7 @@ class ipc_tools
     static inline const char *argsep_next_interesting(const char *src,
         const char *delim)
     {
-        const char *special    = strpbrk(src, "\"'\\");
+        const char *special    = strpbrk(src, R"("'\)");
         const char *next_delim = strpbrk(src, delim);
         if (!special)
         {
@@ -246,10 +249,10 @@ class ipc_tools
     {
         *argc     = 0;
         int alloc = 2;
-        char **argv    = (char**)malloc(sizeof(char*) * alloc);
-        bool in_token  = false;
-        bool in_string = false;
-        bool in_char   = false;
+        auto argv = static_cast<char**>(malloc(sizeof(char*) * alloc));
+        bool in_token    = false;
+        bool in_string   = false;
+        bool in_char     = false;
         bool in_brackets = false; // brackets are used for criteria
         bool escaped     = false;
         const char *end  = start;
@@ -297,16 +300,16 @@ class ipc_tools
 add_token:
                 if (end - start > 0)
                 {
-                    char *token = (char*)malloc(end - start + 1);
+                    auto token = static_cast<char*>(malloc(end - start + 1));
                     strncpy(token, start, end - start + 1);
                     token[end - start] = '\0';
                     argv[*argc] = token;
                     int tmp_argc = *argc;
                     if (++*argc + 1 == alloc)
                     {
-                        char **tmp_argv = (char**)realloc(argv,
+                        auto tmp_argv = static_cast<char**>(realloc(argv,
                             (alloc *= 2) *
-                            sizeof(char*));
+                            sizeof(char*)));
                         if (nullptr == tmp_argv)
                         {
                             free_argv(tmp_argc, argv);
@@ -373,7 +376,7 @@ shift_over:
     static int unescape_string(char *string)
     {
         /* TODO: More C string escapes */
-        int len = strlen(string);
+        int len = (int)strlen(string);
         int i;
         for (i = 0; string[i]; ++i)
         {

@@ -8,10 +8,9 @@
 // fullscreen [enable|disable|toggle] [global]
 Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *ctx)
 {
-    Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "fullscreen", EXPECTED_AT_MOST,
-                 2)) != Json::nullValue)
+    if (Json::Value error;(error =
+                               ipc_command::checkarg(argc, "fullscreen", EXPECTED_AT_MOST,
+                                   2)) != Json::nullValue)
     {
         return error;
     }
@@ -33,13 +32,13 @@ Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *c
 
     if (view == nullptr)
     {
-        return ipc_json::command_result(RETURN_NOT_FOUND);
+        return ipc_json::command_result(RETURN_ABORTED);
     }
 
     auto toplevel_view = wf::toplevel_cast(view);
     if (toplevel_view == nullptr)
     {
-        return ipc_json::command_result(RETURN_NOT_FOUND);
+        return ipc_json::command_result(RETURN_ABORTED);
     }
 
     bool is_fullscreen = toplevel_view->toplevel()->current().fullscreen;

@@ -32,7 +32,7 @@ int criteria::lenient_strcmp(const char *a, const char *b)
     }
 }
 
-bool criteria::is_empty()
+bool criteria::is_empty() const
 {
     return !this->title &&
            !this->shell &&
@@ -61,7 +61,7 @@ bool criteria::generate_regex(pcre2_code **regex, char *value)
     PCRE2_SIZE offset;
 
     *regex = pcre2_compile((PCRE2_SPTR)value, PCRE2_ZERO_TERMINATED,
-        PCRE2_UTF | PCRE2_UCP, &errorcode, &offset, NULL);
+        PCRE2_UTF | PCRE2_UCP, &errorcode, &offset, nullptr);
     if (!*regex)
     {
         PCRE2_UCHAR buffer[256];
@@ -159,7 +159,7 @@ int criteria::regex_cmp(const char *item, const pcre2_code *regex)
 {
     pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regex, NULL);
     int result = pcre2_match(regex, (PCRE2_SPTR)item, strlen(
-        item), 0, 0, match_data, NULL);
+        item), 0, 0, match_data, nullptr);
     pcre2_match_data_free(match_data);
     return result;
 }
@@ -198,7 +198,7 @@ bool criteria::view_has_window_type(struct sway_view *view, enum atom_name name)
  *   return 0;
  *  } */
 
-bool criteria::has_container()
+bool criteria::has_container() const
 {
     return /* criteria->con_mark || */ this->con_id;
 }
@@ -288,9 +288,9 @@ bool criteria::matches_view(const Json::Value& view)
             }
 
             std::string focused_shell_str = focused_shell_ojb.asString();
-            const char *focused_shell     = focused_shell_str.c_str();
 
-            if (focused && strcmp(view_shell, focused_shell))
+            if (const char *focused_shell = focused_shell_str.c_str();
+                focused && strcmp(view_shell, focused_shell))
             {
                 return false;
             }
@@ -493,8 +493,8 @@ bool criteria::matches_view(const Json::Value& view)
 
     if (this->urgent)
     {
-        Json::Value is_urgent = view.get("urgent", Json::nullValue);
-        if (is_urgent.isNull() || !is_urgent.isBool() ||
+        if (Json::Value is_urgent = view.get("urgent", Json::nullValue);
+            is_urgent.isNull() || !is_urgent.isBool() ||
             (is_urgent.asBool() == false))
         {
             return false;
@@ -502,7 +502,7 @@ bool criteria::matches_view(const Json::Value& view)
 
         std::vector<wayfire_view> urgent_views;
 
-        for (auto& container : wf::get_core().get_all_views())
+        for (auto const& container : wf::get_core().get_all_views())
         {
             Json::Value c = ipc_json::describe_view(container);
             Json::Value u = c.get("urgent", Json::nullValue);
@@ -673,8 +673,8 @@ void criteria::node_for_each_matched_container(Json::Value obj,
         containers->append(obj);
     }
 
-    Json::Value nodes_obj = obj.get("nodes", Json::nullValue);
-    if ((nodes_obj.isNull() == false) && nodes_obj.isArray())
+    if (Json::Value nodes_obj = obj.get("nodes", Json::nullValue);
+        (nodes_obj.isNull() == false) && nodes_obj.isArray())
     {
         for (const auto& node : nodes_obj)
         {
@@ -682,8 +682,8 @@ void criteria::node_for_each_matched_container(Json::Value obj,
         }
     }
 
-    Json::Value floating_nodes_obj = obj.get("floating_nodes", Json::nullValue);
-    if ((floating_nodes_obj.isNull() == false) && floating_nodes_obj.isArray())
+    if (Json::Value floating_nodes_obj = obj.get("floating_nodes", Json::nullValue);
+        (floating_nodes_obj.isNull() == false) && floating_nodes_obj.isArray())
     {
         for (const auto& node : floating_nodes_obj)
         {
@@ -827,6 +827,11 @@ enum criteria_token criteria::token_from_name(const char *name)
 
 bool criteria::parse_token(const char *name, char *value)
 {
+    if (name == nullptr)
+    {
+        return false;
+    }
+
     enum criteria_token token = token_from_name(name);
     if (token == T_INVALID)
     {
@@ -874,7 +879,7 @@ bool criteria::parse_token(const char *name, char *value)
             this->con_id = view ? view->get_id() : 0;
         } else
         {
-            this->con_id = strtoul(value, &endptr, 10);
+            this->con_id = (uint32_t)strtoul(value, &endptr, 10);
             if (*endptr != 0)
             {
                 error = strdup(
@@ -948,7 +953,7 @@ bool criteria::parse_token(const char *name, char *value)
         break;
 
       case T_PID:
-        this->pid = strtoul(value, &endptr, 10);
+        this->pid = (pid_t)strtoul(value, &endptr, 10);
         if (*endptr != 0)
         {
             error = strdup("The value for 'pid' should be numeric");
@@ -984,8 +989,13 @@ void criteria::unescape(char *value)
         return;
     }
 
-    char *copy     = static_cast<char*>(calloc(strlen(value) + 1, 1));
-    char *readhead = value;
+    auto copy = static_cast<char*>(calloc(strlen(value) + 1, 1));
+    if (copy == nullptr)
+    {
+        return;
+    }
+
+    char const *readhead = value;
     char *writehead = copy;
     while (*readhead)
     {
@@ -1053,14 +1063,15 @@ bool criteria::parse(char *raw, char **error_arg)
 #if HAVE_XWAYLAND && WIP
     criteria->window_type = ATOM_LAST; // default value
 #endif
-    char *name = nullptr, *value = nullptr;
+    char *name     = nullptr;
+    char *value    = nullptr;
     bool in_quotes = false;
 
     while (*head && *head != ']')
     {
         skip_spaces(&head);
         // Parse token name
-        char *namestart = head;
+        char const *namestart = head;
         while ((*head >= 'a' && *head <= 'z') || *head == '_')
         {
             ++head;
@@ -1085,7 +1096,7 @@ bool criteria::parse(char *raw, char **error_arg)
                 ++head;
             }
 
-            char *valuestart = head;
+            char const *valuestart = head;
             if (in_quotes)
             {
                 while (*head && (*head != '"' || *(head - 1) == '\\'))
@@ -1156,7 +1167,7 @@ bool criteria::parse(char *raw, char **error_arg)
     }
 
     ++head;
-    int len = head - raw;
+    auto len = (int)(head - raw);
     this->raw = static_cast<char*>(calloc(len + 1, 1));
     memcpy(this->raw, raw, len);
     return true;

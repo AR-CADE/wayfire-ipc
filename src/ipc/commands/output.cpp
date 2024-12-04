@@ -5,7 +5,7 @@
 
 struct output_config *new_output_config(const char *name)
 {
-    struct output_config *oc =
+    auto oc =
         (struct output_config*)calloc(1, sizeof(struct output_config));
     if (oc == nullptr)
     {
@@ -64,27 +64,54 @@ Json::Value output_position_handler(int argc, char **argv,
 Json::Value output_mode_handler(int argc, char **argv, command_handler_context *ctx);
 
 std::map<std::string, std::function<Json::Value(int argc, char**argv,
-    command_handler_context*ctx)>> output_handler_map
-{
-    {"dpms", output_power_handler},
+    command_handler_context*ctx)>, std::less<>> const output_handler_map{{"dpms", output_power_handler},
     {"power", output_power_handler},
     {"scale", output_scale_handler},
     {"transform", output_transform_handler},
     {"position", output_position_handler},
-    {"mode", output_mode_handler},
-};
+    {"mode", output_mode_handler}, };
 
-Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
+
+std::function<Json::Value(int argc, char**argv,
+    command_handler_context*ctx)> output_handler_map_try_at(const std::string& k)
+{
+    try {
+        return output_handler_map.at(k);
+    } catch (const std::out_of_range& ex)
+    {
+        (void)ex;
+        return nullptr;
+    }
+}
+
+void cleanup(command_handler_context*& ctx)
+{
+    if (ctx->output_config != nullptr)
+    {
+        free_output_config(ctx->output_config);
+    }
+
+    ctx->output_config  = nullptr;
+    ctx->leftovers.argc = 0;
+    ctx->leftovers.argv = nullptr;
+}
+
+Json::Value output_handler(int argc, char **argv,
+    command_handler_context *ctx)
 {
     Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "output", EXPECTED_AT_LEAST,
-                 1)) != Json::nullValue)
+    if ((error = ipc_command::checkarg(argc, "output", EXPECTED_AT_LEAST, 1)) !=
+        Json::nullValue)
     {
         return error;
     }
 
     auto output_config = new_output_config(argv[0]);
+    if (output_config == nullptr)
+    {
+        return ipc_json::command_result(RETURN_OUT_OF_RESOURCES);
+    }
+
     ctx->output_config = output_config;
     error = ipc_json::command_result(RETURN_INVALID_PARAMETER);
 
@@ -96,11 +123,12 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
         ctx->leftovers.argc = 0;
         ctx->leftovers.argv = nullptr;
 
-        auto cmd_handler = output_handler_map[*argv];
+        auto cmd_handler = output_handler_map_try_at(*argv);
 
         if (cmd_handler == nullptr)
         {
-            break;
+            error = ipc_json::command_result(RETURN_NOT_FOUND);
+            goto fail;
         }
 
         error.clear();
@@ -115,14 +143,12 @@ Json::Value output_handler(int argc, char **argv, command_handler_context *ctx)
         argv = ctx->leftovers.argv;
     }
 
-    ctx->output_config  = nullptr;
-    ctx->leftovers.argc = 0;
-    ctx->leftovers.argv = nullptr;
+    cleanup(ctx);
 
     return ipc_json::command_result(RETURN_SUCCESS);
 
 fail:
-    ctx->output_config = nullptr;
-    free_output_config(output_config);
+    cleanup(ctx);
+
     return error;
 }

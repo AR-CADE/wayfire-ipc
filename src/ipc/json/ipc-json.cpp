@@ -19,14 +19,15 @@
 #include <wayfire/view-helpers.hpp>
 // #include <wlr/backend/libinput.h>
 
+using wf::option_wrapper_t;
 
-wf::option_wrapper_t<bool> xwayland_enabled("core/xwayland");
-wf::option_wrapper_t<int> max_render_time{"core/max_render_time"};
-wf::option_wrapper_t<bool> dynamic_delay{"workarounds/dynamic_repaint_delay"};
+option_wrapper_t<std::string> xwayland("core/xwayland");
+option_wrapper_t<int> max_render_time{"core/max_render_time"};
+option_wrapper_t<bool> dynamic_delay{"workarounds/dynamic_repaint_delay"};
 
-wf::option_wrapper_t<int> keyboard_repeat_delay{"input/kb_repeat_delay"};
-wf::option_wrapper_t<int> keyboard_repeat_rate{"input/kb_repeat_rate"};
-wf::option_wrapper_t<double> mouse_scroll_speed{"input/mouse_scroll_speed"};
+option_wrapper_t<int> keyboard_repeat_delay{"input/kb_repeat_delay"};
+option_wrapper_t<int> keyboard_repeat_rate{"input/kb_repeat_rate"};
+option_wrapper_t<double> mouse_scroll_speed{"input/mouse_scroll_speed"};
 
 // static const unsigned long i3_scratch_id = rand() %
 // (unsigned long)(2000 + (RAND_MAX / 2));
@@ -61,7 +62,9 @@ Json::Value ipc_json::get_abi_version()
 
 Json::Value ipc_json::get_version()
 {
-    int major = 0, minor = 0, patch = 0;
+    int major = 0;
+    int minor = 0;
+    int patch = 0;
     Json::Value version;
 
     sscanf(WAYFIRE_VERSION, "%d.%d.%d", &major, &minor, &patch);
@@ -109,7 +112,7 @@ Json::Value ipc_json::args_to_json(char **argv, int argc)
             auto arg = argv[i];
             if (arg != nullptr)
             {
-                std::string s = std::string(arg);
+                auto s = std::string(arg);
 
                 std::vector<std::string> cmd_call = ipc_tools::split_string(s, "=");
                 cmd["cmd"] = cmd_call[0];
@@ -247,7 +250,7 @@ const char*ipc_json::input_device_get_type_description(
         return "unknown";
     }
 
-    wlr_input_device *wlr_handle = device->get_wlr_handle();
+    wlr_input_device const *wlr_handle = device->get_wlr_handle();
     if (wlr_handle == nullptr)
     {
         return "unknown";
@@ -329,11 +332,12 @@ const char*ipc_json::orientation_description(enum wl_output_transform transform)
 Json::Value ipc_json::command_result(RETURN_STATUS status, const char *error)
 {
     Json::Value object;
-    object["success"] = (bool)(status == RETURN_SUCCESS);
+    auto success = status == RETURN_SUCCESS;
+    object["success"] = success;
     object["status"]  = status;
-    if (object["success"] == false)
+    if (success == false)
     {
-        object["parse_error"] = status == RETURN_INVALID_PARAMETER;
+        object["parse_error"] = status == RETURN_INVALID_PARAMETER || status == RETURN_NOT_FOUND;
         if (error != nullptr)
         {
             object["error"] = std::string(error);
@@ -634,8 +638,7 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
             if (keymap != nullptr)
             {
                 xkb_layout_index_t num_layouts = xkb_keymap_num_layouts(keymap);
-                xkb_layout_index_t layout_idx;
-                for (layout_idx = 0; layout_idx < num_layouts; layout_idx++)
+                for (xkb_layout_index_t layout_idx = 0; layout_idx < num_layouts; layout_idx++)
                 {
                     const char *layout = xkb_keymap_layout_get_name(keymap,
                         layout_idx);
@@ -660,11 +663,10 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
     if (wlr_handle->type == WLR_INPUT_DEVICE_POINTER)
     {
         float sf = 1.0f;
-        double scroll_factor = mouse_scroll_speed.value();
-        if (!isnan(scroll_factor) &&
+        if (double scroll_factor = mouse_scroll_speed.value();!isnan(scroll_factor) &&
             (scroll_factor != std::numeric_limits<float>::min()))
         {
-            sf = scroll_factor;
+            sf = (float)scroll_factor;
         }
 
         object["scroll_factor"] = (double)sf;
@@ -700,7 +702,7 @@ Json::Value ipc_json::describe_seat(wlr_seat *seat)
 
     Json::Value devices = Json::arrayValue;
     auto inputs = wf::get_core().get_input_devices();
-    for (auto& device : inputs)
+    for (auto const& device : inputs)
     {
         devices.append(describe_input(device));
     }
@@ -719,7 +721,7 @@ Json::Value ipc_json::describe_disabled_output(wf::output_t *output)
         return object;
     }
 
-    wlr_output *wlr_output = output->handle;
+    wlr_output const *wlr_output = output->handle;
 
     if (!wlr_output)
     {
@@ -805,15 +807,15 @@ Json::Value ipc_json::describe_output_mode(const struct wlr_output_mode *mode)
     return mode_object;
 }
 
-Json::Value ipc_json::create_node(int id, const std::string& type, char *name, bool focused,
-    Json::Value focus, wlr_box rect)
+Json::Value ipc_json::create_node(int id, const std::string& type, const std::string& name, bool focused,
+    const Json::Value & focus, wlr_box rect)
 {
     Json::Value object;
 
     object["id"] = id;
 
     object["name"] = Json::nullValue;
-    if (name != nullptr)
+    if (name.data() != nullptr)
     {
         object["name"] = name;
     }
@@ -864,8 +866,7 @@ Json::Value ipc_json::describe_output(wf::output_t *output)
     object["floating_nodes"] = get_shell_view_nodes(output);
 
     Json::Value focusNodes = Json::arrayValue;
-    auto workspaces = get_workspaces_nodes(output);
-    if (!workspaces.isNull() && workspaces.isArray())
+    if (auto workspaces = get_workspaces_nodes(output);!workspaces.isNull() && workspaces.isArray())
     {
         for (Json::ArrayIndex i = 0; i < workspaces.size(); i++)
         {
@@ -1077,7 +1078,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
             layer == wf::scene::layer::DWIDGET);
 
     Json::Value object =
-        create_node(view->get_id(), floating ? "floating_con" : "con", view->get_title().data(),
+        create_node(view->get_id(), floating ? "floating_con" : "con", view->get_title(),
             false, Json::nullValue,
             wlr_box{0, 0, 0, 0});
 
@@ -1115,8 +1116,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 
     object["focus"] = focusNodes;
 
-    wf::output_t *output = wf::get_core().seat->get_active_output();
-    if (output != nullptr)
+    if (wf::output_t *output = wf::get_core().seat->get_active_output();output != nullptr)
     {
         object["focused"] = (wf::get_active_view_for_output(output) == view) &&
             view->get_transformed_node()->is_enabled();
@@ -1136,8 +1136,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         }
     }
 
-    wl_client *client = view->get_client();
-    if (client != nullptr)
+    if (wl_client *client = view->get_client();client != nullptr)
     {
         /* Get pid for native view */
         pid_t wl_pid = 0;
@@ -1145,8 +1144,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
         object["pid"] = wl_pid;
     }
 
-    auto wlr_surface = view->get_wlr_surface();
-    if (wlr_surface != nullptr)
+    if (auto wlr_surface = view->get_wlr_surface();wlr_surface != nullptr)
     {
         wf::geometry_t rect;
         rect.x     = wlr_surface->pending.dx;
@@ -1160,8 +1158,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["visible"] = view->get_transformed_node()->is_enabled();
     object["window_rect"] = describe_wlr_box(view->get_bounding_box());
 
-    auto top = toplevel_view->toplevel();
-    if (top != nullptr)
+    if (auto top = toplevel_view->toplevel();top != nullptr)
     {
         object["geometry"] = describe_geometry(top->current().geometry);
         object["fullscreen_mode"] = (top->current().fullscreen) ? 1 : 0;
@@ -1179,12 +1176,12 @@ Json::Value ipc_json::describe_view(wayfire_view view)
     object["idle_inhibitors"] = idle_inhibitors;
 
 #if HAVE_XWAYLAND
-    if (xwayland_enabled == 1)
+    if ((xwayland.value() == "true") /*|| (xwayland.value() == "lazy")*/)
     {
         auto main_wlr_surface = view->get_wlr_surface();
         if (main_wlr_surface != nullptr)
         {
-            struct wlr_xwayland_surface *main_xsurf =
+            struct wlr_xwayland_surface const *main_xsurf =
                 wlr_xwayland_surface_try_from_wlr_surface(main_wlr_surface);
             if (main_xsurf != nullptr)
             {
@@ -1195,8 +1192,7 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 
                 object["window"] = main_xsurf->window_id;
 
-                auto hints = main_xsurf->hints;
-                if (hints != nullptr)
+                if (auto hints = main_xsurf->hints;hints != nullptr)
                 {
                     object["urgent"] = hints->flags &
                         XCB_ICCCM_WM_HINT_X_URGENCY;
@@ -1205,26 +1201,22 @@ Json::Value ipc_json::describe_view(wayfire_view view)
                     object["urgent"] = false;
                 }
 
-                auto clazz = main_xsurf->class_t;
-                if (clazz != nullptr)
+                if (auto clazz = main_xsurf->class_t;clazz != nullptr)
                 {
                     object["class"] = std::string(clazz);
                 }
 
-                auto instance = main_xsurf->instance;
-                if (instance != nullptr)
+                if (auto instance = main_xsurf->instance;instance != nullptr)
                 {
                     window_props["instance"] = std::string(instance);
                 }
 
-                auto title = main_xsurf->title;
-                if (title != nullptr)
+                if (auto title = main_xsurf->title;title != nullptr)
                 {
                     window_props["title"] = std::string(title);
                 }
 
-                auto role = main_xsurf->role;
-                if (role != nullptr)
+                if (auto role = main_xsurf->role;role != nullptr)
                 {
                     window_props["window_role"] = std::string(role);
                 }
@@ -1249,15 +1241,14 @@ Json::Value ipc_json::describe_view(wayfire_view view)
 Json::Value ipc_json::get_root_node()
 {
     Json::Value focusNodes = Json::arrayValue;
-    auto active_output     = wf::get_core().seat->get_active_output();
 
-    if (active_output == nullptr)
+    if (wf::get_core().seat->get_active_output() == nullptr)
     {
         return Json::nullValue;
     }
 
     Json::Value object =
-        create_node(0, "root", std::string("root").data(),
+        create_node(0, "root", "root",
             false, Json::nullValue,
             wlr_box{0, 0, 0, 0});
 
@@ -1268,9 +1259,9 @@ Json::Value ipc_json::get_root_node()
     wf::geometry_t rect;
     rect.x = -1;
     rect.y = -1;
-    object["focused"] = outputs.size() == 0;
+    object["focused"] = outputs.empty();
 
-    for (wf::output_t *output : outputs)
+    for (wf::output_t const *output : outputs)
     {
         focusNodes.append(output->get_id());
         if (rect.x == -1)
@@ -1325,7 +1316,7 @@ Json::Value ipc_json::get_root_node()
 Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
-    for (auto& view :
+    for (auto const & view :
          wf::get_core().get_all_views())
     {
         if ((view->role != wf::VIEW_ROLE_DESKTOP_ENVIRONMENT) || !view->is_mapped())
@@ -1345,7 +1336,7 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
             container["nodes"] = views;
             if (container["focused"] == true)
             {
-                container["focused"] = views.size() == 0;
+                container["focused"] = views.empty();
             }
 
             nodes.append(container);
@@ -1358,7 +1349,7 @@ Json::Value ipc_json::get_shell_view_nodes(wf::output_t *output)
 Json::Value ipc_json::get_top_view_nodes(wf::point_t point, wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
-    for (auto& view :
+    for (auto const& view :
          wf::collect_views_from_output(output,
              {wf::scene::layer::TOP, wf::scene::layer::DWIDGET}))
     {
@@ -1409,7 +1400,7 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
         return nodes;
     }
 
-    for (auto& v :
+    for (auto const& v :
          toplevel_view->enumerate_views())
     {
         if (v == view)
@@ -1447,7 +1438,7 @@ Json::Value ipc_json::get_view_nodes(wayfire_view view, bool floating)
 Json::Value ipc_json::get_container_nodes(wf::point_t point, wf::output_t *output)
 {
     Json::Value nodes = Json::arrayValue;
-    for (auto& view : wf::collect_views_from_output(output,
+    for (auto const& view : wf::collect_views_from_output(output,
         {wf::scene::layer::TOP, wf::scene::layer::WORKSPACE, wf::scene::layer::DWIDGET}))
     {
         auto toplevel_view = wf::toplevel_cast(view);
@@ -1508,7 +1499,7 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
                     workspace["nodes"] = container;
                     if (workspace["focused"] == true)
                     {
-                        workspace["focused"] = container.size() == 0;
+                        workspace["focused"] = container.empty();
                     }
                 }
 
@@ -1518,7 +1509,7 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
     }
 
     std::sort(vector.begin(), vector.end(),
-        [] (Json::Value workspace_a, Json::Value workspace_b)
+        [] (Json::Value const& workspace_a, Json::Value const& workspace_b)
     {
         Json::Value workspace_a_id = workspace_a.get("id", Json::nullValue);
         Json::Value workspace_b_id = workspace_b.get("id", Json::nullValue);
@@ -1539,7 +1530,7 @@ Json::Value ipc_json::get_workspaces_nodes(wf::output_t *output,
         return a_id < b_id;
     });
 
-    for (auto& workspace : vector)
+    for (auto const& workspace : vector)
     {
         nodes.append(workspace);
     }
@@ -1552,7 +1543,7 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
 {
     Json::Value nodes = Json::arrayValue;
 
-    for (auto& view : output->wset()->get_views(0, ws))
+    for (auto const& view : output->wset()->get_views(0, ws))
     {
         if ((view->role != wf::VIEW_ROLE_TOPLEVEL) || !view->is_mapped())
         {
@@ -1571,7 +1562,7 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes_by_workspace(wf::point_t
             container["nodes"] = views;
             if (container["focused"])
             {
-                container["focused"] = views.size() == 0;
+                container["focused"] = views.empty();
             }
 
             nodes.append(container);
@@ -1630,10 +1621,10 @@ Json::Value ipc_json::get_i3_scratchpad_container_nodes()
     return nodes;
 }
 
-Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
+Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(const Json::Value & rootNodes)
 {
     Json::Value object =
-        create_node(i3_scratch_id, "workspace", std::string("__i3_scratch").data(),
+        create_node(i3_scratch_id, "workspace", "__i3_scratch",
             false, Json::nullValue,
             wlr_box{0, 0, 0, 0});
 
@@ -1666,10 +1657,10 @@ Json::Value ipc_json::get_i3_scratchpad_workspace_nodes(Json::Value rootNodes)
     return object;
 }
 
-Json::Value ipc_json::get_i3_scratchpad_output_nodes(Json::Value rootNodes)
+Json::Value ipc_json::get_i3_scratchpad_output_nodes(const Json::Value& rootNodes)
 {
     Json::Value object =
-        create_node(i3_output_id, "output", (char*)"__i3",
+        create_node(i3_output_id, "output", "__i3",
             false, Json::nullValue,
             wlr_box{0, 0, 0, 0});
 
@@ -1753,7 +1744,7 @@ Json::Value ipc_json::describe_workspace(wf::point_t point, wf::output_t *output
     // Node attr
     //
     Json::Value object =
-        create_node(id, "workspace", std::to_string(index).data(),
+        create_node(id, "workspace", std::to_string(index),
             focused, Json::nullValue,
             rect);
 

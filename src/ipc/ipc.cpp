@@ -8,14 +8,16 @@
 #include <wayfire/signal-definitions.hpp>
 #include <wayfire/view.hpp>
 
-wf::option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
-wf::option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
-wf::option_wrapper_t<std::string> xkb_options{"input/xkb_options"};
-wf::option_wrapper_t<std::string> xkb_rules{"input/xkb_rules"};
+using wf::option_wrapper_t;
+
+option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
+option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
+option_wrapper_t<std::string> xkb_options{"input/xkb_options"};
+option_wrapper_t<std::string> xkb_rules{"input/xkb_rules"};
 
 // Damn, another variant ... hoppefully we have our event_mask, in the worst case, i
 // can implement a completly useless workaroud (but mandatory ;-) ) to fix it !!!!
-wf::option_wrapper_t<std::string> xkb_variant{"input/xkb_variant"};
+option_wrapper_t<std::string> xkb_variant{"input/xkb_variant"};
 static struct wl_listener display_destroy;
 static struct wl_event_source *fini_event_source;
 
@@ -46,7 +48,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
     static int handle_fini_timeout(void *data)
     {
-        ipc_t *instance = static_cast<ipc_t*>(data);
+        auto instance = static_cast<ipc_t*>(data);
         instance->fini_timeout();
         return 0;
     }
@@ -68,7 +70,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         wl_event_source_timer_update(fini_event_source, 100);
     }
 
-    void fini_timeout()
+    void fini_timeout() const
     {
         ipc_t::handle_display_destroy(nullptr, nullptr);
     }
@@ -76,7 +78,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
   private:
 
     void signal_event(const enum ipc_event_type & signal,
-        const std::string & json_string)
+        const std::string & json_string) const
     {
         if (signal == IPC_WF_EVENT_TYPE_NONE)
         {
@@ -175,27 +177,27 @@ class ipc_t : public wf::per_output_plugin_instance_t
     }
 
     wf::signal::connection_t<wf::view_mapped_signal> on_view_mapped =
-        [=] (wf::view_mapped_signal *ev)
+        [this] (wf::view_mapped_signal *ev)
     {
         bind_view_events(ev->view);
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "new");
     };
 
     wf::signal::connection_t<wf::view_unmapped_signal> on_view_unmapped =
-        [=] (wf::view_unmapped_signal *ev)
+        [this] (wf::view_unmapped_signal *ev)
     {
         unbind_view_events(ev->view);
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "close");
     };
 
     wf::signal::connection_t<wf::view_minimized_signal> on_view_minimized =
-        [=] (wf::view_minimized_signal *ev)
+        [this] (wf::view_minimized_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "move");
     };
 
     wf::signal::connection_t<wf::view_fullscreen_signal> on_view_fullscreened =
-        [=] (wf::view_fullscreen_signal *ev)
+        [this] (wf::view_fullscreen_signal *ev)
     {
         auto view = ev->view;
         if (view == nullptr)
@@ -217,30 +219,30 @@ class ipc_t : public wf::per_output_plugin_instance_t
     };
 
     wf::signal::connection_t<wf::keyboard_focus_changed_signal> on_keyboard_focus_changed =
-        [=] (wf::keyboard_focus_changed_signal *ev)
+        [this] (wf::keyboard_focus_changed_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, wf::node_to_view(ev->new_focus), "focus");
     };
 
     wf::signal::connection_t<wf::view_change_workspace_signal>
-    on_view_change_workspace = [=] (wf::view_change_workspace_signal *ev)
+    on_view_change_workspace = [this] (wf::view_change_workspace_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "move");
     };
 
     wf::signal::connection_t<wf::wm_actions_above_changed_signal>
-    on_wm_actions_above_changed = [=] (wf::wm_actions_above_changed_signal *ev)
+    on_wm_actions_above_changed = [this] (wf::wm_actions_above_changed_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "floating");
     };
 
     wf::signal::connection_t<wf::view_title_changed_signal> on_view_title_changed =
-        [=] (wf::view_title_changed_signal *ev)
+        [this] (wf::view_title_changed_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "title");
     };
     wf::signal::connection_t<wf::view_geometry_changed_signal>
-    on_view_geometry_changed = [=] (wf::view_geometry_changed_signal *ev)
+    on_view_geometry_changed = [this] (wf::view_geometry_changed_signal *ev)
     {
         signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "move");
     };
@@ -387,7 +389,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
     void xkb_change()
     {
         auto devices = wf::get_core().get_input_devices();
-        for (auto & dev : devices)
+        for (auto dev : devices)
         {
             auto wlr_handle = dev->get_wlr_handle();
 
@@ -479,13 +481,13 @@ class ipc_t : public wf::per_output_plugin_instance_t
     }
 
     wf::signal::connection_t<wf::workspace_changed_signal> on_workspace_changed =
-        [=] (wf::workspace_changed_signal *ev)
+        [this] (wf::workspace_changed_signal *ev)
     {
         signal_workspace_event(IPC_I3_EVENT_TYPE_WORKSPACE, ev, "focus");
     };
 
     wf::signal::connection_t<wf::workspace_grid_changed_signal>
-    on_workspace_grid_changed = [=] (wf::workspace_grid_changed_signal *ev)
+    on_workspace_grid_changed = [this] (wf::workspace_grid_changed_signal *ev)
     {
         (void)ev;
         wf::workspace_changed_signal signal;
@@ -518,11 +520,11 @@ class ipc_t : public wf::per_output_plugin_instance_t
         //
         // Connect options change signal
         //
-        xkb_model.set_callback([=] () { xkb_change(); });
-        xkb_variant.set_callback([=] () { xkb_change(); });
-        xkb_layout.set_callback([=] () { xkb_change(); });
-        xkb_options.set_callback([=] () { xkb_change(); });
-        xkb_rules.set_callback([=] () { xkb_change(); });
+        xkb_model.set_callback([this] () { xkb_change(); });
+        xkb_variant.set_callback([this] () { xkb_change(); });
+        xkb_layout.set_callback([this] () { xkb_change(); });
+        xkb_options.set_callback([this] () { xkb_change(); });
+        xkb_rules.set_callback([this] () { xkb_change(); });
     }
 
     void unbind_events()

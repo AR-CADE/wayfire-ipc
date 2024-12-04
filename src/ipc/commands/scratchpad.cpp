@@ -100,10 +100,9 @@ Json::Value scratchpad_handler(int argc, char **argv, command_handler_context *c
 {
     (void)ctx;
 
-    Json::Value error;
-    if ((error =
-             ipc_command::checkarg(argc, "scratchpad", EXPECTED_AT_LEAST,
-                 1)) != Json::nullValue)
+    if (Json::Value error;(error =
+                               ipc_command::checkarg(argc, "scratchpad", EXPECTED_AT_LEAST,
+                                   1)) != Json::nullValue)
     {
         return error;
     }
