@@ -10,7 +10,7 @@ This details the interprocess communication (IPC) protocol plugin for wayfire. T
 IPC protocol can be used to control or obtain information from a wayfire process.
 
 The IPC protocol uses a UNIX socket as the method of communication. The path
-to the socket is stored in the environment variable _WAYFIRESOCK_ and, 
+to the socket is stored in the environment variable _WAYFIREI3SOCK_ and, 
 for backwards compatibility with sway, _SWAYSOCK_ and with i3, _I3SOCK_.
 
 # MESSAGE AND REPLY FORMAT

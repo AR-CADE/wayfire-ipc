@@ -109,10 +109,10 @@ void ipc_server_t::serve()
 
     // We want to use socket name set by user, not existing socket from another
     // wayfire instance.
-    if ((getenv("WAYFIRESOCK") != nullptr) &&
-        (access(getenv("WAYFIRESOCK"), F_OK) == -1))
+    if ((getenv("WAYFIREI3SOCK") != nullptr) &&
+        (access(getenv("WAYFIREI3SOCK"), F_OK) == -1))
     {
-        reset_sockaddr(getenv("WAYFIRESOCK"));
+        reset_sockaddr(getenv("WAYFIREI3SOCK"));
     } else if ((getenv("SWAYSOCK") != nullptr) &&
                (access(getenv("SWAYSOCK"), F_OK) == -1))
     {
@@ -140,7 +140,7 @@ void ipc_server_t::serve()
     LOGD("ipc_sockaddr->sun_path ", ipc_sockaddr.sun_path);
 
     // Set wayfire IPC socket path so that wf-msg works out of the box
-    setenv("WAYFIRESOCK", ipc_sockaddr.sun_path, 1);
+    setenv("WAYFIREI3SOCK", ipc_sockaddr.sun_path, 1);
     setenv("I3SOCK", ipc_sockaddr.sun_path, 1);
     setenv("SWAYSOCK", ipc_sockaddr.sun_path, 1);
 
@@ -307,7 +307,7 @@ void ipc_server_t::setup_user_sockaddr() const
     LOGD("Socket path ", dir);
 
     if (path_size <= snprintf(ipc_sock->sun_path, path_size,
-        "%s/wf-ipc.%u.sock", dir, getuid()))
+        "%s/wf-i3-ipc.%u.sock", dir, getuid()))
     {
         LOGE("Socket path is too long");
     }

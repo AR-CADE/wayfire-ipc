@@ -14,10 +14,9 @@
 
 char *get_socketpath(void)
 {
-    const char *wfsock = getenv("WAYFIRESOCK");
-    if (wfsock)
+    if (const char *wfi3sock = getenv("WAYFIREI3SOCK"))
     {
-        return strdup(wfsock);
+        return strdup(wfi3sock);
     }
 
     const char *swaysock = getenv("SWAYSOCK");
@@ -43,7 +42,7 @@ char *get_socketpath(void)
     bzero(sun_path, path_size + 1);
 
     if (path_size <=
-        snprintf(sun_path, path_size, "%s/wf-ipc.%u.sock", dir, getuid()))
+        snprintf(sun_path, path_size, "%s/wf-i3-ipc.%u.sock", dir, getuid()))
     {
         LOGE("Socket path is too long");
         return nullptr;

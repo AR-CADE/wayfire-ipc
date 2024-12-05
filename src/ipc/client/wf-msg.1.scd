@@ -30,7 +30,7 @@ _wf-msg_ [options...] [message]
 
 *-s, --socket* <path>
 	Use the specified socket path. Otherwise, wf-msg will ask wayfire where the
-	socket is (which is the value of $WAYFIRESOCK).
+	socket is (which is the value of $WAYFIREI3SOCK).
 
 *-t, --type* <type>
 	Specify the type of IPC message. See below.
