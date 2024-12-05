@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include "ipc-client.hpp"
+#include "i3-ipc-client.hpp"
 #include <iostream>
 
 char *get_socketpath(void)

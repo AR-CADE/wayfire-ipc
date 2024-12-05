@@ -2,12 +2,12 @@
 #include "commands/command_impl.hpp"
 
 static struct wl_event_source *ipc_event_source;
-static std::vector<ipc_server_cli*> ipc_client_list;
+static std::vector<i3_ipc_client*> ipc_client_list;
 static int ipc_socket;
 static struct sockaddr_un ipc_sockaddr;
 static struct wl_listener ipc_display_destroy;
 
-void ipc_server_t::send_tick(const std::string& payload)
+void i3_ipc_server::send_tick(const std::string& payload)
 {
     if (!has_event_listeners(IPC_I3_EVENT_TYPE_TICK))
     {
@@ -23,13 +23,13 @@ void ipc_server_t::send_tick(const std::string& payload)
     send_event(tickmsg_string.c_str(), IPC_I3_EVENT_TYPE_TICK);
 }
 
-void ipc_server_t::send_event(const char *json_string, enum ipc_event_type event)
+void i3_ipc_server::send_event(const char *json_string, enum ipc_event_type event)
 {
     assert(json_string != nullptr);
 
     for (int i = 0; i < (int)ipc_client_list.size(); i++)
     {
-        ipc_server_cli *client = ipc_client_list[i];
+        i3_ipc_client *client = ipc_client_list[i];
         if (client == nullptr)
         {
             continue;
@@ -52,12 +52,12 @@ void ipc_server_t::send_event(const char *json_string, enum ipc_event_type event
     }
 }
 
-uint32_t ipc_server_t::client_count()
+uint32_t i3_ipc_server::client_count()
 {
     return (uint32_t)ipc_client_list.size();
 }
 
-void ipc_server_t::serve()
+void i3_ipc_server::serve() const
 {
     ipc_socket = -1;
     ipc_event_source = nullptr;
@@ -153,7 +153,7 @@ void ipc_server_t::serve()
             WL_EVENT_READABLE, handle_connection, nullptr);
 }
 
-bool ipc_server_t::send_reply(ipc_server_cli *client, int payload_type,
+bool i3_ipc_server::send_reply(i3_ipc_client *client, int payload_type,
     const char *payload, uint32_t payload_length)
 {
     assert(payload != nullptr);
@@ -208,7 +208,7 @@ bool ipc_server_t::send_reply(ipc_server_cli *client, int payload_type,
     return true;
 }
 
-void ipc_server_t::send_status(ipc_server_cli *client,
+void i3_ipc_server::send_status(i3_ipc_client *client,
     enum ipc_payload_type payload_type,
     RETURN_STATUS status)
 {
@@ -217,7 +217,7 @@ void ipc_server_t::send_status(ipc_server_cli *client,
     send_reply(client, payload_type, msg.c_str(), msg.size());
 }
 
-void ipc_server_t::handle_display_destroy(struct wl_listener *listener, void *data)
+void i3_ipc_server::handle_display_destroy(struct wl_listener *listener, void *data)
 {
     (void)listener;
     (void)data;
@@ -240,7 +240,7 @@ void ipc_server_t::handle_display_destroy(struct wl_listener *listener, void *da
     wl_list_remove(&ipc_display_destroy.link);
 }
 
-int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
+int i3_ipc_server::handle_connection(int fd, uint32_t mask, void *data)
 {
     (void)fd;
     (void)data;
@@ -271,7 +271,7 @@ int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
         return 0;
     }
 
-    auto client = new ipc_server_cli();
+    auto client = new i3_ipc_client();
 
     client->pending_length = 0;
     client->fd = client_fd;
@@ -290,7 +290,7 @@ int ipc_server_t::handle_connection(int fd, uint32_t mask, void *data)
     return 0;
 }
 
-void ipc_server_t::setup_user_sockaddr() const
+void i3_ipc_server::setup_user_sockaddr() const
 {
     auto ipc_sock = &ipc_sockaddr;
 
@@ -313,10 +313,10 @@ void ipc_server_t::setup_user_sockaddr() const
     }
 }
 
-int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *data)
+int i3_ipc_server::client_handle_writable(int client_fd, uint32_t mask, void *data)
 {
     (void)client_fd;
-    auto client = static_cast<ipc_server_cli*>(data);
+    auto client = static_cast<i3_ipc_client*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {
@@ -365,9 +365,9 @@ int ipc_server_t::client_handle_writable(int client_fd, uint32_t mask, void *dat
     return 0;
 }
 
-int ipc_server_t::client_handle_readable(int client_fd, uint32_t mask, void *data)
+int i3_ipc_server::client_handle_readable(int client_fd, uint32_t mask, void *data)
 {
-    auto client = static_cast<ipc_server_cli*>(data);
+    auto client = static_cast<i3_ipc_client*>(data);
 
     if (mask & WL_EVENT_ERROR)
     {
@@ -449,7 +449,7 @@ int ipc_server_t::client_handle_readable(int client_fd, uint32_t mask, void *dat
     return 0;
 }
 
-void ipc_server_t::client_disconnect(ipc_server_cli *client)
+void i3_ipc_server::client_disconnect(i3_ipc_client *client)
 {
     if (client == nullptr)
     {
@@ -483,11 +483,11 @@ void ipc_server_t::client_disconnect(ipc_server_cli *client)
     delete client;
 }
 
-bool ipc_server_t::has_event_listeners(enum ipc_event_type event)
+bool i3_ipc_server::has_event_listeners(enum ipc_event_type event)
 {
     for (int i = 0; i < (int)ipc_client_list.size(); i++)
     {
-        ipc_server_cli *client = ipc_client_list[i];
+        i3_ipc_client const *client = ipc_client_list[i];
         if ((client->subscribed_events & event_mask(event)) != 0)
         {
             return true;
@@ -500,7 +500,7 @@ bool ipc_server_t::has_event_listeners(enum ipc_event_type event)
 #define ASYNC_INTERNAL_COMMAND 1
 #define SYNC_INTERNAL_COMMAND 0
 
-void ipc_server_t::ipc_client_handle_command(ipc_server_cli *client,
+void i3_ipc_server::ipc_client_handle_command(i3_ipc_client *client,
     uint32_t payload_length,
     enum ipc_payload_type payload_type)
 {

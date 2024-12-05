@@ -1,8 +1,8 @@
 
 server = shared_module(
-    'ipc-server', 
+    'i3-ipc', 
     'ipc.cpp', 
-    'server/ipc-server.cpp', 
+    'server/i3-ipc-server.cpp', 
     'json/ipc-json.cpp', 
     'commands/core.cpp', 
     'commands/command_impl.cpp',

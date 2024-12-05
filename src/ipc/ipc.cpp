@@ -23,7 +23,7 @@ static struct wl_event_source *fini_event_source;
 
 class ipc_t : public wf::per_output_plugin_instance_t
 {
-    wf::shared_data::ref_ptr_t<ipc_server_t> get_instance;
+    wf::shared_data::ref_ptr_t<i3_ipc_server> get_instance;
 
   public:
     void init() override
@@ -43,7 +43,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         wl_list_remove(&display_destroy.link);
 
-        ipc_server_t::handle_display_destroy(listener, data);
+        i3_ipc_server::handle_display_destroy(listener, data);
     }
 
     static int handle_fini_timeout(void *data)
@@ -85,12 +85,12 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (!ipc_server_t::has_event_listeners(signal))
+        if (!i3_ipc_server::has_event_listeners(signal))
         {
             return;
         }
 
-        ipc_server_t::send_event(json_string.c_str(), signal);
+        i3_ipc_server::send_event(json_string.c_str(), signal);
     }
 
     Json::Value window_json_data(wayfire_view view, const std::string & change,
@@ -103,7 +103,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return Json::nullValue;
         }
 
-        if (ipc_server_t::client_count() == 0)
+        if (i3_ipc_server::client_count() == 0)
         {
             return Json::nullValue;
         }
@@ -138,7 +138,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
     void signal_shutdown_event()
     {
-        if (!ipc_server_t::has_event_listeners(IPC_I3_EVENT_TYPE_SHUTDOWN))
+        if (!i3_ipc_server::has_event_listeners(IPC_I3_EVENT_TYPE_SHUTDOWN))
         {
             return;
         }
@@ -159,7 +159,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (!ipc_server_t::has_event_listeners(signal))
+        if (!i3_ipc_server::has_event_listeners(signal))
         {
             return;
         }
@@ -264,7 +264,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         // return Json::nullValue;
         // }
 
-        if (ipc_server_t::client_count() == 0)
+        if (i3_ipc_server::client_count() == 0)
         {
             return Json::nullValue;
         }
@@ -289,7 +289,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
         // return;
         // }
 
-        if (!ipc_server_t::has_event_listeners(signal))
+        if (!i3_ipc_server::has_event_listeners(signal))
         {
             return;
         }
@@ -334,7 +334,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return Json::nullValue;
         }
 
-        if (ipc_server_t::client_count() == 0)
+        if (i3_ipc_server::client_count() == 0)
         {
             return Json::nullValue;
         }
@@ -361,7 +361,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (!ipc_server_t::has_event_listeners(signal))
+        if (!i3_ipc_server::has_event_listeners(signal))
         {
             return;
         }
@@ -414,7 +414,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return Json::nullValue;
         }
 
-        if (ipc_server_t::client_count() == 0)
+        if (i3_ipc_server::client_count() == 0)
         {
             return Json::nullValue;
         }
@@ -468,7 +468,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
             return;
         }
 
-        if (!ipc_server_t::has_event_listeners(signal))
+        if (!i3_ipc_server::has_event_listeners(signal))
         {
             return;
         }

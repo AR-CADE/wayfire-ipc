@@ -19,7 +19,7 @@
 #include <ipc/json.hpp>
 #include <ipc/tools.hpp>
 #include <ipc.h>
-#include "ipc-client.hpp"
+#include "i3-ipc-client.hpp"
 #include <wayfire/plugin.hpp>
 
 static bool success_object(Json::Value result)

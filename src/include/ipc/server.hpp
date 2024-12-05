@@ -35,7 +35,7 @@
 #include <ipc/json.hpp>
 #include <ipc/tools.hpp>
 
-class ipc_server_cli
+class i3_ipc_client
 {
   public:
     //
@@ -62,7 +62,7 @@ class ipc_server_cli
     enum ipc_payload_type pending_type;
 };
 
-class ipc_server_t
+class i3_ipc_server
 {
   public:
     static void send_tick(const std::string& payload);
@@ -70,12 +70,12 @@ class ipc_server_t
     static uint32_t client_count();
     static void handle_display_destroy(wl_listener *listener, void *data);
     static bool has_event_listeners(enum ipc_event_type event);
-    void serve();
+    void serve() const;
 
   protected:
-    static bool send_reply(ipc_server_cli *client, int payload_type,
+    static bool send_reply(i3_ipc_client *client, int payload_type,
         const char *payload, uint32_t payload_length);
-    static void send_status(ipc_server_cli *client,
+    static void send_status(i3_ipc_client *client,
         enum ipc_payload_type payload_type,
         RETURN_STATUS status);
 
@@ -84,8 +84,8 @@ class ipc_server_t
     void setup_user_sockaddr() const;
     static int client_handle_writable(int client_fd, uint32_t mask, void *data);
     static int client_handle_readable(int client_fd, uint32_t mask, void *data);
-    static void client_disconnect(ipc_server_cli *client);
-    static void ipc_client_handle_command(ipc_server_cli *client,
+    static void client_disconnect(i3_ipc_client *client);
+    static void ipc_client_handle_command(i3_ipc_client *client,
         uint32_t payload_length,
         enum ipc_payload_type payload_type);
 };

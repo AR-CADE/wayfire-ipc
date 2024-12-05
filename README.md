@@ -24,7 +24,7 @@ $ sudo ninja -C build install
 
 ## Usage
 
-Add `ipc-server` to the plugins list in ~/.config/wayfire.ini (alternatively you can also use [wcm](https://github.com/WayfireWM/wcm))
+Add `i3-ipc` to the plugins list in ~/.config/wayfire.ini (alternatively you can also use [wcm](https://github.com/WayfireWM/wcm))
 
 This project provide a command line tool similar to `swaymsg` called `wf-msg`, to use it open a terminal window and type:
 
