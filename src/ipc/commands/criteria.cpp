@@ -1,4 +1,3 @@
-
 #include <wayfire/plugins/common/util.hpp>
 #include "criteria.hpp"
 #include <ipc/json.hpp>
