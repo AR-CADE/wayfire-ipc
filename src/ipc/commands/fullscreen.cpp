@@ -1,9 +1,4 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <strings.h>
-#include <wayfire/core.hpp>
-#include <wayfire/window-manager.hpp>
 
 // fullscreen [enable|disable|toggle] [global]
 Json::Value fullscreen_handler(int argc, char **argv, command_handler_context *ctx)

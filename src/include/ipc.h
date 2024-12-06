@@ -2,7 +2,6 @@
 #define _WAYFIRE_IPC_H
 
 #include <cstdint>
-#include "wlroots_support.h"
 #include <sys/types.h>
 
 constexpr char ipc_magic[] = {'i', '3', '-', 'i', 'p', 'c'};

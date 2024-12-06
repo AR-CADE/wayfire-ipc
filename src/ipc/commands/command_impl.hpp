@@ -5,8 +5,6 @@
 #include <ipc/json.hpp>
 #include <ipc/tools.hpp>
 #include <json/value.h>
-#include <vector>
-#include "criteria.hpp"
 
 class ipc_command : public command
 {

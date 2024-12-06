@@ -1,7 +1,5 @@
-#include "output.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <string>
+#include "command_impl.hpp"
+
 
 struct output_config *new_output_config(const char *name)
 {

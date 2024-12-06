@@ -3,37 +3,16 @@
 
 
 #include <ipc.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <future>
 #include <json/json.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <thread>
 #include <unistd.h>
-#include <wayfire/config-backend.hpp>
 #include <wayfire/core.hpp>
-#include <wayfire/signal-definitions.hpp>
-#include <wayfire/util/log.hpp>
-#include <wayfire/view.hpp>
-#include <wayfire/config/config-manager.hpp>
-#include <wayfire/config/section.hpp>
-#include <wayfire/geometry.hpp>
 #include <wayfire/input-device.hpp>
-#include <wayfire/object.hpp>
-#include <wayfire/output-layout.hpp>
-#include <wayfire/output.hpp>
-#include <wayfire/plugin.hpp>
-#include <wayfire/workspace-set.hpp>
-#include <wayland-server-core.h>
-#include <wayland-client.h>
 #include <ipc/json.hpp>
-#include <ipc/tools.hpp>
+
 
 class i3_ipc_client
 {

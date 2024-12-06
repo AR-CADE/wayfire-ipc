@@ -3,11 +3,7 @@
 
 #include <ipc.h>
 #include <json.hpp>
-#include <wayfire/geometry.hpp>
-#include <wayfire/output.hpp>
-#include <wlr/types/wlr_seat.h>
-#include <wlr/types/wlr_compositor.h>
-#include <xwayland_support.h>
+#include <wayfire/core.hpp>
 
 class ipc_json : public json
 {

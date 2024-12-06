@@ -1,12 +1,5 @@
-#include <json/forwards.h>
-#include <json/value.h>
-#include <wayfire/core.hpp>
-#include <wayfire/output-layout.hpp>
-#include <wayfire/output.hpp>
-#include "../command_impl.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <wayfire/core.hpp>
+#include "ipc/command.h"
+#include "ipc/json.hpp"
 
 static RETURN_STATUS set_tranform(enum wl_output_transform transform,
     wf::output_t *output)

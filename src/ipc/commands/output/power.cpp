@@ -1,15 +1,6 @@
-#include "../command_impl.hpp"
-#include <ipc.h>
 #include <signals/power-signals.hpp>
-#include <cstdint>
-#include <cstdio>
-#include <json/json.h>
-#include <json/value.h>
-#include <map>
-#include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/output-layout.hpp>
-#include <wayfire/output.hpp>
+#include "ipc/command.h"
+#include "ipc/json.hpp"
 
 static RETURN_STATUS signal_power_cmd(const Json::Value& argv)
 {

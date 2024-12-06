@@ -1,22 +1,14 @@
 #include <ipc.h>
-#include <algorithm>
-#include <cstdlib>
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
-#include <json/value.h>
-#include <wlr/util/box.h>
 #if 0
     #include <libinput.h>
 #endif
-#include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/geometry.hpp>
 #include <wayfire/input-device.hpp>
-#include <wayfire/output.hpp>
 #include <wayfire/plugin.hpp>
 #include <wayfire/plugins/common/workspace-wall.hpp>
-#include <wayfire/view.hpp>
 #include <wayfire/view-helpers.hpp>
+
 // #include <wlr/backend/libinput.h>
 
 using wf::option_wrapper_t;

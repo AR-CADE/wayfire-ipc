@@ -1,16 +1,5 @@
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <json/value.h>
-#include <string>
-#include <vector>
-#include <wayfire/core.hpp>
-#include <wayfire/toplevel-view.hpp>
-#include <wayfire/util/log.hpp>
+
 #include <wayfire/plugins/common/util.hpp>
-#include <wayfire/view.hpp>
-#include <wayfire/output.hpp>
-#include <wayfire/workspace-set.hpp>
 #include "criteria.hpp"
 #include <ipc/json.hpp>
 

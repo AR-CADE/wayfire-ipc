@@ -1,8 +1,5 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include <cstdint>
-#include <json/value.h>
-#include <string>
+#include "criteria.hpp"
 
 bool ipc_command::parse_boolean(const char *boolean, bool current)
 {

@@ -1,13 +1,5 @@
-#include <cstdint>
-#include <json/forwards.h>
-#include <json/value.h>
-#include <wayfire/core.hpp>
-#include <wayfire/output-layout.hpp>
-#include <wayfire/output.hpp>
-#include "../command_impl.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <wayfire/core.hpp>
+#include "ipc/command.h"
+#include "ipc/json.hpp"
 
 static RETURN_STATUS set_position(wf::output_config::position_t position,
     wf::output_t *output)

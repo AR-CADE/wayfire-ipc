@@ -2,11 +2,7 @@
 #include <signals/wm-actions-signals.hpp>
 #include "wayfire/per-output-plugin.hpp"
 #include "wayfire/plugins/common/shared-core-data.hpp"
-#include <sys/time.h>
-#include <wayfire/core.hpp>
-#include <wayfire/output.hpp>
-#include <wayfire/signal-definitions.hpp>
-#include <wayfire/view.hpp>
+#include <wayfire/workspace-set.hpp>
 
 using wf::option_wrapper_t;
 

@@ -1,19 +1,10 @@
 #ifndef _WAYFIRE_IPC_TOOLS_H
 #define _WAYFIRE_IPC_TOOLS_H
 
-#include <cassert>
-#include <cstddef>
-#include <cstring>
+
 #include <ipc.h>
-#include <string>
-#include <string_view>
-#include <vector>
-#include <wayfire/core.hpp>
-#include <wayfire/geometry.hpp>
 #include <wayfire/output-layout.hpp>
-#include <wayfire/output.hpp>
 #include <wayfire/seat.hpp>
-#include <wayfire/util/log.hpp>
 #include <wayfire/workspace-set.hpp>
 #include <wayfire/window-manager.hpp>
 

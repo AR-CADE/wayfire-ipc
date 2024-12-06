@@ -1,8 +1,4 @@
-#include <json/value.h>
-#include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/output-layout.hpp>
-#include "core.hpp"
+#include <ipc/command.h>
 
 Json::Value output_handler(int argc, char **argv, command_handler_context *ctx);
 Json::Value kill_handler(int argc, char **argv, command_handler_context *ctx);

@@ -1,13 +1,7 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <strings.h>
-#include <wayfire/core.hpp>
-#include <wayfire/opengl.hpp>
 // #include <wayfire/plugins/common/shared-core-data.hpp>
 // #include <wayfire/plugins/ipc/ipc-helpers.hpp>
 // #include <wayfire/plugins/ipc/ipc-method-repository.hpp>
-#include <wayfire/view-transform.hpp>
 
 Json::Value opacity_handler(int argc, char **argv, command_handler_context *ctx)
 {

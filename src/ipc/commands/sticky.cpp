@@ -1,7 +1,4 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include <json/value.h>
-#include <wayfire/core.hpp>
 
 Json::Value sticky_handler(int argc, char **argv, command_handler_context *ctx)
 {

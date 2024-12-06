@@ -1,5 +1,4 @@
 - rename the repository from `WAYFIRE-IPC` to `WAYFIRE-I3-IPC`
-- headers cleanup
 - check where it's possible to call a distributed fuction with ipc instead of writing/maintaining my own duplicated code
 - sync commands, criteria, etc with [sway](https://github.com/swaywm/sway)
 - move to nlohmann_json (if possible)

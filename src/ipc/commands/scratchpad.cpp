@@ -1,8 +1,4 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include "ipc/tools.hpp"
-#include <json/forwards.h>
-#include <json/value.h>
 
 static void scratchpad_toggle_auto(wf::output_t *output)
 {

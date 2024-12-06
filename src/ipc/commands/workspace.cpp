@@ -1,10 +1,4 @@
 #include "command_impl.hpp"
-#include "ipc.h"
-#include "ipc/tools.hpp"
-#include <json/value.h>
-#include <string>
-#include <wayfire/core.hpp>
-#include <wayfire/geometry.hpp>
 
 void workspace_switch(wf::point_t ws, wf::output_t *output)
 {
