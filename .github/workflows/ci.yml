@@ -54,7 +54,7 @@ jobs:
         image: opensuse/tumbleweed:latest
     steps:
     - run: zypper --non-interactive --gpg-auto-import-keys refresh && zypper --non-interactive dup
-    - run: zypper --non-interactive install git clang cmake pkgconf meson ninja wayland-devel xwayland-devel wayland-protocols-devel Mesa-libGLESv3-devel libinput-devel libxkbcommon-devel libpixman-1-0-devel glm-devel libdrm-devel libglvnd-devel cairo-devel pango-devel systemd-devel scdoc seatd-devel jsoncpp-devel pcre2-devel hwdata libdisplay-info-devel vulkan-devel vulkan-headers vulkan-tools vulkan-utility-libraries-devel
+    - run: zypper --non-interactive install git clang cmake pkgconf meson ninja wayland-devel xwayland-devel wayland-protocols-devel Mesa-libGLESv3-devel libinput-devel libxkbcommon-devel libpixman-1-0-devel glm-devel libdrm-devel libglvnd-devel cairo-devel pango-devel systemd-devel scdoc seatd-devel jsoncpp-devel pcre2-devel hwdata libdisplay-info-devel vulkan-devel vulkan-headers vulkan-tools vulkan-utility-libraries-devel Mesa-libGLESv2-devel
 
     - name: Wayfire
       uses: actions/checkout@v5
