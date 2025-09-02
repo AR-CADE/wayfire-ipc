@@ -1,6 +1,7 @@
 #include <ipc.h>
 #include <ipc/tools.hpp>
 #include <ipc/json.hpp>
+#include <wayfire/view-transform.hpp>
 #if 0
     #include <libinput.h>
 #endif
@@ -8,6 +9,7 @@
 #include <wayfire/plugin.hpp>
 #include <wayfire/plugins/common/workspace-wall.hpp>
 #include <wayfire/view-helpers.hpp>
+#include <wayfire/nonstd/wlroots-full.hpp>
 
 // #include <wlr/backend/libinput.h>
 
@@ -248,32 +250,25 @@ const char*ipc_json::input_device_get_type_description(
         return "unknown";
     }
 
-    switch (wlr_handle->type)
-    {
-      case WLR_INPUT_DEVICE_POINTER:
-        if (device_is_touchpad(device))
-        {
-            return "touchpad";
-        } else
-        {
-            return "pointer";
-        }
-
-      case WLR_INPUT_DEVICE_KEYBOARD:
-        return "keyboard";
-
-      case WLR_INPUT_DEVICE_TOUCH:
-        return "touch";
-
-      case WLR_INPUT_DEVICE_TABLET_TOOL:
-        return "tablet_tool";
-
-      case WLR_INPUT_DEVICE_TABLET_PAD:
-        return "tablet_pad";
-
-      case WLR_INPUT_DEVICE_SWITCH:
-        return "switch";
-    }
+    switch (wlr_handle->type) {
+	case WLR_INPUT_DEVICE_POINTER:
+		if (device_is_touchpad(device)) {
+			return "touchpad";
+		} else {
+			return "pointer";
+		}
+	case WLR_INPUT_DEVICE_KEYBOARD:
+		return "keyboard";
+	case WLR_INPUT_DEVICE_TOUCH:
+		return "touch";
+	case WLR_INPUT_DEVICE_TABLET:
+		return "tablet_tool";
+	case WLR_INPUT_DEVICE_TABLET_PAD:
+		return "tablet_pad";
+	case WLR_INPUT_DEVICE_SWITCH:
+		return "switch";
+	}
+	return "unknown";
 
     return "unknown";
 }
@@ -603,13 +598,13 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
         std::string name(wlr_handle->name);
         std::transform(name.begin(), name.end(), name.begin(),
             [] (char c) {return c == ' ' ? '_' : c;});
-        object["identifier"] = std::to_string(wlr_handle->vendor) + ":" +
-            std::to_string(wlr_handle->product) + ":" + name;
+        object["identifier"] = "0:0:" + name;
+;
     }
 
     object["name"]    = wlr_handle->name;
-    object["vendor"]  = wlr_handle->vendor;
-    object["product"] = wlr_handle->product;
+    object["vendor"]  = 0;
+    object["product"] = 0;
     object["type"]    = input_device_get_type_description(device);
 
     if (wlr_handle->type == WLR_INPUT_DEVICE_KEYBOARD)

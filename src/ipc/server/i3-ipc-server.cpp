@@ -761,39 +761,38 @@ void i3_ipc_server::ipc_client_handle_command(i3_ipc_client *client,
     {
         Json::Value object;
 
-        if (auto config = &wf::get_core().config)
+        
+        Json::Value sections = Json::arrayValue;
+        std::vector<std::shared_ptr<wf::config::section_t>> all_sections =
+            wf::get_core().config->get_all_sections();
+
+        for (std::shared_ptr<wf::config::section_t> s : all_sections)
         {
-            Json::Value sections = Json::arrayValue;
-            std::vector<std::shared_ptr<wf::config::section_t>> all_sections =
-                config->get_all_sections();
+            Json::Value section;
+            section["name"] = s->get_name();
+            section["type"] = "section";
 
-            for (std::shared_ptr<wf::config::section_t> s : all_sections)
+            Json::Value options = Json::arrayValue;
+            std::vector<std::shared_ptr<wf::config::option_base_t>>
+            registred_options = s->get_registered_options();
+
+            for (std::shared_ptr<wf::config::option_base_t> registred_option
+                    :
+                    registred_options)
             {
-                Json::Value section;
-                section["name"] = s->get_name();
-                section["type"] = "section";
-
-                Json::Value options = Json::arrayValue;
-                std::vector<std::shared_ptr<wf::config::option_base_t>>
-                registred_options = s->get_registered_options();
-
-                for (std::shared_ptr<wf::config::option_base_t> registred_option
-                     :
-                     registred_options)
-                {
-                    Json::Value option;
-                    option["name"]  = registred_option->get_name();
-                    option["type"]  = "option";
-                    option["value"] = registred_option->get_value_str();
-                    options.append(option);
-                }
-
-                section["options"] = options;
-                sections.append(section);
+                Json::Value option;
+                option["name"]  = registred_option->get_name();
+                option["type"]  = "option";
+                option["value"] = registred_option->get_value_str();
+                options.append(option);
             }
 
-            object["config"] = sections.toStyledString();
+            section["options"] = options;
+            sections.append(section);
         }
+
+        object["config"] = sections.toStyledString();
+        
 
         std::string json_string = ipc_json::json_to_string(object);
         send_reply(client, payload_type, json_string.c_str(),

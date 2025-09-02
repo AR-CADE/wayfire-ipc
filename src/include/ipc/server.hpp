@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <wayfire/core.hpp>
 #include <wayfire/input-device.hpp>
+#include <wayfire/config/config-manager.hpp>
 #include <ipc/json.hpp>
 
 

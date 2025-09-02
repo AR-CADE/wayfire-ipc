@@ -1,4 +1,5 @@
 #include "command_impl.hpp"
+#include <wayfire/view-transform.hpp>
 // #include <wayfire/plugins/common/shared-core-data.hpp>
 // #include <wayfire/plugins/ipc/ipc-helpers.hpp>
 // #include <wayfire/plugins/ipc/ipc-method-repository.hpp>

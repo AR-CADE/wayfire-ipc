@@ -1,5 +1,6 @@
 #include "ipc/command.h"
 #include "ipc/json.hpp"
+#include <wlr/util/transform.h>
 
 static RETURN_STATUS set_tranform(enum wl_output_transform transform,
     wf::output_t *output)

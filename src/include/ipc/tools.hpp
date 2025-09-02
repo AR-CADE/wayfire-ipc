@@ -2,6 +2,7 @@
 #define _WAYFIRE_IPC_TOOLS_H
 
 
+#include <cstring>
 #include <ipc.h>
 #include <wayfire/output-layout.hpp>
 #include <wayfire/seat.hpp>

@@ -1,7 +1,6 @@
 - rename the repository from `WAYFIRE-IPC` to `WAYFIRE-I3-IPC`
 - check where it's possible to call a distributed fuction with ipc instead of writing/maintaining my own duplicated code
 - sync commands, criteria, etc with [sway](https://github.com/swaywm/sway)
-- move to nlohmann_json (if possible)
 - move to the workspace sets api (and call the ipc plugin for all actions)
 - use the wf::scene api to generate the json tree (if possible)
 - deprecate, then remove `wf-msg` (just get swaymsg directly from sway, or [dart_swaymsg](https://github.com/AR-CADE/dart_swaymsg))

@@ -4,10 +4,12 @@
 #include "wayfire/per-output-plugin.hpp"
 #include "wayfire/plugins/common/shared-core-data.hpp"
 #include <wayfire/output-layout.hpp>
+#include <wayfire/seat.hpp>
 #include <wayfire/signal-definitions.hpp>
 #include <ipc/command.h>
 #include <ipc/json.hpp>
 #include <wayfire/toplevel-view.hpp>
+#include <wayfire/util.hpp>
 
 class wayfire_power
 {

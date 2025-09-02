@@ -1,4 +1,5 @@
 #include <signals/power-signals.hpp>
+#include <wayfire/seat.hpp>
 #include "ipc/command.h"
 #include "ipc/json.hpp"
 

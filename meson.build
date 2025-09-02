@@ -21,8 +21,15 @@ c_comp = meson.get_compiler('c')
 wayfire        	= dependency('wayfire')
 jsoncpp        	= dependency('jsoncpp')
 pcre2           = dependency('libpcre2-8')
-#nlohmann_json = dependency('nlohmann_json')
+yyjson           = dependency('yyjson', required: false)
 
+if not yyjson.found()
+	cmake = import('cmake')
+	cmake_opts = cmake.subproject_options()
+	cmake_opts.add_cmake_defines({'CMAKE_POSITION_INDEPENDENT_CODE': true})
+	sub_proj = cmake.subproject('yyjson', options: cmake_opts)
+	yyjson = sub_proj.dependency('yyjson')
+endif
 
 version = '"@0@"'.format(wayfire.version())
 add_project_arguments('-DWAYFIRE_VERSION=@0@'.format(version), language: ['cpp', 'c'])
