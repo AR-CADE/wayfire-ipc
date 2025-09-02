@@ -23,6 +23,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.10.x
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
   test_arch_xwayland:
     name: "Test on Arch Linux with Xwayland"
@@ -45,6 +46,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.10.x
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
 
   test_code_style:
@@ -63,6 +65,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.10.x
     - run: cd wayfire-ipc && wget https://raw.githubusercontent.com/AR-CADE/wayfire-ipc/main/uncrustify.ini
     - run: cd wayfire-ipc && git ls-files | grep "hpp$\|cpp$" | xargs ../uncrustify/build/uncrustify -c uncrustify.ini --no-backup --replace
     - run: cd wayfire-ipc && git diff --exit-code
