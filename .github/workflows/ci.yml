@@ -13,15 +13,17 @@ jobs:
     - run: pacman --noconfirm --noprogressbar -Sy git clang lld libc++ pkgconf meson ninja wayland wayland-protocols libinput libxkbcommon pixman glm libdrm libglvnd cairo pango systemd scdoc base-devel seatd jsoncpp pcre2 hwdata libdisplay-info openmp nlohmann-json
 
     - name: Wayfire
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         repository: WayfireWM/wayfire
         path: wayfire
+        ref: 0.9.x
     - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
     - name: Wayfire IPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.9.x
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
   test_arch_xwayland:
     name: "Test on Arch Linux with Xwayland"
@@ -34,15 +36,17 @@ jobs:
     - run: pacman --noconfirm --noprogressbar -Sy git clang lld libc++ pkgconf meson ninja wayland wayland-protocols libinput libxkbcommon pixman glm libdrm libglvnd cairo pango systemd scdoc base-devel seatd jsoncpp pcre2 hwdata libdisplay-info openmp nlohmann-json xorg-xwayland xcb-util xcb-util-cursor xcb-util-errors xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm 
 
     - name: Wayfire
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         repository: WayfireWM/wayfire
         path: wayfire
+        ref: 0.9.x
     - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
     - name: Wayfire IPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.9.x
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
   test_tumbleweed:
     name: "Test on openSUSE Tumbleweed"
@@ -52,14 +56,13 @@ jobs:
     steps:
     - run: zypper --non-interactive --gpg-auto-import-keys refresh && zypper --non-interactive dup
     - run: zypper --non-interactive install git clang pkgconf meson ninja wayland-devel xwayland-devel wayland-protocols-devel Mesa-libGLESv3-devel libinput-devel libxkbcommon-devel libpixman-1-0-devel glm-devel libdrm-devel libglvnd-devel cairo-devel pango-devel systemd-devel scdoc seatd-devel jsoncpp-devel pcre2-devel hwdata libdisplay-info-devel nlohmann_json-devel
-    - run: zypper --non-interactive addrepo https://download.opensuse.org/repositories/home:Dead_Mozay:wayfire/openSUSE_Tumbleweed/home:Dead_Mozay:wayfire.repo
-    - run: zypper --non-interactive --gpg-auto-import-keys refresh
-    - run: zypper --non-interactive install wayfire wlroots-0_17-devel wayfire-devel          
+    - run: zypper --non-interactive install wayfire wayfire-devel          
 
     - name: Wayfire IPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.9.x
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
   test_code_style:
     name: "Check code style with uncrustify"
@@ -68,15 +71,16 @@ jobs:
     - run: sudo apt-get update
     - run: sudo apt-get install -y git cmake gcc make
     - name: Build Uncrustify
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         repository: ammen99/uncrustify
         path: uncrustify
     - run: cd uncrustify && mkdir build && cd build && cmake .. && make && cd ../..
     - name: Run Uncrustify Check
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         path: wayfire-ipc
+        ref: 0.9.x
     - run: cd wayfire-ipc && wget https://raw.githubusercontent.com/AR-CADE/wayfire-ipc/main/uncrustify.ini
     - run: cd wayfire-ipc && git ls-files | grep "hpp$\|cpp$" | xargs ../uncrustify/build/uncrustify -c uncrustify.ini --no-backup --replace
     - run: cd wayfire-ipc && git diff --exit-code
