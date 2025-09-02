@@ -17,7 +17,6 @@ jobs:
       with:
         repository: WayfireWM/wayfire
         path: wayfire
-        ref: 0.10.x
     - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
     - name: Wayfire IPC
       uses: actions/checkout@v5
@@ -39,7 +38,6 @@ jobs:
       with:
         repository: WayfireWM/wayfire
         path: wayfire
-        ref: 0.10.x
     - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
     - name: Wayfire IPC
       uses: actions/checkout@v5
