@@ -47,31 +47,6 @@ jobs:
         path: wayfire-ipc
     - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
 
-  test_tumbleweed:
-    name: "Test on openSUSE Tumbleweed"
-    runs-on: ubuntu-latest
-    container:
-        image: opensuse/tumbleweed:latest
-    steps:
-    - run: zypper --non-interactive --gpg-auto-import-keys refresh && zypper --non-interactive dup
-    - run: zypper --non-interactive install git clang cmake pkgconf meson ninja wayland-devel xwayland-devel wayland-protocols-devel Mesa-libGLESv3-devel libinput-devel libxkbcommon-devel libpixman-1-0-devel 
-    - run: zypper --non-interactive install glm-devel libdrm-devel libglvnd-devel cairo-devel pango-devel systemd-devel scdoc seatd-devel jsoncpp-devel pcre2-devel hwdata libdisplay-info-devel vulkan-devel vulkan-headers vulkan-tools vulkan-utility-libraries-devel Mesa-libGLESv2-devel 
-    - run: zypper --non-interactive install libevdev-devel Mesa-libGL-devel libjpeg62-devel libpng16-devel libxml2-devel wlroots-devel=0.19.0 Mesa-libEGL-devel freetype2-devel glslang-devel inotify-tools-devel libxkbcommon-x11-devel xcb-util-errors-devel libxcb-devel xcb-util-renderutil-devel
-
-    - name: Wayfire
-      uses: actions/checkout@v5
-      with:
-        repository: WayfireWM/wayfire
-        path: wayfire
-        ref: 0.10.x
-    - run: cd wayfire && git submodule sync --recursive && git submodule update --init --force --recursive && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild && ninja -v -Cbuild install && cd ..
-  
-    - name: Wayfire IPC
-      uses: actions/checkout@v5
-      with:
-        path: wayfire-ipc
-    - run: cd wayfire-ipc && meson build --prefix=/usr --buildtype=release && ninja -v -Cbuild
-
   test_code_style:
     name: "Check code style with uncrustify"
     runs-on: ubuntu-latest
