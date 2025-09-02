@@ -6,16 +6,16 @@
 #include <wayfire/workspace-set.hpp>
 #include <wayfire/nonstd/wlroots-full.hpp>
 
-//using wf::option_wrapper_t;
+// using wf::option_wrapper_t;
 
-//option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
-//option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
-//option_wrapper_t<std::string> xkb_options{"input/xkb_options"};
-//option_wrapper_t<std::string> xkb_rules{"input/xkb_rules"};
+// option_wrapper_t<std::string> xkb_model{"input/xkb_model"};
+// option_wrapper_t<std::string> xkb_layout{"input/xkb_layout"};
+// option_wrapper_t<std::string> xkb_options{"input/xkb_options"};
+// option_wrapper_t<std::string> xkb_rules{"input/xkb_rules"};
 
 // Damn, another variant ... hoppefully we have our event_mask, in the worst case, i
 // can implement a completly useless workaroud (but mandatory ;-) ) to fix it !!!!
-//option_wrapper_t<std::string> xkb_variant{"input/xkb_variant"};
+// option_wrapper_t<std::string> xkb_variant{"input/xkb_variant"};
 
 static struct wl_listener display_destroy;
 static struct wl_event_source *fini_event_source;
@@ -385,27 +385,27 @@ class ipc_t : public wf::per_output_plugin_instance_t
         signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, ev->device, "removed");
     };
 
-   /*  void xkb_change()
-    {
-        auto seat     = wf::get_core().get_current_seat();
-        auto keyboard = wlr_seat_get_keyboard(seat);
+    /*  void xkb_change()
+     *  {
+     *    auto seat     = wf::get_core().get_current_seat();
+     *    auto keyboard = wlr_seat_get_keyboard(seat);
+     *
+     *    auto devices = wf::get_core().get_input_devices();
+     *    for (auto dev : devices)
+     *    {
+     *        auto wlr_handle = dev->get_wlr_handle();
+     *
+     *        if (wlr_handle == &keyboard->base)
+     *        {
+     *            signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
+     *                    "xkb_layout");
+     *            signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
+     *                    "xkb_keymap");
+     *        }
+     *    }
+     *  } */
 
-        auto devices = wf::get_core().get_input_devices();
-        for (auto dev : devices)
-        {
-            auto wlr_handle = dev->get_wlr_handle();
-
-            if (wlr_handle == &keyboard->base)
-            {
-                signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
-                        "xkb_layout");
-                signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
-                        "xkb_keymap");
-            }
-        }
-    } */
-        
-    wf::signal::connection_t<wf::input_event_signal<mwlr_keyboard_modifiers_event>> on_keyboard_modifiers 
+    wf::signal::connection_t<wf::input_event_signal<mwlr_keyboard_modifiers_event>> on_keyboard_modifiers
         =
             [=] (wf::input_event_signal<mwlr_keyboard_modifiers_event> *ev)
 
@@ -426,12 +426,11 @@ class ipc_t : public wf::per_output_plugin_instance_t
             if (wlr_handle == ev->device)
             {
                 signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
-                        "xkb_layout");
+                    "xkb_layout");
                 signal_input_event(IPC_SWAY_EVENT_TYPE_INPUT, dev,
-                        "xkb_keymap");
+                    "xkb_keymap");
             }
         }
-
     };
 
     Json::Value workspace_json_data(wf::workspace_changed_signal *data,
@@ -548,13 +547,11 @@ class ipc_t : public wf::per_output_plugin_instance_t
         //
         // Connect options change signal
         //
-        //xkb_model.set_callback([this] () { xkb_change(); });
-        //xkb_variant.set_callback([this] () { xkb_change(); });
-        //xkb_layout.set_callback([this] () { xkb_change(); });
-        //xkb_options.set_callback([this] () { xkb_change(); });
-        //xkb_rules.set_callback([this] () { xkb_change(); });
-
-
+        // xkb_model.set_callback([this] () { xkb_change(); });
+        // xkb_variant.set_callback([this] () { xkb_change(); });
+        // xkb_layout.set_callback([this] () { xkb_change(); });
+        // xkb_options.set_callback([this] () { xkb_change(); });
+        // xkb_rules.set_callback([this] () { xkb_change(); });
     }
 
     void unbind_events()
@@ -581,11 +578,11 @@ class ipc_t : public wf::per_output_plugin_instance_t
         //
         // Disconnect options change signal
         //
-        //xkb_model.set_callback(nullptr);
-        //xkb_variant.set_callback(nullptr);
-        //xkb_layout.set_callback(nullptr);
-        //xkb_options.set_callback(nullptr);
-        //xkb_rules.set_callback(nullptr);
+        // xkb_model.set_callback(nullptr);
+        // xkb_variant.set_callback(nullptr);
+        // xkb_layout.set_callback(nullptr);
+        // xkb_options.set_callback(nullptr);
+        // xkb_rules.set_callback(nullptr);
     }
 
     void bind_output_events(wf::output_t *output)

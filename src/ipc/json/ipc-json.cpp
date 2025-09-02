@@ -250,25 +250,34 @@ const char*ipc_json::input_device_get_type_description(
         return "unknown";
     }
 
-    switch (wlr_handle->type) {
-	case WLR_INPUT_DEVICE_POINTER:
-		if (device_is_touchpad(device)) {
-			return "touchpad";
-		} else {
-			return "pointer";
-		}
-	case WLR_INPUT_DEVICE_KEYBOARD:
-		return "keyboard";
-	case WLR_INPUT_DEVICE_TOUCH:
-		return "touch";
-	case WLR_INPUT_DEVICE_TABLET:
-		return "tablet_tool";
-	case WLR_INPUT_DEVICE_TABLET_PAD:
-		return "tablet_pad";
-	case WLR_INPUT_DEVICE_SWITCH:
-		return "switch";
-	}
-	return "unknown";
+    switch (wlr_handle->type)
+    {
+      case WLR_INPUT_DEVICE_POINTER:
+        if (device_is_touchpad(device))
+        {
+            return "touchpad";
+        } else
+        {
+            return "pointer";
+        }
+
+      case WLR_INPUT_DEVICE_KEYBOARD:
+        return "keyboard";
+
+      case WLR_INPUT_DEVICE_TOUCH:
+        return "touch";
+
+      case WLR_INPUT_DEVICE_TABLET:
+        return "tablet_tool";
+
+      case WLR_INPUT_DEVICE_TABLET_PAD:
+        return "tablet_pad";
+
+      case WLR_INPUT_DEVICE_SWITCH:
+        return "switch";
+    }
+
+    return "unknown";
 
     return "unknown";
 }
@@ -599,7 +608,6 @@ Json::Value ipc_json::describe_input(nonstd::observer_ptr<wf::input_device_t> de
         std::transform(name.begin(), name.end(), name.begin(),
             [] (char c) {return c == ' ' ? '_' : c;});
         object["identifier"] = "0:0:" + name;
-;
     }
 
     object["name"]    = wlr_handle->name;
