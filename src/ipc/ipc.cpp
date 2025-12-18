@@ -217,10 +217,10 @@ class ipc_t : public wf::per_output_plugin_instance_t
         }
     };
 
-    wf::signal::connection_t<wf::keyboard_focus_changed_signal> on_keyboard_focus_changed =
-        [this] (wf::keyboard_focus_changed_signal *ev)
+    wf::signal::connection_t<wf::view_activated_state_signal> view_activated =
+        [this] (wf::view_activated_state_signal *ev)
     {
-        signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, wf::node_to_view(ev->new_focus), "focus");
+        signal_window_event(IPC_I3_EVENT_TYPE_WINDOW, ev->view, "focus");
     };
 
     wf::signal::connection_t<wf::view_change_workspace_signal>
@@ -594,7 +594,6 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         output->connect(&on_view_mapped);
         output->connect(&on_view_unmapped);
-        output->connect(&on_keyboard_focus_changed);
         output->connect(&on_view_geometry_changed);
         output->connect(&on_view_minimized);
         output->connect(&on_view_fullscreened);
@@ -613,7 +612,6 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         output->disconnect(&on_view_mapped);
         output->disconnect(&on_view_unmapped);
-        output->disconnect(&on_keyboard_focus_changed);
         output->disconnect(&on_view_geometry_changed);
         output->disconnect(&on_view_minimized);
         output->disconnect(&on_view_fullscreened);
@@ -632,6 +630,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         view->connect(&on_view_title_changed);
         view->connect(&on_view_geometry_changed);
+        view->connect(&view_activated);
     }
 
     void unbind_view_events(wayfire_view view)
@@ -643,6 +642,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
         view->disconnect(&on_view_title_changed);
         view->disconnect(&on_view_geometry_changed);
+        view->disconnect(&view_activated);
     }
 
     void bind_core_events()
