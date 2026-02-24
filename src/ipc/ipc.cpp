@@ -54,19 +54,7 @@ class ipc_t : public wf::per_output_plugin_instance_t
 
     void fini() override
     {
-        /* Notify exit */
-        signal_shutdown_event();
-
         unbind_events();
-
-        // Set a timeout of 100 ms to give some time to all clients to handle the
-        // "exit" signal before disconnecting them and finish this instance of plugin
-        display_destroy.notify = handle_display_destroy;
-        wl_display_add_destroy_listener(wf::get_core().display, &display_destroy);
-        fini_event_source =
-            wl_event_loop_add_timer(wf::get_core().ev_loop, handle_fini_timeout,
-                this);
-        wl_event_source_timer_update(fini_event_source, 100);
     }
 
     void fini_timeout() const
