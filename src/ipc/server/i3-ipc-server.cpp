@@ -59,6 +59,11 @@ uint32_t i3_ipc_server::client_count()
 
 void i3_ipc_server::serve() const
 {
+    if (ipc_socket > 0)
+    {
+        return;
+    }
+
     ipc_socket = -1;
     ipc_event_source = nullptr;
 
@@ -229,6 +234,7 @@ void i3_ipc_server::handle_display_destroy(struct wl_listener *listener, void *d
 
     close(ipc_socket);
     unlink(ipc_sockaddr.sun_path);
+    ipc_socket = 0;
 
     while (ipc_client_list.size())
     {
